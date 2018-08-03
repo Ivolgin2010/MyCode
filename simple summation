@@ -1,0 +1,129 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#---------------------------------------------------------------------------------------
+
+import wx
+
+#########################################################################################
+class InputData(wx.Dialog):
+    
+#------------------------------------------------------------------------------------------
+    def __init__(self):
+      
+        wx.Dialog.__init__(self, None, wx.ID_ANY, title='Введите значения')
+
+        panel = wx.Panel(self, wx.ID_ANY)
+
+        labelOne = wx.StaticText(panel, wx.ID_ANY, 'Число 1:')
+        
+        self.inputTxtOne = wx.TextCtrl(panel, wx.ID_ANY, '')
+        
+#         self.inputTxtOne.SetBackgroundColour((100, 100, 100))
+#         self.inputTxtOne.SetBackgroundColour("Yellow")
+#         self.inputTxtOne.SetForegroundColour(wx.RED)
+
+        self.inputTxtOne.SetEditable(True)
+
+        labelTwo = wx.StaticText(panel, wx.ID_ANY, 'Число 2:')
+        self.inputTxtTwo = wx.TextCtrl(panel, wx.ID_ANY,'')
+        self.inputTxtTwo.SetEditable(True)
+
+        self.calcBtn = wx.Button(panel, wx.ID_ANY, 'Calc')
+        
+        self.cancelBtn = wx.Button(panel, wx.ID_ANY, 'Cancel')
+        
+        self.clearBtn = wx.Button(panel, wx.ID_ANY, 'Clear')
+        
+               
+        # Выключаем кнопку отмены
+        self.cancelBtn.Disable()
+        
+#-------------------------------------------------------------------------
+        
+        self.Bind(wx.EVT_BUTTON, self.onCalc, self.calcBtn)
+        self.Bind(wx.EVT_BUTTON, self.onCancel, self.cancelBtn)
+        self.Bind(wx.EVT_BUTTON, self.onClear, self.clearBtn)
+        
+#-------------------------------------------------------------------------
+
+        topSizer        = wx.BoxSizer(wx.VERTICAL)
+
+        inputOneSizer   = wx.BoxSizer(wx.HORIZONTAL)
+        inputTwoSizer   = wx.BoxSizer(wx.HORIZONTAL)
+        
+
+        btnSizer        = wx.BoxSizer(wx.HORIZONTAL)
+
+        inputOneSizer.Add(labelOne, 0, wx.ALL, 5)
+
+        inputOneSizer.Add(self.inputTxtOne, 1, wx.ALL|wx.EXPAND, 5)
+
+
+        inputTwoSizer.Add(labelTwo, 0, wx.ALL, 5)
+        
+        inputTwoSizer.Add(self.inputTxtTwo, 1, wx.ALL|wx.EXPAND, 5)
+
+
+        btnSizer.Add(self.calcBtn, 0, wx.ALL, 5)
+        
+        btnSizer.Add(self.cancelBtn, 0, wx.ALL, 5)
+        
+        btnSizer.Add(self.clearBtn, 0, wx.ALL, 50)
+
+        topSizer.Add(inputOneSizer, 0, wx.ALL|wx.EXPAND, 5)
+        topSizer.Add(inputTwoSizer, 0, wx.ALL|wx.EXPAND, 5)
+        
+        topSizer.Add(btnSizer, 0, wx.ALL|wx.CENTER, 5)
+
+        panel.SetSizer(topSizer)
+        
+        topSizer.Fit(self)
+        
+#--------------------------------------------------------------------------------------
+    def onCalc(self, event):
+        
+        """ Суммируем два числа  """
+        
+        # Считываем значения полей
+        
+        number1 = float(self.inputTxtOne.GetValue())
+        number2 = float(self.inputTxtTwo.GetValue())
+        
+        # Находим сумму введенных значений
+        summa =  number1 +  number2
+        
+        # Выводим сообщение с результатом
+        result = wx.MessageBox(u'Сумма чисел равна: %s' % (str(summa)), u'Ответ', wx.OK | wx.ICON_INFORMATION)
+        
+        # Выкл. и вкл. кнопки
+        self.calcBtn.Disable()
+        self.cancelBtn.Enable()
+        
+#--------------------------------------------------------------------------------------
+    def onCancel(self, event):
+        
+        """ Закрываем окно """
+        
+        self.Close()
+#--------------------------------------------------------------------------------------
+
+    def onClear(self, event):
+        
+        """ Очищаем поля """
+        
+        # Очищаем поля ввода чисел
+        self.inputTxtOne.Clear()
+        self.inputTxtTwo.Clear()
+        
+        # Вкл кнопку расчета и выкл кнопку отмены
+        self.calcBtn.Enable()
+        self.cancelBtn.Disable()
+        
+######################################################################################
+# Run programm
+if __name__ == '__main__':
+    
+    app = wx.App(False)
+    frame = InputData().Show()
+    
+    app.MainLoop()
