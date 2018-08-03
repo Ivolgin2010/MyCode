@@ -1,1 +1,1 @@
-This repository will be containig somo wxpython code.
+This repository will be containig some wxpython code.
