@@ -10,11 +10,11 @@ class InputData(wx.Dialog):
 #------------------------------------------------------------------------------------------
     def __init__(self):
       
-        wx.Dialog.__init__(self, None, wx.ID_ANY, title='Введите значения')
+        wx.Dialog.__init__(self, None, wx.ID_ANY, title='Enter values')
 
         panel = wx.Panel(self, wx.ID_ANY)
 
-        labelOne = wx.StaticText(panel, wx.ID_ANY, 'Число 1:')
+        labelOne = wx.StaticText(panel, wx.ID_ANY, 'Number 1:')
         
         self.inputTxtOne = wx.TextCtrl(panel, wx.ID_ANY, '')
         
@@ -24,7 +24,7 @@ class InputData(wx.Dialog):
 
         self.inputTxtOne.SetEditable(True)
 
-        labelTwo = wx.StaticText(panel, wx.ID_ANY, 'Число 2:')
+        labelTwo = wx.StaticText(panel, wx.ID_ANY, 'Number 2:')
         self.inputTxtTwo = wx.TextCtrl(panel, wx.ID_ANY,'')
         self.inputTxtTwo.SetEditable(True)
 
@@ -35,7 +35,7 @@ class InputData(wx.Dialog):
         self.clearBtn = wx.Button(panel, wx.ID_ANY, 'Clear')
         
                
-        # Выключаем кнопку отмены
+        # Switch off Cancel button
         self.cancelBtn.Disable()
         
 #-------------------------------------------------------------------------
@@ -82,40 +82,40 @@ class InputData(wx.Dialog):
 #--------------------------------------------------------------------------------------
     def onCalc(self, event):
         
-        """ Суммируем два числа  """
+        """ Summation  """
         
-        # Считываем значения полей
+        # Read values
         
         number1 = float(self.inputTxtOne.GetValue())
         number2 = float(self.inputTxtTwo.GetValue())
         
-        # Находим сумму введенных значений
+        # Getting summ 
         summa =  number1 +  number2
         
-        # Выводим сообщение с результатом
-        result = wx.MessageBox(u'Сумма чисел равна: %s' % (str(summa)), u'Ответ', wx.OK | wx.ICON_INFORMATION)
+        # Show message with result
+        result = wx.MessageBox(u'Summa is: %s' % (str(summa)), u'Ответ', wx.OK | wx.ICON_INFORMATION)
         
-        # Выкл. и вкл. кнопки
+        # Turn off and turn of the buttons
         self.calcBtn.Disable()
         self.cancelBtn.Enable()
         
 #--------------------------------------------------------------------------------------
     def onCancel(self, event):
         
-        """ Закрываем окно """
+        """ Close frame """
         
         self.Close()
 #--------------------------------------------------------------------------------------
 
     def onClear(self, event):
         
-        """ Очищаем поля """
+        """ Clear the fields """
         
-        # Очищаем поля ввода чисел
+        # Clear values
         self.inputTxtOne.Clear()
         self.inputTxtTwo.Clear()
         
-        # Вкл кнопку расчета и выкл кнопку отмены
+        # Turn on button and turn off Cansel button
         self.calcBtn.Enable()
         self.cancelBtn.Disable()
         
