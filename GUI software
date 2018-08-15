@@ -1,0 +1,2512 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
+"""
+Программа расчета электрического обогрева нефтяных скважин.
+
+"""
+#------------------------------------------------------------------------------
+
+# Импортируемые библиотеки
+
+import wx
+import wx.lib.agw.ribbon as RB
+import wx.html as html
+
+import os
+import wx.lib.agw.aui as aui
+# import wx.xrc
+import wx.aui
+
+from time import strftime
+
+import logging
+import wx.lib.plot as plot
+
+import wx.adv
+# from wx.lib.wordwrap import wordwrap
+
+from __future__ import print_function
+
+import matplotlib 
+# import matplotlib.pyplot as plt 
+matplotlib.use('WXAgg')
+from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigCanvas
+  
+from matplotlib.figure import Figure
+import  numpy
+
+#----------------------------------------------------------------------
+# Идентификаторы для кнопок меню в функциональном окне
+
+ID_OpenFile = wx.NewIdRef()
+ID_SaveAsFile = wx.NewIdRef()
+ID_SetData = wx.NewIdRef()
+ID_Run  = wx.NewIdRef()
+ID_Plot = wx.NewIdRef()
+ID_CreateReport = wx.NewIdRef()
+ID_ViewReport = wx.NewIdRef()
+ID_PrintReport = wx.NewIdRef()
+ID_Help = wx.NewIdRef()
+
+
+####################################################################################
+
+class MainFrame(wx.Frame):
+    """ 
+    Создаем основное окно программы из которого будет вызываться 
+    функциональное окно, используя которое можно получить результат расчета    """
+#------------------------------------------------------------------------------
+# Создаем фрейм
+    def __init__(self, *args, **kwargs):
+        super(MainFrame, self).__init__(*args, **kwargs)
+        
+        self.InitUI()
+    
+# Создаем меню
+#------------------------------------------------------------------------------
+    def InitUI(self):
+
+        # Создаем панель меню
+        menubar = wx.MenuBar()
+        
+        # Создаем меню 
+        fileMenu = wx.Menu()
+        
+        # Создаем пункт меню 'Выход' с комбинацией быстрых клавиш
+        quitItem = fileMenu.Append(wx.ID_EXIT, u'&Выход\tCtrl+Q', 'нажмите для выхода из программы')
+    
+        # Создаем меню 'Файл'
+        menubar.Append(fileMenu, u'Файл')
+        
+        # Показываем панель меню
+        self.SetMenuBar(menubar)
+      
+        #Создаем пункт меню 'Справка'
+        helpMenu = wx.Menu()
+    
+        # Создаем пунк меню О программе
+        aboutItem = helpMenu.Append(wx.ID_ABOUT, u"О программе", ' сведения о программе')
+
+        # Создаем меню Справка
+        menubar.Append(helpMenu, u'Справка')
+        
+        self.SetMenuBar(menubar)
+#-------------------------------------------------------------------------------------------        
+        """ При необходимости, здесь создаем дополнительные пункты меню """ 
+
+
+#---------------- Обрабатываем события из меню --------------------------------------------
+
+        # Выходим из главного окна программы при нажатии 'Выход' 
+        self.Bind(wx.EVT_MENU, self.OnQuit, quitItem)
+        
+        # Вызываем окно справки 'О программе'
+        self.Bind(wx.EVT_MENU, self.AboutMessage, aboutItem)
+        
+#-------------------------------------------------------------------------------------------        
+# Задаем дополнительные параметры
+       
+    # Задаем размер подменю 
+        self.SetSize((350, 250))
+        
+        # Устанавливаем цвет фона
+        self.SetBackgroundColour('#87857C')
+        
+        # Расположение
+        self.Centre()
+
+        # Создаем строку состояния StatusBar
+        self.CreateStatusBar()
+        
+        # Выводим в нем приветствие
+        self.PushStatusText("Добро пожаловать в программу")
+
+#----------------- Создаем иконки ToolBar -----------------------------------------------------
+    
+        # Создаем панель
+        toolbar = self.CreateToolBar()
+        
+        # Добавляем картинку значка
+        ToolBarIcon = toolbar.AddTool(wx.ID_ANY, 'Data', wx.Bitmap('data.jpg'))
+        
+        # Делаем пенель видимой
+        toolbar.Realize()
+        
+        # Выводим всплывающую подсказку
+        self.SetToolTip(wx.ToolTip("создать новый расчет"))
+        
+#------------ Вызываем функциональное окно программы -------------------------------------------
+
+        # Кликаем мышкой по иконке - вызываем процедуру OnRibbonBar
+        self.Bind(wx.EVT_TOOL, self.OnRibbonBar, ToolBarIcon)
+        
+#-------- Задаем параметры главного окна --------------------------------------------------
+        
+        # Задаем размеры главного окна
+        self.SetSize((400, 300))
+        
+        # Указываем название главного окна
+        self.SetTitle(u'Обогрев скважины')
+        
+        # Задаем расположение
+        self.Centre()
+
+#----------------- Добавляем иконку в верхний левый угол главного окна ---------------------------
+
+        self.panel = wx.Panel(self, wx.ID_ANY)
+        
+        # Размещаем картинку
+        icon = wx.Icon('o&g1.jpg', wx.BITMAP_TYPE_JPEG)
+        
+        # Показываем в окне
+        self.SetIcon(icon)
+        
+#***************************************************************************************************  
+#                Процедуры
+#**************************************************************************************************
+    def OnQuit(self, event):
+        """ Закрываем главное окно  """
+        self.Close()
+        
+#-------------------------------------------------------------------------------------------------------
+# Выводим окно сообщения 
+#     def OnMessage(self,event):
+#         wx.MessageBox(u'Вызов нового функционального окна!', u'Новое окно', wx.OK | wx.ICON_INFORMATION)
+        
+#--------------------------------------------------------------------------------------------------------  
+#
+    def AboutMessage(self, event):
+        """ Выдодим окно справки """
+        
+        # Выводим информационное сообщение
+        info = wx.adv.AboutDialogInfo()
+        
+        # Создаем шаблон для описания
+        desc = ["\n Программа позволяет проводится теплотехнический расчет работы нефтяной скважины по данным технологической анкеты.\n",
+                "Вводятся начальные данные по скважине. Строится геотерма скважины. Определяются теплопотери в грунт.",
+                "Строится термограмма скважины с учетом характера движения жидкости. Определяется глубина отложения парафинов и проводится расчет параметров электрического кабеля.\n",
+                "Информация о платформе: (%s,%s)\n",
+                "Лицензия: частная"]
+        desc = "\n".join(desc)
+        
+        # Получаем информацию по системе
+        py_version = [sys.platform, ", python ", sys.version.split()[0]]
+        platform = list(wx.PlatformInfo[1:])
+        platform[0] += (" " + wx.VERSION_STRING)
+        wx_info = ", ".join(platform)
+
+        # Заполняем поля 
+        info.SetName("Программа расчета обогрева нефтяных скважин\n")
+        info.SetVersion("Версия 1.0")
+        info.SetCopyright("Copyright (C) ОКБ <<Гамма>>")
+        info.SetDescription(desc % (py_version, wx_info))
+        info.SetWebSite("https://okb-gamma.ru/")
+        info.AddDeveloper("Инженер-разработчик исследовательской группы ОГК Гераськин Игорь Сергеевич")
+
+        # Создаем и показываем диалог
+        wx.adv.AboutBox(info)
+
+#--------------------------------------------------------------------------------------------------------
+# 
+    def OnRibbonBar(self, event):
+        """ Вызываем функциональное окно по нажатию на значок    """
+        
+        # Создаем диалоговое окно
+        dlg = RibbonBar(None, title="Новый расчет", size=(500,180))
+        
+        # Показываем его
+        dlg.ShowModal()
+        
+#----------------------------------------------------------------------------------------------------------
+# Запускаем главное окно программы
+def main():
+    
+    app = wx.App()
+    ex = MainFrame(None)
+    ex.Center()
+    ex.Show()
+    
+    app.MainLoop()
+    
+
+#######################################################################################################################
+class RibbonBar(wx.Dialog):
+    """
+    Создаем функциональное окно программы
+    
+    """
+#---------------------------------------------------------------------------------------------------------------------
+    def __init__(self, *ls, **kw):
+        wx.Dialog.__init__(self, *ls, **kw)
+        
+#****************************** Создаем вкладку Главная **********************************************************
+
+        """ В данной вкладке находятся стандартные 
+              инструменты для работы с данными - значки Открыть и Сохранить как """
+    
+        # Создаем панель закладок        
+        ribbonBar = RB.RibbonBar(self, wx.ID_ANY, agwStyle=RB.RIBBON_BAR_DEFAULT_STYLE|RB.RIBBON_BAR_SHOW_PANEL_EXT_BUTTONS)
+        
+        # Создаем вкладку Главная
+        HomepageTab = RB.RibbonPage(ribbonBar, wx.ID_ANY, "Главная")
+        
+        # Создаем панель Стандартные
+        HomepagePanel = RB.RibbonPanel(HomepageTab, wx.ID_ANY, u"Стандартные")
+        
+        # Размещаем панель на вкладке    
+        setHomepagePanel = RB.RibbonButtonBar(HomepagePanel)
+        
+#------------------------------ Рисуем значки -----------------------------------------------------------         
+        # Открыть
+        HomepageIconOpen = wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_OTHER, wx.Size(48, 48))
+   
+        # Определяем значок 'Сохранить как' кнопки (выбираем из ряда стандартных)
+        HomepageIconSaveAs = wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE_AS, wx.ART_OTHER, wx.Size(48, 48))
+       
+        # Задаем название значка и рисуем его
+        setHomepagePanel.AddSimpleButton(ID_OpenFile, u"Открыть", HomepageIconOpen, 'открыть файл')
+        
+        # Вызываем окно 'Открыть'
+        setHomepagePanel.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.OnOpenFileRibbon, id=ID_OpenFile)
+        
+        # Задаем название значка и рисуем его
+        setHomepagePanel.AddSimpleButton(ID_SaveAsFile, u"Сохранить как", HomepageIconSaveAs, 'сохранить файл с указанием имени')
+        
+         # Вызываем окно 'Открыть'
+        setHomepagePanel.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.OnSaveAsFileRibbon, id=ID_SaveAsFile)
+        
+#******************************** Создаем вкладку Инструменты ***********************************************
+
+        """ В данной вкладке находятся следующие инструменты:
+            - Ввод данных
+            - Пуск
+            А на одной панели:
+            - Построить график
+            - Создать отчет
+            - Просмотр отчета
+            - Печать отчета
+            
+         """
+#--------------------------------------------------------------------------------------------------------------------        
+        # Создаем вкладку Инструменты
+        ToolsTab = RB.RibbonPage(ribbonBar, wx.ID_ANY, "Инструменты")
+        
+        # Делаем вкладку Инструменты активной 
+        ribbonBar.SetActivePage(ToolsTab)
+        
+        # Создаем панель 'Данные'
+        DataPanel = RB.RibbonPanel(ToolsTab, wx.ID_ANY, u"Данные")
+        
+        # Размещаем панель на вкладке
+        setDataPanel = RB.RibbonButtonBar(DataPanel)
+           
+        # Задаем рисунок значка
+        ToolsIconSetData = wx.Bitmap( "menu icons/data1.jpg", wx.BITMAP_TYPE_ANY)
+        
+        # Задаем название значка и всплывающей подсказки
+        setDataPanel.AddSimpleButton(ID_SetData, u"Ввод данных", ToolsIconSetData, 'ввести данные для расчета')
+        
+        # Вызываем окно 'Ввод данных'
+        setDataPanel.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.OnOpenNewWindow, id=ID_SetData)
+            
+#----------------------- Создаем панель Расчет ------------------------------------------------------------------------
+
+        CalcPanel = RB.RibbonPanel(ToolsTab, wx.ID_ANY, u"Расчет")
+     
+        # Размещаем панель на вкладке
+        self.setCalcPanel = RB.RibbonButtonBar(CalcPanel)
+        
+        # Задаем рисунок значка
+        ToolsIconRunButton = wx.Bitmap( "menu icons/run1.jpg", wx.BITMAP_TYPE_ANY)
+        
+        # Задаем название кнопки и значок
+        self.setCalcPanel.AddSimpleButton(ID_Run, u"Пуск", ToolsIconRunButton, 'запустить расчет')
+        
+        # Вызываем окно 'Пуск'
+        self.setCalcPanel.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.OnRunCalculation, id=ID_Run)
+        
+#------------------------ Создаем панель Результаты расчета -------------------------------------------------------
+
+        PlotPanel = RB.RibbonPanel(ToolsTab, wx.ID_ANY, u"Результаты расчета")
+        
+        # Размещаем панель на вкладке
+        setResult = RB.RibbonButtonBar(PlotPanel)
+        
+        # Задаем рисунок значка
+        TooslIconPlot = wx.Bitmap( "menu icons/plot.jpg", wx.BITMAP_TYPE_ANY)
+        
+        # Создаем кнопку Построить график
+        setResult.AddSimpleButton(ID_Plot, u"График", TooslIconPlot, 'построить график')
+
+        # Задаем рисунок значка
+        ToolsIconReport = wx.Bitmap( "menu icons/report.jpg", wx.BITMAP_TYPE_ANY )
+        
+        # Вызываем окно 'Построить график'        
+        setResult.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.OnPlotGraph, id=ID_Plot)
+
+#----------------------------------------------------------------------------------------------------------------------        
+        # Создаем кнопку Создать отчет
+        setResult.AddSimpleButton(ID_CreateReport, u"Создать отчет", ToolsIconReport, 'создать отчет')
+        
+       # Задаем рисунок значка
+        ToolsIconReview = wx.Bitmap( "menu icons/open.jpg", wx.BITMAP_TYPE_ANY )
+        
+         # Вызываем окно 'Создать отчет'
+        setResult.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.OnCreateReport, id=ID_CreateReport)
+        
+#---------------------------------------------------------------------------------------------------------------------        
+        # Создаем кнопку Просмотр отчета
+        setResult.AddSimpleButton(ID_ViewReport, u"Просмотр отчета", ToolsIconReview, 'открыть отчет для просмотра')
+      
+        # Задаем рисунок значка
+        ToolsIconPrint = wx.Bitmap( "menu icons/print2.jpg", wx.BITMAP_TYPE_ANY )
+        
+        # Вызываем окно 'Просмотр отчета'
+        setResult.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.OnOpenViewer, id=ID_ViewReport)
+        
+#----------------------------------------------------------------------------------------------------------------------
+        # Создаем кнопку Печать отчета
+        setResult.AddSimpleButton(ID_PrintReport, u"Печать отчета", ToolsIconPrint, 'напечатать отчет')       
+        
+        # Вызываем окно 'Просмотр отчета'
+        setResult.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.onPrintDocument, id=ID_PrintReport)
+        
+#**************************************** Создаем вкладку Справка **************************************************************
+    
+        #Создаем вкладку Справка
+        infoTab = RB.RibbonPage(ribbonBar, wx.ID_ANY, "Справка")
+    
+        # Создаем панель Информация
+        HelpPanel = RB.RibbonPanel(infoTab, wx.ID_ANY, u"Информация")
+        
+        # Размещаем панель на вкладке
+        helpinfo = RB.RibbonButtonBar(HelpPanel)
+
+        # Задаем рисунок значка
+        HelpIcon = wx.Bitmap( u"menu icons/help.jpg", wx.BITMAP_TYPE_ANY)
+        
+        # Создаем кнопку и ее название
+        helpinfo.AddSimpleButton(ID_Help, u"Помощь", HelpIcon, 'справочные метериалы по программе')
+    
+        # Вызываем меню 'Помощь'
+        helpinfo.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.onOpenHelpWindow, id=ID_Help)
+        
+#--------------------- Показываем панель -------------------------------------------
+
+        ribbonBar.Realize()
+        
+        # Выравниваем        
+        s = wx.BoxSizer(wx.VERTICAL)
+        s.Add(ribbonBar, 0, wx.EXPAND)
+        self.SetSizer(s)
+        
+#---------------------------------------------------------------------------------------------------------------------        
+ # Управляем видимостью иконок на функциональной панели
+ # Начальная установка кнопок - активны только 'Ввод данных' и 'Помощь'
+    
+        # Активность кнопки 'Открыть'  
+        setHomepagePanel.EnableButton(ID_OpenFile, True)
+        
+        # Активность кнопки 'Сохранить как'  
+        setHomepagePanel.EnableButton(ID_SaveAsFile, True)
+        
+        # Активность кнопки 'Ввод данных'  
+        setDataPanel.EnableButton(ID_SetData, True)
+        
+        # Активность кнопки 'Пуск'  
+        self.setCalcPanel.EnableButton(ID_Run, False)
+        
+        # Активность кнопки 'Построить график'  
+        setResult.EnableButton(ID_Plot, True)
+        
+        # Активность кнопки 'Создать отчет' 
+        setResult.EnableButton(ID_CreateReport, True)
+        
+        # Активность кнопки 'Просмотр отчета' 
+        setResult.EnableButton(ID_ViewReport, True)
+        
+        # Активность кнопки 'Печать отчета' 
+        setResult.EnableButton(ID_PrintReport, True)
+        
+        # Активность кнопки 'Помощь' 
+        helpinfo.EnableButton(ID_Help, True)
+
+#**********************************************************************************************************
+# Методы классов
+#*********************************************************************************************************
+#----------------------------------------------------------------------------------------------------------------
+# Открываем файл для просмотра
+   
+    def OnOpenFileRibbon(self, event):
+        
+        wildcard = "Text file (*.txt)|*.txt|"     \
+                   "Python source (*.py)|*.py|"     \
+                   "MS Office documents (*.doc)|*.doc|" \
+            "All files (*.*)|*.*"     
+  
+        # Создаем окно
+        frame = wx.Frame(None, title="Открываем файл", size=(800, 700))
+#---------------------------------------------------------------------------------------------
+
+  # добавить сюда меню (пункты сохранить, сохранить как и выход)
+
+#----------------------------------------------------------------------------------------------
+        
+        # Создаем окно многострочного текста и открываем его во фрейме
+        self.my_text = wx.TextCtrl(frame, style=wx.TE_MULTILINE)
+        self.my_text.SetFont(wx.Font(FONTSIZE, wx.FONTFAMILY_TELETYPE, wx.NORMAL, wx.NORMAL))
+       
+        # Выбираем текущую рабочую директорию
+        self.currentDirectory = os.getcwd()
+        
+        # Открываем диалог и выбираем файл        
+        dialog = wx.FileDialog(None, message="Открытие документа", defaultDir= self.currentDirectory, 
+                            defaultFile="", wildcard=wildcard, style=wx.FD_OPEN)
+
+        # Show the dialog and retrieve the user response. If it is the OK response, 
+        # process the data.
+        if dialog.ShowModal() == wx.ID_OK:
+            # This returns the file that was selected
+            path = dialog.GetPath()
+
+        # Открываем файл только для чтения
+            fileopen = open(path, 'r')
+            self.my_text.SetValue(fileopen.read())
+            fileopen.close()  
+    
+        # Показываем окно
+        frame.Show()
+#-------------------------------------------------------------------------------------------------------------
+# Сохраняем файл как 
+
+    def OnSaveAsFileRibbon(self, event):
+
+        """
+        Create and show the Save FileDialog
+        """
+        wildcard = "Text source (*.txt)|*.txt|" \
+            "All files (*.*)|*.*"
+        
+        self.currentDirectory = os.getcwd()
+        
+        dlg = wx.FileDialog(self, message="Сохранение документа", defaultDir=self.currentDirectory, 
+                            defaultFile="", wildcard=wildcard, style=wx.FD_SAVE)
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+            report = open(path, "w") 
+
+            report.close()
+
+        dlg.Destroy()
+
+#---------------------------------------------------------------------------------------------------------------        
+
+# Открываем окно Ввода данных
+
+    def OnOpenNewWindow(self, event):
+        """ открываем окно ввода данных """
+        
+        NewWindow = NotebookFrame(None)
+        NewWindow.Show()
+#---------------------------------------------------------------------------------------------------------------
+# Запускаем расчет
+
+    def OnRunCalculation(self, event):
+        """ запускаем расчет """       
+        
+        dialog = MyProgressDialog()
+        dialog.Show()
+        dialog.Destroy()
+    
+#----------------------------------------------------------------------------------------------------------    
+# Открываем окно рисования графика
+
+    def OnPlotGraph(self, event):
+        """ строим график """
+        
+        fig = PlotFrame()
+        fig.Show(True)
+        
+#----------------------------------------------------------------------------------------------------------     
+
+# Открываем запуск создания отчета
+
+    def OnCreateReport(self, event):
+        """ создаем отчет """
+        create = ReportWindow(None)
+        create.Show()
+        
+#---------------------------------------------------------------------------------------------------------
+# Открываем просмотрщик
+
+    def OnOpenViewer(self, event):
+        """ открываем просмотрщик """
+        
+        frame = Viewer(None, 'Файловый просмотрщик')
+        frame.Show()
+
+#--------------------------------------------------------------------------------------------------------
+# Открываем окно печати
+
+    def onPrintDocument(self, event):
+        """ выводим документ на печать """
+        
+        frame = PrintFrameworkSample()
+        frame.Show()
+    
+#---------------------------------------------------------------------------------------------------------  
+# Открываем окно Помощи
+
+    def onOpenHelpWindow(self, event):
+        """ открываем окно справки """
+        
+        helpwindow = HelpWindow(None)
+        helpwindow.Show() 
+        
+##################################################################################################
+#----------------------------------------- Входные данные ---------------------------------------#
+##################################################################################################
+# Создаем вкладки
+
+class TabPanelOne(wx.Panel):
+    """
+    Первая вкладка 
+    """
+#--------------------------------------------------------------------------------------------
+# Размещаем на панели текст и поля для ввода 
+
+    def __init__(self, parent):
+        """ """
+        wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
+        
+        font14 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')   
+        text14 = wx.StaticText(self, wx.ID_ANY, "Глубина забоя, м", (40,50))
+        text14.SetFont(font14)
+        text14.SetForegroundColour('black')
+        self.Show(True)
+                
+        font15 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')   
+        text15 = wx.StaticText(self, wx.ID_ANY, "Длина эксплуатационной колонны, м", (40,100))
+        text15.SetFont(font15)
+        text15.SetForegroundColour('black')
+        self.Show(True)
+        
+        font16 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text16 = wx.StaticText(self, wx.ID_ANY, "Диаметр эксплуатационной колонны, м", (40,150))
+        text16.SetFont(font16)
+        text16.SetForegroundColour('black')
+        self.Show(True)
+        
+        
+        font17 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text17 = wx.StaticText(self, wx.ID_ANY, "Длина колонны НКТ, м", (150,230))
+        text17.SetFont(font17)
+        text17.SetForegroundColour('black')
+        self.Show(True)
+        
+        font18 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text18 = wx.StaticText(self, wx.ID_ANY, "Диаметр колонны НКТ, м", (150,280))
+        text18.SetFont(font18)
+        text18.SetForegroundColour('black')
+        self.Show(True)
+        
+#         font19 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+#         text19 = wx.StaticText(self, wx.ID_ANY, "Статический уровень флюида в скважине, м", (40,300))
+#         text19.SetFont(font19)
+#         text19.SetForegroundColour('black')
+#         self.Show(True)
+        
+        font62 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text62 = wx.StaticText(self, wx.ID_ANY, "Напряжение питания ПЭД, В", (240, 380))
+        text62.SetFont(font62)
+        text62.SetForegroundColour('black')
+        self.Show(True)
+        
+        font63 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text63 = wx.StaticText(self, wx.ID_ANY, "Частота питающего напряжения, Гц", (240, 430))
+        text63.SetFont(font63)
+        text63.SetForegroundColour('black')
+        self.Show(True)
+        
+        font64 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text64 = wx.StaticText(self, wx.ID_ANY, "Ток потребления ПЭД, А", (240, 480))
+        text64.SetFont(font64)
+        text64.SetForegroundColour('black')
+        self.Show(True)
+        
+        # Рисуем поля ввода значений
+        self.txt14 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(180, 50))
+        # Устанавливаем фон поля
+#         self.txt14.SetBackgroundColour("#FFFFE8")
+        # Устанавливаем фокус
+#         self.txt14.SetFocus()
+
+        self.txt15 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(320, 100))
+        self.txt16 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(330, 150))
+        self.txt17 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(340, 230))
+        self.txt18 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(340, 280))
+        
+        self.txt62 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(450, 380))
+        self.txt63 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(510, 430))
+        self.txt64 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(430, 480))
+        
+        # Обрабатываем событие (меняем подсветку полей ввода)
+        self.txt14.Bind(wx.EVT_SET_FOCUS, self.FirstFieldOn)
+        self.txt15.Bind(wx.EVT_SET_FOCUS, self.SecondFieldOn)
+        self.txt16.Bind(wx.EVT_SET_FOCUS, self.ThirdFieldOn)
+#         self.txt17.Bind(wx.EVT_SET_FOCUS, self.FourthFieldOn)
+#         self.txt18.Bind(wx.EVT_SET_FOCUS, self.FifthFieldOn)
+#         self.txt62.Bind(wx.EVT_SET_FOCUS, self.SixthFieldOn)
+#         self.txt63.Bind(wx.EVT_SET_FOCUS, self.SeventhFieldOn)
+#         self.txt64.Bind(wx.EVT_SET_FOCUS, self.EighthFieldOn)
+                
+        
+        # Рисуем резделительную линию
+        wx.StaticLine(self, pos=(30, 600), size=(950,2))
+        
+            
+        # Рисуем кнопку 'следующая'
+        self.btn_next1 = wx.Button(self, wx.ID_OK, label="следующая>>", pos=(500, 710))
+        
+        # Делаем ее видимой
+#         self.btn_next1.Enable()
+        
+        # Переключаемся на другую вкладку по нажатию кнопки
+        self.Bind(wx.EVT_BUTTON, self.OnCheckFirstTab, self.btn_next1)
+       
+        # Рисуем кнопку закрыть
+        self.btn_close1 = wx.Button(self, wx.ID_OK, label="Закрыть", pos=(650, 710))
+        
+        # При нажатии закрываем окно
+        self.btn_close1.Bind(wx.EVT_BUTTON, self.onCloseDataTabOne, self.btn_close1)
+        
+        """ после проверки заполнения всех полей на первой вкладке (в случае заполнения всех пустых полей)
+            переходим к заполнению полей следующей вкладки
+        """
+
+#----------------------------------------------------------------------------------------------------------------
+# Управляем подсветкой полей ввода на первой вкладке
+
+    def FirstFieldOn(self, event):
+        """  """
+        # Устанавливаем белый фон для остальных полей
+        self.txt15.SetBackgroundColour("white")
+        self.txt15.Refresh()
+        
+        self.txt16.SetBackgroundColour("white")
+        self.txt16.Refresh()
+        
+        # Устанавливаем желтый фон для текущего поля
+        self.txt14.SetBackgroundColour("#FFFFE8")
+        self.txt14.SetFocus()
+        self.txt14.Refresh()
+         
+    def SecondFieldOn(self, event):
+        """  """
+        # Устанавливаем белый фон для остальных полей
+        self.txt14.SetBackgroundColour("white")
+        self.txt14.Refresh()
+        
+        self.txt16.SetBackgroundColour("white")
+        self.txt16.Refresh()
+        
+        # Устанавливаем желтый фон для текущего поля
+        self.txt15.SetBackgroundColour("#FFFFE8")
+        self.txt15.Refresh()
+    
+    
+    def ThirdFieldOn(self, event):
+        """  """
+        # Устанавливаем белый фон для остальных полей
+        self.txt15.SetBackgroundColour("white")
+        self.txt15.Refresh()
+        
+        self.txt14.SetBackgroundColour("white")
+        self.txt14.Refresh()
+        
+        #  Устанавливаем желтый фон для текущего поля
+        self.txt16.SetBackgroundColour("#FFFFE8")
+        self.txt16.Refresh()
+         
+#     def FourthFieldOn(self, event):
+#         """  """
+#         #
+#         self.txt14.SetBackgroundColour("white")
+#         self.txt14.Refresh()
+        
+#         #
+#         self.txt15.SetBackgroundColour("#FFFFE8")
+#         self.txt15.Refresh()        
+        
+        
+#-----------------------------------------------------------------------------------------------------------------        
+# Закрываем окно 
+
+    def onCloseDataTabOne(self, event):
+        """ Закрываем ноутбук с данными """      
+  
+        self.GetTopLevelParent().Destroy()
+    
+#-----------------------------------------------------------------------------------------------------------------
+# Проверяем заполнение всех поей вкладки
+
+    def OnCheckFirstTab(self, event):
+        """ проверяем все ли поля заполнены """
+        
+        # Контрольные значения
+        self.h_bhole = self.txt14.GetValue()
+        self.h_obs = self.txt15.GetValue()
+        self.d_vnesh_obs = self.txt16.GetValue()
+#         fourth = self.txt17.GetValue()
+#         fifth = self.txt18.GetValue()
+#         sixth = self.txt62.GetValue()
+#         seventh = self.txt63.GetValue()
+#         eighth = self.txt64.GetValue()
+        
+        if self.h_bhole and self.h_obs and self.d_vnesh_obs != '':
+            
+            # Переходим на следующую вкладку
+            self.notebook = self.GetParent()
+            self.notebook.SetSelection(1)
+            
+            # Если все поля заполнены - делаем кнопку 'следующая' неактивной
+#             self.btn_next1.Disable()
+            
+            # Делаем первую вкладку неактивной
+            self.notebook.EnableTab(0, False)
+           
+        else:
+            # Выводим сообщение
+            dlg = wx.MessageDialog(self, 'Чтобы перейти к следущей вкладке, пожалуйста, заполните все пустые поля',
+                                     'Сообщение', wx.OK)
+            dlg.ShowModal() # показываем сообщение
+            dlg.Destroy() # удаляем когда все закончится
+            
+########################################################################
+class TabPanelTwo(wx.Panel):
+    """
+    Вторая вкладка 
+    
+    """
+    #----------------------------------------------------------------------
+    def __init__(self, parent):
+        """"""
+        wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
+        
+        
+        font22 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')   
+        text22 = wx.StaticText(self, wx.ID_ANY, "Глубина вечномерзлых грунтов, м", (40, 50))
+        text22.SetFont(font22)
+        text22.SetForegroundColour('black')
+        self.Show(True)
+        
+        font23 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text23 = wx.StaticText(self, wx.ID_ANY, "Средняя температура наиболее холодного месяца, град. С", (40, 100))
+        text23.SetFont(font23)
+        text23.SetForegroundColour('black')
+        self.Show(True)
+        
+        font24 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text24 = wx.StaticText(self, wx.ID_ANY, "Максимальная температура наиболее теплого месяца, град. С", (40, 150))
+        text24.SetFont(font24)
+        text24.SetForegroundColour('black')
+        self.Show(True)
+        
+        self.txt22 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(300, 50))
+        self.txt23 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(490, 100))
+        self.txt24 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(510, 150))
+        
+        wx.StaticLine(self, pos=(30, 300), size=(950,2))
+        
+#         self.btn_previous1 = wx.Button(self, wx.ID_OK, label="<<предыдущая", pos=(350, 710))
+        self.btn_next2 = wx.Button(self, wx.ID_OK, label="следующая>>", pos=(500, 710))
+    
+#         self.btn_next2.Enable()
+#         self.Bind(wx.EVT_BUTTON, self.ReturnOnFirstTab, self.btn_previous1)
+
+        self.Bind(wx.EVT_BUTTON, self.OnCheckSecondTab, self.btn_next2)
+        
+        self.btn_close2 = wx.Button(self, wx.ID_OK, label="Закрыть", pos=(650, 710))
+        self.btn_close2.Bind(wx.EVT_BUTTON, self.onCloseDataTabTwo, self.btn_close2)
+#-----------------------------------------------------------------------------------------------------------------        
+# Закрываем окно ноутбука
+
+    def onCloseDataTabTwo(self, event):
+        """ Закрываем ноутбук с данными """      
+  
+        self.GetTopLevelParent().Destroy()
+    
+#-----------------------------------------------------------------------------------------------------------------
+# # Возвращаемся назад на перыдущую вкладку
+#     def ReturnOnFirstTab(self, event):
+        
+#         # Переходим на следующую вкладку
+#         self.notebook = self.GetParent()
+#         self.notebook.SetSelection(0)
+        
+#         self.btn_next1.Enable()
+        
+#         # Контрольные значения
+#         self.h_bhole = self.txt14.GetValue()
+#         self.h_obs = self.txt15.GetValue()
+#         self.d_vnesh_obs = self.txt16.GetValue()
+
+        
+#         if self.h_bhole and self.h_obs and self.d_vnesh_obs != '':
+            
+#             # Переходим на следующую вкладку
+#             self.notebook = self.GetParent()
+#             self.notebook.SetSelection(1)
+            
+#             # Если все поля заполнены - делаем кнопку 'следующая' неактивной
+#             self.btn_next1.Disable()
+           
+#         else:
+#             # Выводим сообщение
+#             dlg = wx.MessageDialog(self, 'Чтобы перейти к следущей вкладке, пожалуйста, заполните все пустые поля',
+#                                      'Сообщение', wx.OK)
+#             dlg.ShowModal() # показываем сообщение
+#             dlg.Destroy() # удаляем когда все закончится
+        
+
+#-----------------------------------------------------------------------------------------------------------------
+# Переходим на третью вкладку
+    def OnCheckSecondTab(self, event):
+        
+        # Контрольные значения
+        self.h_ice = self.txt22.GetValue()
+        self.t_month = self.txt23.GetValue()
+        self.t_maxh = self.txt24.GetValue()
+
+        
+        if self.h_ice and self.t_month and self.t_maxh != '':
+            
+            # Переходим на следующую вкладку
+            self.notebook = self.GetParent()
+            self.notebook.SetSelection(2)
+            
+            # Если все поля заполнены - делаем кнопку 'следующая' неактивной
+#             self.btn_next2.Enable()
+            
+             # Делаем вкладку неактивной
+            self.notebook.EnableTab(1, False)
+           
+        else:
+            # Выводим сообщение
+            dlg = wx.MessageDialog(self, 'Чтобы перейти к следущей вкладке, пожалуйста, заполните все пустые поля',
+                                     'Сообщение', wx.OK)
+            dlg.ShowModal() # показываем сообщение
+            dlg.Destroy() # удаляем когда все закончится
+            
+#-----------------------------------------------------------------------------------------------------------------
+
+########################################################################
+class TabPanelThree(wx.Panel):
+    """
+    Третья вкладка
+    """
+    #----------------------------------------------------------------------
+    def __init__(self, parent):
+        """"""
+        wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
+
+        font31 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')   
+        text31 = wx.StaticText(self, wx.ID_ANY, "Плотность нефтяного флюида в условиях пласта, кг/м3", (40,50))
+        text31.SetFont(font31)
+        text31.SetForegroundColour('black')
+        self.Show(True)
+                
+        font32 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')   
+        text32 = wx.StaticText(self, wx.ID_ANY, "Вязкость нефтяного флюида, мПа*с", (40,100))
+        text32.SetFont(font32)
+        text32.SetForegroundColour('black')
+        self.Show(True)
+        
+        font33 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text33 = wx.StaticText(self, wx.ID_ANY, "Давление насыщения в условиях пласта, МПа", (40,150))
+        text33.SetFont(font33)
+        text33.SetForegroundColour('black')
+        self.Show(True)
+        
+        
+        font34 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text34 = wx.StaticText(self, wx.ID_ANY, "Температурный коэффициент давления насыщения", (40,200))
+        text34.SetFont(font34)
+        text34.SetForegroundColour('black')
+        self.Show(True)
+        
+        font35 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text35 = wx.StaticText(self, wx.ID_ANY, "Газосодержание пластовой жидкости, м3/м3", (40,250))
+        text35.SetFont(font35)
+        text35.SetForegroundColour('black')
+        self.Show(True)
+        
+        font21 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')   
+        text21 = wx.StaticText(self, wx.ID_ANY, "Температура нефтяного пласта, град. С", (40,300))
+        text21.SetFont(font21)
+        text21.SetForegroundColour('black')
+        self.Show(True)
+       
+        self.txt31 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(460, 50))
+        self.txt32 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(310, 100))
+        self.txt33 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(390, 150))
+        self.txt34 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(410, 200))
+        self.txt35 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(380, 250))
+        
+        self.txt21 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(350, 300))
+        
+        wx.StaticLine(self, pos=(30, 400), size=(950,2))
+        
+#         sizer = wx.BoxSizer(wx.VERTICAL)
+#         txtOne = wx.TextCtrl(self, wx.ID_ANY, "")
+#         txtTwo = wx.TextCtrl(self, wx.ID_ANY, "")
+
+#         sizer = wx.BoxSizer(wx.VERTICAL)
+#         sizer.Add(txtOne, 0, wx.ALL, 5)
+#         sizer.Add(txtTwo, 0, wx.ALL, 5)
+
+#         self.SetSizer(sizer)
+
+#         self.btn_previous2 = wx.Button(self, wx.ID_OK, label="<<предыдущая", pos=(350, 710))
+        self.btn_next3 = wx.Button(self, wx.ID_OK, label="следующая>>", pos=(500, 710))
+        self.btn_next3.Enable()
+        
+        self.btn_close3 = wx.Button(self, wx.ID_OK, label="Закрыть", pos=(650, 710))
+        self.btn_close3.Bind(wx.EVT_BUTTON, self.onCloseDataTabThree, self.btn_close3)
+#-----------------------------------------------------------------------------------------------------------------        
+# Закрываем окно ноутбука
+
+    def onCloseDataTabThree(self, event):
+        """ Закрываем ноутбук с данными """      
+  
+        self.GetTopLevelParent().Destroy()
+
+        
+########################################################################
+class TabPanelFour(wx.Panel):
+    """
+    Четвертая вкладка
+    """
+    #----------------------------------------------------------------------
+    def __init__(self, parent):
+        """"""
+        wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
+
+        font41 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')   
+        text41 = wx.StaticText(self, wx.ID_ANY, "Дебит по жидкости (с чистой НКТ), м3/сут", (40,50))
+        text41.SetFont(font41)
+        text41.SetForegroundColour('black')
+        self.Show(True)
+                
+        font42 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')   
+        text42 = wx.StaticText(self, wx.ID_ANY, "Дебит по нефти, т/сут", (40,100))
+        text42.SetFont(font42)
+        text42.SetForegroundColour('black')
+        self.Show(True)
+        
+        font43 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text43 = wx.StaticText(self, wx.ID_ANY, "Газовый фактор, м3/м3", (40,150))
+        text43.SetFont(font43)
+        text43.SetForegroundColour('black')
+        self.Show(True)
+        
+        
+        font44 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text44 = wx.StaticText(self, wx.ID_ANY, "Содержание воды, массовая доля, %", (40, 200))
+        text44.SetFont(font44)
+        text44.SetForegroundColour('black')
+        self.Show(True)
+        
+        font45 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text45 = wx.StaticText(self, wx.ID_ANY, "Динамический уровень, м", (40, 250))
+        text45.SetFont(font45)
+        text45.SetForegroundColour('black')
+        self.Show(True)
+        
+        font46 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text46 = wx.StaticText(self, wx.ID_ANY, "Давление на устье, МПа", (40, 300))
+        text46.SetFont(font46)
+        text46.SetForegroundColour('black')
+        self.Show(True)
+        
+        font47 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text47 = wx.StaticText(self, wx.ID_ANY, "Температура жидкости на выходе из скважины, МПа", (40, 350))
+        text47.SetFont(font47)
+        text47.SetForegroundColour('black')
+        self.Show(True)
+        
+        font48 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text48 = wx.StaticText(self, wx.ID_ANY, "Минимальный дебит по жидкости, м3/сут", (40, 400))
+        text48.SetFont(font48)
+        text48.SetForegroundColour('black')
+        self.Show(True)
+        
+        font49 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text49 = wx.StaticText(self, wx.ID_ANY, "Глубина спуска скребка при механической очистке, м", (40, 450))
+        text49.SetFont(font48)
+        text49.SetForegroundColour('black')
+        self.Show(True)
+        
+           
+        font410 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text410 = wx.StaticText(self, wx.ID_ANY, "Максимальная глубина отложения АСПО (по данным КРС), м", (40, 500))
+        text410.SetFont(font410)
+        text410.SetForegroundColour('black')
+        self.Show(True)
+        
+        self.txt41 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(370, 50))
+        self.txt42 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(230, 100))
+        self.txt43 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(230, 150))
+        self.txt44 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(320, 200))
+        self.txt45 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(240, 250))
+        self.txt46 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(240, 300))
+        self.txt47 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(430, 350))
+        self.txt48 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(360, 400))
+        self.txt49 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(450, 450))
+        self.txt410 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(480, 500))
+
+        wx.StaticLine(self, pos=(30, 600), size=(950,2))
+        
+#         self.btn_previous3 = wx.Button(self, wx.ID_OK, label="<<предыдущая", pos=(350, 710))
+        self.btn_next4 = wx.Button(self, wx.ID_OK, label="следующая>>", pos=(500, 710))
+        self.btn_next4.Enable()
+        
+        self.btn_close4 = wx.Button(self, wx.ID_OK, label="Закрыть", pos=(650, 710))
+        self.btn_close4.Bind(wx.EVT_BUTTON, self.onCloseDataTabFour, self.btn_close4)
+#-----------------------------------------------------------------------------------------------------------------        
+# Закрываем окно ноутбука
+
+    def onCloseDataTabFour(self, event):
+        """ Закрываем ноутбук с данными """      
+  
+        self.GetTopLevelParent().Destroy()
+
+########################################################################
+class TabPanelFive(wx.Panel):
+    """
+    Пятая вкладка
+    """
+    #----------------------------------------------------------------------
+    def __init__(self, parent):
+        """"""
+        wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
+
+        font51 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')   
+        text51 = wx.StaticText(self, wx.ID_ANY, "Плотность дегазированной нефти в норм. условиях, кг/м3", (40,50))
+        text51.SetFont(font51)
+        text51.SetForegroundColour('black')
+        self.Show(True)
+                
+        font52 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')   
+        text52 = wx.StaticText(self, wx.ID_ANY, "Вязкость дегазированной нефти, мПа*с", (40,100))
+        text52.SetFont(font52)
+        text52.SetForegroundColour('black')
+        self.Show(True)
+        
+        font53 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text53 = wx.StaticText(self, wx.ID_ANY, "Содержание парафина, массовая доля, %", (40,150))
+        text53.SetFont(font53)
+        text53.SetForegroundColour('black')
+        self.Show(True)
+        
+        
+        font54 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text54 = wx.StaticText(self, wx.ID_ANY, "Содержание асфальтенов, массовая доля, %", (40, 200))
+        text54.SetFont(font54)
+        text54.SetForegroundColour('black')
+        self.Show(True)
+        
+        font55 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text55 = wx.StaticText(self, wx.ID_ANY, "Содержание смол селикогелевых, массовая доля, %", (40, 250))
+        text55.SetFont(font55)
+        text55.SetForegroundColour('black')
+        self.Show(True)
+        
+        font56 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text56 = wx.StaticText(self, wx.ID_ANY, "Температура застывания нефти, град. С", (40, 300))
+        text56.SetFont(font56)
+        text56.SetForegroundColour('black')
+        self.Show(True)
+        
+        font57 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text57 = wx.StaticText(self, wx.ID_ANY, "Температура насыщения нефти парафином, град. С", (40, 350))
+        text57.SetFont(font57)
+        text57.SetForegroundColour('black')
+        self.Show(True)
+        
+        font58 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text58 = wx.StaticText(self, wx.ID_ANY, "Температура плавления парафинов, град. С", (40, 400))
+        text58.SetFont(font58)
+        text58.SetForegroundColour('black')
+        self.Show(True)
+        
+        font59 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text59 = wx.StaticText(self, wx.ID_ANY, "Плотность сопутствующего газа, кг/м3", (40, 450))
+        text59.SetFont(font58)
+        text59.SetForegroundColour('black')
+        self.Show(True)
+        
+           
+        font510 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text510 = wx.StaticText(self, wx.ID_ANY, "Плотность сопутствующей воды, кг/м3", (40, 500))
+        text510.SetFont(font510)
+        text510.SetForegroundColour('black')
+        self.Show(True)
+        
+        self.txt51 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(480, 50))
+        self.txt52 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(340, 100))
+        self.txt53 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(360, 150))
+        self.txt54 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(380, 200))
+        self.txt55 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(430, 250))
+        self.txt56 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(350, 300))
+        self.txt57 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(420, 350))
+        self.txt58 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(370, 400))
+        self.txt59 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(340, 450))
+        self.txt510 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(340, 500))
+        
+        wx.StaticLine(self, pos=(30, 600), size=(950,2))
+        
+#         self.btn_previous4 = wx.Button(self, wx.ID_OK, label="<<предыдущая", pos=(350, 710))
+        self.btn_next5 = wx.Button(self, wx.ID_OK, label="следующая>>", pos=(500, 710))
+        self.btn_next5.Enable()
+        
+        self.btn_close5 = wx.Button(self, wx.ID_OK, label="Закрыть", pos=(650, 710))
+        self.btn_close5.Bind(wx.EVT_BUTTON, self.onCloseDataTabFive, self.btn_close5)
+#-----------------------------------------------------------------------------------------------------------------        
+# Закрываем окно ноутбука
+
+    def onCloseDataTabFive(self, event):
+        """ Закрываем ноутбук с данными """      
+  
+        self.GetTopLevelParent().Destroy()
+
+#######################################################################
+class TabPanelSix(wx.Panel):
+    """
+    Шестая вкладка
+    """
+    #----------------------------------------------------------------------
+    def __init__(self, parent):
+        """"""
+        wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
+
+        font61 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')   
+        text61 = wx.StaticText(self, wx.ID_ANY, "Допустимое газосодержание при откачке нефтегазовой смеси по объему, %", (40,50))
+        text61.SetFont(font61)
+        text61.SetForegroundColour('black')
+        self.Show(True)
+                
+        font62 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')   
+        text62 = wx.StaticText(self, wx.ID_ANY, "Внутренний диаметр НКТ, м", (40,100))
+        text62.SetFont(font62)
+        text62.SetForegroundColour('black')
+        self.Show(True)
+        
+        font63 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text63 = wx.StaticText(self, wx.ID_ANY, "Внутренний диаметр обсадной трубы, м", (40,150))
+        text63.SetFont(font63)
+        text63.SetForegroundColour('black')
+        self.Show(True)
+        
+        
+        font64 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text64 = wx.StaticText(self, wx.ID_ANY, "Теплоемкость нефти, Дж/кг*К", (40, 200))
+        text64.SetFont(font64)
+        text64.SetForegroundColour('black')
+        self.Show(True)
+        
+        font65 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text65 = wx.StaticText(self, wx.ID_ANY, "Отношение длины верхней части к полной. 1 = одна ступень", (40, 250))
+        text65.SetFont(font65)
+        text65.SetForegroundColour('black')
+        self.Show(True)
+        
+        font66 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text66 = wx.StaticText(self, wx.ID_ANY, "Длина холодного конца, м", (40, 300))
+        text66.SetFont(font66)
+        text66.SetForegroundColour('black')
+        self.Show(True)
+        
+        font67 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text67 = wx.StaticText(self, wx.ID_ANY, "Толщина термического сопротивления грунта, м", (40, 350))
+        text67.SetFont(font67)
+        text67.SetForegroundColour('black')
+        self.Show(True)
+        
+        font68 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text68 = wx.StaticText(self, wx.ID_ANY, "Запас по длине обогрева, м", (40, 400))
+        text68.SetFont(font68)
+        text68.SetForegroundColour('black')
+        self.Show(True)
+        
+        font69 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text69 = wx.StaticText(self, wx.ID_ANY, "Запас по минимальной температуре на выходе, град. С", (40, 450))
+        text69.SetFont(font69)
+        text69.SetForegroundColour('black')
+        self.Show(True)
+        
+           
+        font610 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text610 = wx.StaticText(self, wx.ID_ANY, "Диапазон регулирования по температуре на выходе, град. С", (40, 500))
+        text610.SetFont(font610)
+        text610.SetForegroundColour('black')
+        self.Show(True)
+        
+        font611 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text611 = wx.StaticText(self, wx.ID_ANY, "Диаметр кабеля, м", (40, 550))
+        text611.SetFont(font611)
+        text611.SetForegroundColour('black')
+        self.Show(True)
+        
+        font612 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text612 = wx.StaticText(self, wx.ID_ANY, "Ручной выбор длины обогрева, м", (40, 600))
+        text612.SetFont(font612)
+        text612.SetForegroundColour('black')
+        self.Show(True)
+        
+        font613 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text613 = wx.StaticText(self, wx.ID_ANY, "Ручной выбор напряжения питания кабеля, В", (40, 650))
+        text613.SetFont(font613)
+        text613.SetForegroundColour('black')
+        self.Show(True)
+        
+        self.txt61 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(600, 50))
+        self.txt62 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(250, 100))
+        self.txt63 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(340, 150))
+        self.txt64 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(270, 200))
+        self.txt65 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(500, 250))
+        self.txt66 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(250, 300))
+        self.txt67 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(400, 350))
+        self.txt68 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(260, 400)) 
+        self.txt69 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(470, 450))
+        self.txt610 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(500, 500))
+        self.txt611 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(190, 550))
+        self.txt612 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(290, 600))
+        self.txt613 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(380, 650))
+        
+        # Рисуем линию раздела
+        wx.StaticLine(self, pos=(30, 700), size=(950,2))
+        
+        # Рисуем кнопки
+        self.btn1 = wx.Button(self, wx.ID_OK, label="Сохранить данные", pos=(750, 710))
+        btn2 = wx.Button(self, wx.ID_STOP, label="Закрыть", pos=(900, 710))
+        
+        # Сохраняем введенные данные
+        self.Bind(wx.EVT_BUTTON, self.onSaveAsData, self.btn1)
+        self.Bind(wx.EVT_BUTTON, self.onCloseData, btn2)
+        
+        
+#-----------------------------------------------------------------------------------------------------------------        
+# Закрываем окно ноутбука
+
+    def onCloseData(self, event):
+        """ Закрываем ноутбук с данными """      
+        
+        # Включаем кнопку 'Пуск'  
+#         self.setCalcPanel.EnableButton(ID_Run, True)
+#         on_run = OnRunButton()
+          
+        # Закрываем ноутбук    
+        self.GetTopLevelParent().Destroy()
+        
+#-----------------------------------------------------------------------------------------------------------------
+# Сохраняем данные ноутбука
+
+    def onSaveAsData(self, event):
+        """ Сохраняем данные с полей """
+
+        wildcard = "Text source (*.txt)|*.txt|" \
+            "All files (*.*)|*.*"
+    
+        self.currentDirectory = os.getcwd()
+
+        dlg = wx.FileDialog(self, message="Сохранение документа", defaultDir=self.currentDirectory, 
+                            defaultFile="", wildcard=wildcard, style=wx.FD_SAVE)
+        
+        if dlg.ShowModal() == wx.ID_OK:
+            
+            path = dlg.GetPath()
+            
+            report = open(path, "w") 
+            
+#------------------------------------------------------------------------------------------------------------------
+ # Считываем значения с полей
+        
+        """ Ниже приводится список переменных, участвующих в расчетах (цифра - номер пункта анкеты):
+        
+            h_bhole - 1.4 глубина забоя, м
+
+            h_obs - 1.5 Длина эксплуатационной колонны, м
+
+            d_vnesh_obs - 1.6 Диаметр эксплуатационной колонны,м
+
+            h_nkt - 1.7 Длина колонны НКТ, м
+
+            d_vnesh_nkt - 1.8 Диаметр колонны НКТ, м
+
+            h_stat - 1.9 Статический уровень флюида в скважине, м
+            
+
+            t_bhole - 2.1 Температура нефтяного пласта, град С
+
+            h_ice - 2.2 Глубина вечномерзлых грунтов, м
+
+            t_month - 2.3 Средняя температура наиболее холодного месяца, град С
+
+            t_maxh - 2.4 Максимальная температура наиболее теплого месяца, град С
+            
+
+            ro - 3.1 Плотность нефтяного флюида в условиях пласта, кг/м3
+
+            visc_plast - 3.2 Вязкость нефтяного флюида в условиях пласта, мПа*с
+
+            pn_plast - 3.3 Давление насыщения в условиях пласта, МПа
+
+            tkpn - 3.4 Температурный коэффициент давления насыщения
+
+            g_plast - 3.5 Газосодержание пластовой жидкости, м3/м3
+            
+
+            nomdebit - 4.1 Дебит по жидкости (с чистой НКТ), м3/сут
+    
+            debit_oil - 4.2 Дебит по нефти, т/сут
+
+            g - 4.3 Газовый фактор, м3/м3
+
+            water - 4.4 Содержание воды, массовая доля,% по массе
+
+            h_din - 4.5 Динамический уровень, м от устья
+
+            p_wellhead - 4.6 Давление на устье, МПа
+    
+            t_wellhead - 4.7 Температура жидкости на выходе из скважины, град С
+
+            debit - 4.8 Минимальный дебит по жидкости м3/сут
+
+            scraper - 4.9 Глубина спуска скребка при механической очистке, м
+
+            h_aspo - 4.10 Максимальная глубина отложения АСПО (по данным КРС), м
+            
+
+            ro_oil - 5.1 Плотность дегазированной нефти в норм. условиях,кг/м3
+
+            visc_oil - 5.2 Вязкость дегазированной нефти, мПа*с
+
+            cp - 5.3 Содержание парафина, массовая доля, %
+
+            asf - 5.4 Содержание асфальтенов, массовая доля, %
+
+            silica_gel - 5.5 Содержание смол силикагелевых, массовая доля, %
+
+            freezing_oil - 5.6 Температура застывания нефти, град С
+
+            t_0 - 5.7 Температура насыщения нефти парафином, град С
+
+            melting - 5.8 Температура плавления парафинов, град С
+
+            ro_gas - 5.9 Плотность сопутствующего газа, кг/м3
+
+            ro_water - 5.10 Плотность сопутствующей воды, кг/м3
+            
+
+            ESP_gas - 6.1 Допустимое газосодержание при откачке нефтегазовой смеси по объему, %
+            
+            u_ESP - 6.2 Напряжение питания ПЭД, В
+            
+            f_ESP - 6.3 Частота питающего напряжения, Гц
+            
+            i_ESP - 6.4 Ток потребления ПЭД, А            
+            
+
+            d_vnut_nkt - Внутренний диаметр нкт, м
+
+            d_vnut_obs - Внутренний диаметр обсадной трубы, м
+
+            c_neft - Теплоемкость нефти, Дж/кг·К
+
+            kll - Отношение длины верхней части к полной. 1 = одна ступень
+
+            holkon - Длина холодного конца, м
+
+            sh_gr - Толщина термического сопротивления грунта, м
+
+            glub_zap - Запас по длине обогрева, м
+
+            min_T_zap - Запас по минимальной температуре на выходе, °С
+
+            ustavka - Диапазон регулирования по температуре на выходе, °С
+
+            d_kab - Диаметр кабеля, м
+
+            long - Ручной выбор длины обогрева, м
+
+            u_u - Ручной выбор напряжения питания кабеля, В
+        
+        """
+# --------------------------- Определяем переменные ----------------------------------------------------
+
+#         page = self.notebook.GetPage(0)
+#         page = self.notebook.GetCurrentPage(0)
+
+#         self.h_bhole = float(self.txt14.GetValue())
+
+        self.d_vnut_nkt = float(self.txt62.GetValue())
+           
+        
+        # Создаем заголовочный файл
+
+        # Устанавливаем дату и время
+        date = strftime("%a %d-%m-%y %H:%M:%S")
+
+        # Добавляем линию конца заголовочного файла
+        div = '********************** Конец заголовка ***************************'
+       
+        report.write('\n Сохраненные данные')
+                
+        report.write('\n')
+        
+        report.write('\n Разработчик: ООО ОКБ "Гамма"')
+        
+        report.write('\n')
+        
+        report.write('\n Дата сохранения: ' + date)
+        
+        report.write('\n')
+        
+        report.write('\n' + div * 1 + '\n')
+        
+#         report.write('\n Глубина забоя, м: %s' % self.h_bhole)
+        
+#         report.write('\n')
+        
+#         report.write('\n Название пункта: %s' % value2)
+        
+#         report.write('\n')
+        
+#         report.write('\n Название пункта: %s' % value3)
+
+        report.write('\n')
+
+        report.write('\n Внутренний диаметр НКТ, м: %s' % self.d_vnut_nkt)
+        
+#---------------------------------------------------------------------------------------------------
+        # Закрываем файл после записи
+        report.close()
+    
+        # Деактивируем кнопку 'Сохранене данных'
+        self.btn1.Disable()
+        
+        # Выводим сообщение об успешности сохранения
+        wx.MessageBox(u'Данные успешно сохранены!', u'Сохранение данных', wx.OK | wx.ICON_INFORMATION)
+        
+#####################################################################################################################
+class NotebookFrame(wx.Frame):
+    """    
+    """
+#----------------------------------------------------------------------
+    def __init__(self, parent):
+        wx.Frame.__init__(self, parent, id=wx.ID_ANY, title=u"Ввод данных для расчета", pos=wx.DefaultPosition,
+                          size=wx.Size(1030, 820), style=wx.DEFAULT_FRAME_STYLE | wx.TAB_TRAVERSAL)
+        
+        #------------------ Добавляем иконку в верхний левый угол главного окна ----------------------------
+        # Размещаем картинку
+        icon = wx.Icon('adddata.png', wx.BITMAP_TYPE_PNG)
+        # Показываем в окне
+        self.SetIcon(icon)
+        
+        style = aui.AUI_NB_DEFAULT_STYLE ^ aui.AUI_NB_CLOSE_ON_ACTIVE_TAB
+        
+        mgr = aui.AuiManager()
+
+        # tell AuiManager to manage this frame
+        mgr.SetManagedWindow(self)
+
+
+        # Устанавливаем свойства
+        self.notebook = aui.AuiNotebook(self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, agwStyle = style)
+        
+        # Рисуем вкладки      
+        tab1 = TabPanelOne(self.notebook)
+        tab2 = TabPanelTwo(self.notebook)
+        tab3 = TabPanelThree(self.notebook)
+        
+
+        tab4 = TabPanelFour(self.notebook)
+        tab5 = TabPanelFive(self.notebook)
+        tab6 = TabPanelSix(self.notebook)
+
+        # Называем вкладки
+        self.notebook.AddPage(tab1, "Лифтовое оборудование", False)
+        self.notebook.AddPage(tab2, "Характеристики среды", False)
+        self.notebook.AddPage(tab3, "Пластовой флюид", False)
+        
+        self.notebook.AddPage(tab4, "Параметры скважины", False)
+        self.notebook.AddPage(tab5, "Свойства флюида", False)
+        self.notebook.AddPage(tab6, "Дополнительные параметры", False)
+        
+        mgr.AddPane(self.notebook, aui.AuiPaneInfo().Name("notebook_content").CenterPane().PaneBorder(True))
+        mgr.Update()
+               
+        # Доступность вкладок
+        """ True - вкладка активна, False - нет"""
+        
+        # Управляем активностью вкладок 
+        self.notebook.EnableTab(0, True)
+        self.notebook.EnableTab(1, True)
+        self.notebook.EnableTab(2, True)
+        self.notebook.EnableTab(3, True)
+        self.notebook.EnableTab(4, True)
+        self.notebook.EnableTab(5, True)
+
+#********************************************************************************************************
+# Рисуем боксы
+#--------------------------------------------------------------------------------------
+# 
+        fontlabel1 = wx.Font(10, wx.MODERN, wx.NORMAL, wx.BOLD, False, u'Consolas')  
+        Label = wx.StaticBox(tab1, label='ЭКСПЛУАТАЦИОННАЯ КОЛОННА', pos=(20, 20), size=(440, 170))
+        Label.SetFont(fontlabel1)
+        Label.SetForegroundColour('BLUE')
+        self.Show(True)
+# 
+        fontlabel11 = wx.Font(10, wx.MODERN, wx.NORMAL, wx.BOLD, False, u'Consolas')  
+        Label = wx.StaticBox(tab1, label='НКТ', pos=(120, 210), size=(350, 110))
+        Label.SetFont(fontlabel11)
+        Label.SetForegroundColour('BLUE')
+        self.Show(True)        
+# 
+        fontlabel111 = wx.Font(10, wx.MODERN, wx.NORMAL, wx.BOLD, False, u'Consolas')  
+        Label = wx.StaticBox(tab1, label='НАСОС', pos=(220, 350), size=(430, 180))
+        Label.SetFont(fontlabel111)
+        Label.SetForegroundColour('BLUE')
+        self.Show(True)         
+#---------------------------------------------------------------------------------------------------------
+        fontlabel2 = wx.Font(10, wx.MODERN, wx.NORMAL, wx.BOLD, False, u'Consolas')  
+
+        Label = wx.StaticBox(tab2, label='ПАРАМЕТРЫ СРЕДЫ', pos=(20, 20), size=(630, 200))
+        Label.SetFont(fontlabel2)
+        Label.SetForegroundColour('BLUE')
+        self.Show(True)
+#------------------------------------------------------------------------------------------------------------        
+        fontlabel3 = wx.Font(10, wx.MODERN, wx.NORMAL, wx.BOLD, False, u'Consolas')  
+
+        Label = wx.StaticBox(tab3, label='ПАРАМЕТРЫ', pos=(20, 20), size=(580, 320))
+        Label.SetFont(fontlabel3)
+        Label.SetForegroundColour('BLUE')
+        self.Show(True)
+#----------------------------------------------------------------------------------------------------------------        
+        fontlabel4 = wx.Font(10, wx.MODERN, wx.NORMAL, wx.BOLD, False, u'Consolas')  
+
+        Label = wx.StaticBox(tab4, label='ПАРАМЕТРЫ', pos=(20, 20), size=(590, 520))
+        Label.SetFont(fontlabel4)
+        Label.SetForegroundColour('BLUE')
+        self.Show(True)
+#---------------------------------------------------------------------------------------------------------------        
+        fontlabel5 = wx.Font(10, wx.MODERN, wx.NORMAL,  wx.BOLD, False, u'Consolas')  
+
+        Label = wx.StaticBox(tab5, label='ПАРАМЕТРЫ', pos=(20, 20), size=(580, 520))
+        Label.SetFont(fontlabel5)
+        Label.SetForegroundColour('BLUE')
+        self.Show(True)
+#---------------------------------------------------------------------------------------------------------------        
+        fontlabel6 = wx.Font(10, wx.MODERN, wx.NORMAL,  wx.BOLD, False, u'Consolas')  
+
+        Label = wx.StaticBox(tab6, label='ПАРАМЕТРЫ', pos=(20, 20), size=(700, 670))
+        Label.SetFont(fontlabel6)
+        Label.SetForegroundColour('BLUE')
+        self.Show(True)
+   
+       
+##################################################################################################  
+#------------------------------------------ ProgressBar -----------------------------------------#
+##################################################################################################
+class MyProgressDialog(wx.ProgressDialog):
+    
+    progressMax = 10
+#------------------------------------------------------------------------------------    
+    def __init__(self):
+        wx.ProgressDialog.__init__(self, "Расчет выполняется",
+            "Осталось времени", self.progressMax,
+            style=wx.PD_ELAPSED_TIME | wx.PD_REMAINING_TIME | wx.PD_AUTO_HIDE)
+
+#-------------------------------------------------------------------------------------
+    def Show(self):
+        keepGoing = True
+        count = 0
+        while keepGoing and count < self.progressMax:
+            count = count + 1
+            wx.Sleep(1)
+            keepGoing = self.Update(count)
+
+##################################################################################################  
+#---------------------------------------------- Расчет ------------------------------------------#
+##################################################################################################
+
+# --------------- место для строчек кода с расчетом --------------------------
+
+
+
+##################################################################################################  
+#--------------------------------------- 'Построить график' -------------------------------------#
+##################################################################################################
+
+class PlotFrame(wx.Frame):
+    help_msg="""  Пункты меню:
+     Сохранить                       экспорт рисунка графика (png, eps, bmp, jpg) в файл
+     Копировать                      копировать изображение графика в системный буфер обмена
+     Настройка печати                настройка размера страницы для печати
+     Предварительный просмотр        предварительный просмотр страницы для печати
+     Печать                          отправить график на печать на текущий принтер
+     Выход                           выход из приложения
+  
+     где 'рисунок' означает изображение, построенное с помощью библиотеки matplotlib canvas
+  
+  В добавок, нажатие сочетания клавиш "Ctrl-C" позволяют сохранить изображение в системном буфере обмена
+"""
+  
+    start_msg  = """        воспользуйтесь Меню для печати
+        или Ctrl-C чтобы скопировать изображение в буфер  """
+  
+    about_msg =  """    распечатано из wx версия 0.1  03-Aug-2018
+        Гераськин Игорь <i.geraskin@okb-gamma.ru>"""
+#---------------------------------------------------------------------------------------  
+    def __init__(self):
+        wx.Frame.__init__(self, None, -1, "Результирующий график")
+        self.fig   = Figure((5.0, 3.0), 100)
+        self.canvas= FigCanvas(self, -1, self.fig)
+        self.axes  = self.fig.add_axes([0.15, 0.15, 0.75, 0.75])
+  
+  
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(self.canvas, 1, wx.LEFT|wx.TOP|wx.GROW)
+        sizer.Add(wx.StaticText(self,-1, self.start_msg), 0,
+                  wx.ALIGN_LEFT|wx.TOP)
+  
+        self.canvas.Bind(wx.EVT_KEY_DOWN, self.onKeyEvent)
+  
+        self.SetSizer(sizer)
+        self.Fit()
+        self.Build_Menus()
+        self.Plot_Data()
+#------------------------------------------------------------------------------------------  
+    def Build_Menus(self):
+        """ создаем меню """
+        MENU_EXIT  = wx.NewIdRef()
+        MENU_SAVE  = wx.NewIdRef()
+        MENU_PRINT = wx.NewIdRef()
+        MENU_PSETUP = wx.NewIdRef()
+        MENU_PREVIEW = wx.NewIdRef()
+        MENU_CLIPB = wx.NewIdRef()
+        MENU_HELP = wx.NewIdRef()
+  
+        menuBar = wx.MenuBar()
+  
+        f0 = wx.Menu()
+        f0.Append(MENU_SAVE,   "&Экспорт изображения",   "Сохранить изображение графика")
+        f0.AppendSeparator()
+        f0.Append(MENU_PSETUP, "Настройка страницы...",    "Нстройка принтера")
+        f0.Append(MENU_PREVIEW,"Предварительный просмотр...", "Предварительный просмотр")
+        f0.Append(MENU_PRINT,  "&Печать",           "Печать графика")
+        f0.AppendSeparator()
+        f0.Append(MENU_EXIT,   "В&ыход", "Выход")
+        menuBar.Append(f0,     "&Файл");
+  
+        f1 = wx.Menu()
+        f1.Append(MENU_HELP, "Краткий справочник",  "Краткий справочник")
+  
+        menuBar.Append(f1, "&Помощь");
+  
+        self.SetMenuBar(menuBar)
+  
+        self.Bind(wx.EVT_MENU, self.onPrint,        id=MENU_PRINT)
+        self.Bind(wx.EVT_MENU, self.onPrinterSetup, id=MENU_PSETUP)
+        self.Bind(wx.EVT_MENU, self.onPrinterPreview, id=MENU_PREVIEW)
+        self.Bind(wx.EVT_MENU, self.onClipboard,    id=MENU_CLIPB)
+        self.Bind(wx.EVT_MENU, self.onExport,       id=MENU_SAVE)
+        self.Bind(wx.EVT_MENU, self.onExit ,        id=MENU_EXIT)
+        self.Bind(wx.EVT_MENU, self.onHelp,         id=MENU_HELP)
+        
+        # initialize the print data and set some default values
+        self.pdata = wx.PrintData()
+        self.pdata.SetPaperId(wx.PAPER_LEGAL)
+        self.pdata.SetOrientation(wx.LANDSCAPE)
+        self.margins = (wx.Point(1,10), wx.Point(1,10))
+#------------------------------------------------------------------------------------------
+    # 
+    def onPrinterSetup(self,event=None):
+        self.canvas.Printer_Setup(event=event)
+#         sdf
+#------------------------------------------------------------------------------------------  
+    def onPrinterPreview(self, bmp):
+#     def onPrinterPreview(self,event=None):
+#         self.canvas.Printer_Preview(event=event)
+#         def Preview(self, bmp):
+
+        """Show the print preview """
+
+        data = wx.PrintDialogData(self.pdata)
+        picture = self.canvas.GetValue()
+        
+        printout1 = TextDocPrintout(picture, "title", self.margins)
+        printout2 = None
+        preview = wx.PrintPreview(printout1, printout2, self.pdata)
+        preview.SetZoom(100)
+        if preview.IsOk():
+            pre_frame = wx.PreviewFrame(preview,
+                                        self.parent,
+                                        "Print Preview")
+            # The default size of the preview frame
+            # sometimes needs some help.
+            dsize = wx.GetDisplaySize()
+            width = self.parent.GetSize()[0]
+            height = dsize.GetHeight() - 100
+            pre_frame.SetInitialSize((width, height))
+            pre_frame.Initialize()
+            pre_frame.Show()
+        else:
+            # Error
+            wx.MessageBox("Failed to create print preview",
+                          "Print Error",
+                           style=wx.ICON_ERROR|wx.OK)
+        
+#------------------------------------------------------------------------------------------  
+    def onPrint(self,event=None):
+        self.canvas.Printer_Print(event=event)
+        
+#------------------------------------------------------------------------------------------
+    def onClipboard(self,event=None):
+        self.canvas.Copy_to_Clipboard(event=event)
+        msg = "This works well!"
+        print (msg)
+        
+#------------------------------------------------------------------------------------------
+    def onKeyEvent(self,event=None):
+        """ копируем изображение в буфер обмена """
+        
+        if event == None: return
+        key = event.KeyCode()
+        if (key < wx.WXK_SPACE or  key > 255):  return
+  
+        if (event.ControlDown() and chr(key)=='C'): # Ctrl-C
+            self.onClipboard(event=event)
+            
+#------------------------------------------------------------------------------------------
+    def onHelp(self, event=None):
+        """ вызываем спревку """
+        dlg = wx.MessageDialog(self, self.help_msg, "Краткий справочник", wx.OK | wx.ICON_INFORMATION)
+        dlg.ShowModal()
+        dlg.Destroy()
+        
+#------------------------------------------------------------------------------------------  
+    def onExport(self,event=None):
+        """ сохраняем изображение в файл """
+        
+        file_choices = "JPG (*.jpg)|*.jpg|" \
+                       "PNG (*.png)|*.png|" \
+                       "PS (*.ps)|*.ps|" \
+                       "EPS (*.eps)|*.eps|" \
+                       "BMP (*.bmp)|*.bmp"
+  
+        thisdir  = os.getcwd()
+  
+        dlg = wx.FileDialog(self, message='Сохранение изображения',
+                            defaultDir = thisdir, defaultFile='plot.jpg',
+                            wildcard=file_choices, style=wx.FD_SAVE)
+  
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+            self.canvas.print_figure(path, dpi=300)
+            
+            if (path.find(thisdir) ==  0):
+                path = path[len(thisdir)+1:]
+            print('Сохраняем график в %s' % path)
+            
+#---------------------------------------------------------------------------------------  
+    def onExit(self,event=None):
+        self.Destroy()
+        
+#---------------------------------------------------------------------------------------  
+    def Plot_Data(self):
+        """ строим график """
+        
+        t = numpy.arange(0.0,5.0,0.01)
+        s = numpy.sin(2.0*numpy.pi*t)
+        c = numpy.cos(0.4*numpy.pi*t)
+        
+       
+        self.axes.plot(t,s)
+        self.axes.plot(t,c)
+
+##################################################################################################  
+#---------------------------------- 'Создать отчет' ---------------------------------------------#
+##################################################################################################
+
+class ReportWindow(wx.Dialog):
+
+#------------------------------------------------------------------------------------------
+    def __init__(self, *args, **kwargs):
+        super(ReportWindow, self).__init__(*args, **kwargs)
+
+        self.InitUI()
+        
+#------------------------------------------------------------------------------------------
+    def InitUI(self):
+
+        self.SetSize((400, 380))
+        self.SetTitle(u'Данные по месторождению')
+        self.Centre()
+        
+        panel = wx.Panel(self, -1)
+        self.currentDirectory = os.getcwd()
+        
+        wx.StaticText(panel, -1, u"Оператор:", pos=(10, 20)) 
+        wx.StaticText(panel, -1, u"Название месторождения:", pos=(10, 50))       
+        wx.StaticText(panel, -1, u"Номер скважины:", pos=(10, 80)) 
+        
+        self.posCtrl1 = wx.TextCtrl(panel, -1, "", pos=(80, 20))
+        self.posCtrl2 = wx.TextCtrl(panel, -1, "", pos=(170, 50))
+        self.posCtrl3 = wx.TextCtrl(panel, -1, "", pos=(120, 80))
+        
+        
+        wx.StaticBox(panel, label = u'Способ эксплуатации', pos=(25, 125), size=(350, 150))
+        
+        self.button1 = wx.Button(panel,label = u"Сохранить данные", pos=(10,310))
+        self.button2 = wx.Button(panel,label = u"Создать отчет", pos=(180,310))
+        self.button3 = wx.Button(panel,label = u"Закрыть", pos=(290,310))
+        
+        # Выключаем кнопку 'Создать отчет'
+        self.button2.Disable()
+        
+#----------------------------------------------------------------------------------------------        
+        method1 = self.radio1 = wx.RadioButton(panel, label = u"Механизированный станок-качалка", pos=(40, 150), 
+                                               style = wx.RB_GROUP)
+        method2 = self.radio2 = wx.RadioButton(panel, label = u"Газлифт", pos=(40, 180))
+        method3 = self.radio3 = wx.RadioButton(panel, label = u"Погружной ЭЦН", pos=(40, 210))
+        method3 = self.radio4 = wx.RadioButton(panel, label = u"Винтовой насос", pos=(40, 240))
+
+        self.Bind(wx.EVT_RADIOBUTTON, self.onChoice)
+
+#---------------------------------------------------------------------------------------------
+        self.Bind(wx.EVT_BUTTON, self.onSaveAsFile, self.button1)
+        self.Bind(wx.EVT_BUTTON, self.CreateReport, self.button2)
+        self.Bind(wx.EVT_BUTTON, self.onClose, self.button3)
+
+#----------------------------------------------------------------------------------------------
+    def onChoice(self, event):
+        
+        """ Выбираем способ добычи """
+        
+        btn = event.GetEventObject()
+        self.label = btn.GetLabel()
+        
+#---------------------------------------------------------------------------------------------
+    def onSaveAsFile(self, event):
+        """
+        Создаем и показываем диалог Save FileDialog
+        """
+        wildcard = "Text source (*.txt)|*.txt|" \
+            "All files (*.*)|*.*"
+        self.currentDirectory = os.getcwd()
+        dlg = wx.FileDialog(self, message="Сохранение документа", defaultDir=self.currentDirectory, 
+                            defaultFile="", wildcard=wildcard, style=wx.FD_SAVE)
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+            report = open(path, "w") 
+
+# Создаем заголовочный файл
+
+        # Устанавливаем дату и время
+        date = strftime("%a %d-%m-%y %H:%M:%S")
+
+        # Добавляем линию конеца заголовочного файла
+        div = '********************** Конец заголовка ***************************'
+
+        # Write header data to the file 
+        report.write('\n Программа: Python ver. 2.7')
+        
+        # Добавляем пустую строку
+        report.write('\n')
+        
+        report.write('\n Наименование: Отчет')
+        
+        report.write('\n')
+       
+        self.multiline = """\n Программа позволяет проводится теплотехнический расчет работы нефтяной скважины по данным технологической анкеты.
+\n Вводятся начальные данные по скважине. Строится геотерма скважины. Определяются теплопотери в грунт.
+\n Строится термограмма скважины с учетом характера движения жидкости. Определяется глубина отложения
+\n парафинов и проводится расчет параметров электрического кабеля.
+
+\n Выходными параметрами программы являются:
+- длины обогрева (горячая и холодная зона)
+- электротехнические параметры кабеля (мощность обогрева, ток, напряжение)
+- температура жилы и оболочки """
+        
+        report.write('\n Описание: Программа расчета электрического обогрева нефтяных скважин.\n %s' % self.multiline)  
+        
+        report.write('\n')
+        
+        report.write('\n Разработчик: ООО ОКБ "Гамма"')
+        
+        report.write('\n')
+        
+        report.write('\n Дата расчета: ' + date)
+        
+        report.write('\n')
+        
+        report.write('\n Оператор: %s' % str(self.posCtrl1.GetValue()))
+        
+        report.write('\n')
+        
+        report.write('\n Наименование месторождения: %s' % str(self.posCtrl2.GetValue()))
+        
+        report.write('\n')
+        
+        report.write('\n Номер скважины: %s' % float(self.posCtrl3.GetValue()))
+        
+        report.write('\n')
+        
+        report.write('\n Способ эксплуатации скважины: %s' % self.label)
+
+        report.write('\n')
+    
+        report.write('\n' + div * 1 + '\n')
+        
+        report.write('\n')        
+#--------------------------------------------------------------------------
+
+        # Закрываем файл после записи
+        report.close()
+    
+        self.button1.Disable()
+        
+        wx.MessageBox(u'Данные успешно сохранены!', u'Сохранение данных', wx.OK | wx.ICON_INFORMATION)
+        
+        self.button2.Enable()
+                    
+        dlg.Destroy()
+#--------------------------------------------------------------------------------------------
+
+    def onClose(self, event):
+        """ закрываем окно с данными по месторождению """
+        self.Close()
+
+#--------------------------------------------------------------------------------------------        
+
+    def CreateReport(self, event):
+#---------------------------------------------------------------------
+    # Сюда вставить код для отчета после расчета параметров
+
+#----------------------------------------------------------------------
+        # Закрываем окно с данными
+#         self.Close()
+        self.button2.Disable()
+    
+        # Show message box that's all ok 
+        wx.MessageBox(u'Отчет успешно создан!', u'Создание отчета', wx.OK | wx.ICON_INFORMATION)
+
+##################################################################################################  
+#---------------------------------------- 'Просмотра отчета' ------------------------------------#
+##################################################################################################
+
+class Viewer(wx.Frame):
+    
+#----------------------------------------------------------------------------------------------    
+    def __init__(self, parent, title):
+
+        wx.Frame.__init__(self, parent, title=title, size = (900, 800))
+        
+        style = aui.AUI_NB_DEFAULT_STYLE ^ wx.aui.AUI_NB_BOTTOM
+
+        # Create the notebook 
+             
+        mgr = aui.AuiManager()
+
+        # tell AuiManager to manage this frame
+        mgr.SetManagedWindow(self)
+
+        self.notebook = aui.AuiNotebook(self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, agwStyle=style) 
+    
+        # Добавляем иконку в верхний левый угол главного окна        
+        # Размещаем картинку
+        icon = wx.Icon('viewer.png', wx.BITMAP_TYPE_PNG)
+        # Показываем в окне
+        self.SetIcon(icon)
+
+        # Creating the menubar
+        menu_bar = wx.MenuBar()
+
+        # Setting up the menu
+        file_menu = wx.Menu()
+        # wx.ID_OPEN
+        menu_item = file_menu.Append(wx.ID_OPEN, '&Открыть...\tCtrl+N', 'Выбираем необходимый файл ')
+        
+        # Bind the "select menu item" event to the OnOpen event handler
+        self.Bind(wx.EVT_MENU, self.OnOpenFile, menu_item)
+    
+
+        # Adding the 'file_menu' to the menu bar
+        menu_bar.Append(file_menu, '&Файл')
+        file_menu.AppendSeparator()
+      
+        qmi = wx.MenuItem(file_menu, wx.ID_EXIT, '&Выход\tCtrl+Q', 'Выйти из программы')
+        file_menu.Append(qmi)
+        self.Bind(wx.EVT_MENU, self.OnQuitViewer, qmi)
+        
+        # Adding the menu bar to the frame content
+        self.SetMenuBar(menu_bar)
+        self.Center()
+        self.Show()
+        
+        # Создаем строку состояния StatusBar
+        self.CreateStatusBar()
+        
+        # Выводим в нем приветствие
+        self.PushStatusText("Добро пожаловать! Войдите в меню Файл для выбора файла")
+        
+#---------------------------------------------------------------------------------------------------        
+    def OnOpenFile(self, event):
+
+        # This is how you pre-establish a file filter so that the dialog
+        # only shows the extension(s) you want it to.
+        
+#         wildcard = 'Python source (*.py)|*.py'
+        wildcard = 'Text source (*.txt)|*.txt'
+        
+        dlg = wx.FileDialog(None, message="Выбор файла", defaultDir=os.getcwd(), 
+                            defaultFile="", wildcard=wildcard, style=wx.FD_OPEN)
+
+        # Show the dialog and retrieve the user response. If it is the OK response, 
+        # process the data.
+        if dlg.ShowModal() == wx.ID_OK:
+            # This returns the file that was selected
+            path = dlg.GetPath()
+
+            # Open the file as read-only and slurp its content
+            fid = open(path, 'rt')
+            text = fid.read()
+            fid.close()
+
+            text_ctrl = wx.TextCtrl(self.notebook, style=wx.TE_MULTILINE)
+            text_ctrl.SetFont(wx.Font(FONTSIZE, wx.TELETYPE, wx.NORMAL, wx.NORMAL))
+            text_ctrl.SetValue(text)
+
+            filename = os.path.split(os.path.splitext(path)[0])[1]
+            self.notebook.AddPage(text_ctrl, filename, select=True)
+
+        # Destroy the dialog. Don't do this until you are done with it!
+        # BAD things can happen otherwtwise!
+        dlg.Destroy()
+        
+#------------------------------------------------------------------------------------------------        
+    def OnQuitViewer(self, event):
+        self.Close()
+
+
+##################################################################################################  
+#--------------------------------------- 'Печать отчета' ----------------------------------------#
+##################################################################################################
+# Устанавливаем размер шрифта
+FONTSIZE = 11
+
+#################################################################################
+class TextDocPrintout(wx.Printout):
+    """
+    Печатаем документ.
+    
+    Does not handle page numbers or titles, and it assumes that no
+    lines are longer than what will fit within the page width.  
+    
+    """
+#-------------------------------------------------------------------------
+    def __init__(self, text, title, margins):
+        wx.Printout.__init__(self, title)
+        self.lines = text.split('\n')
+        self.margins = margins
+
+#-------------------------------------------------------------------------
+    def HasPage(self, page):
+        return page <= self.numPages
+    
+#-------------------------------------------------------------------------
+    def GetPageInfo(self):
+        return (1, self.numPages, 1, self.numPages)
+
+#--------------------------------------------------------------------------
+    def CalculateScale(self, dc):
+        # Scale the DC such that the printout is roughly the same as
+        # the screen scaling.
+        ppiPrinterX, ppiPrinterY = self.GetPPIPrinter()
+        ppiScreenX, ppiScreenY = self.GetPPIScreen()
+        logScale = float(ppiPrinterX)/float(ppiScreenX)
+
+        # Now adjust if the real page size is reduced (such as when
+        # drawing on a scaled wx.MemoryDC in the Print Preview.)  If
+        # page width == DC width then nothing changes, otherwise we
+        # scale down for the DC.
+        pw, ph = self.GetPageSizePixels()
+        dw, dh = dc.GetSize()
+        scale = logScale * float(dw)/float(pw)
+
+        # Set the DC's scale.
+        dc.SetUserScale(scale, scale)
+
+        # Find the logical units per millimeter (for calculating the
+        # margins)
+        self.logUnitsMM = float(ppiPrinterX)/(logScale*25.4)
+
+#---------------------------------------------------------------------------------------
+    def CalculateLayout(self, dc):
+        # Determine the position of the margins and the
+        # page/line height
+        topLeft, bottomRight = self.margins
+        dw, dh = dc.GetSize()
+        self.x1 = topLeft.x * self.logUnitsMM
+        self.y1 = topLeft.y * self.logUnitsMM
+        self.x2 = dc.DeviceToLogicalXRel(dw) - bottomRight.x * self.logUnitsMM 
+        self.y2 = dc.DeviceToLogicalYRel(dh) - bottomRight.y * self.logUnitsMM 
+
+        # use a 1mm buffer around the inside of the box, and a few
+        # pixels between each line
+        self.pageHeight = self.y2 - self.y1 - 2*self.logUnitsMM
+        font = wx.Font(FONTSIZE, wx.TELETYPE, wx.NORMAL, wx.NORMAL)
+        dc.SetFont(font)
+        self.lineHeight = dc.GetCharHeight() 
+        self.linesPerPage = int(self.pageHeight/self.lineHeight)
+
+#------------------------------------------------------------------------------------------
+    def OnPreparePrinting(self):
+        # calculate the number of pages
+        dc = self.GetDC()
+        self.CalculateScale(dc)
+        self.CalculateLayout(dc)
+        self.numPages = len(self.lines) / self.linesPerPage
+        if len(self.lines) % self.linesPerPage != 0:
+            self.numPages += 1
+
+#------------------------------------------------------------------------------------------
+    def OnPrintPage(self, page):
+        dc = self.GetDC()
+        self.CalculateScale(dc)
+        self.CalculateLayout(dc)
+
+        # Рисуем контур страницы в пунктирах
+        dc.SetPen(wx.Pen("black", 0))
+        dc.SetBrush(wx.TRANSPARENT_BRUSH)
+        self.r = wx.RectPP((self.x1, self.y1), (self.x2, self.y2))
+        dc.DrawRectangleRect(self.r)
+        dc.SetClippingRect(self.r)
+
+        # Draw the text lines for this page
+        line = (page-1) * self.linesPerPage
+        x = self.x1 + self.logUnitsMM
+        y = self.y1 + self.logUnitsMM
+        while line < (page * self.linesPerPage):
+            dc.DrawText(self.lines[line], x, y)
+            y += self.lineHeight
+            line += 1
+            if line >= len(self.lines):
+                break
+        return True
+
+######################################################################################################
+class PrintFrameworkSample(wx.Frame):
+#--------------------------------------------------------------------------------------------    
+    def __init__(self):
+        wx.Frame.__init__(self, None, size=(900, 800), title="Печать отчета")
+        
+        # Создаем строку состояний
+        self.CreateStatusBar()
+
+        wildcard = "Text source (*.txt)|*.txt|" \
+            "All files (*.*)|*.*"
+        
+        # Создаем окно
+        frame = wx.Frame(None, title="Открываем файл", size=(800, 700))
+        
+        # A text widget to display the doc and let it be edited
+        self.tc = wx.TextCtrl(self, -1, "", style=wx.TE_MULTILINE|wx.TE_DONTWRAP)
+        
+        # Задаем параметры отображаемого шрифта документа
+        self.tc.SetFont(wx.Font(FONTSIZE, wx.TELETYPE, wx.NORMAL, wx.NORMAL))
+        
+        # Выбираем текущую рабочую директорию
+        self.currentDirectory = os.getcwd()
+
+        # Открываем диалог и выбираем файл        
+        dialog = wx.FileDialog(None, message="Открытие документа", defaultDir= self.currentDirectory, 
+                            defaultFile="", wildcard=wildcard, style=wx.FD_OPEN)
+
+        # Show the dialog and retrieve the user response. If it is the OK response, 
+        # process the data.
+        if dialog.ShowModal() == wx.ID_OK:
+            # This returns the file that was selected
+            path = dialog.GetPath()
+
+        # Open the file as read-only and slurp its content
+            fileopen = open(path, 'r')
+            self.tc.SetValue(fileopen.read())
+            fileopen.close()  
+     
+        self.tc.Bind(wx.EVT_SET_FOCUS, self.OnClearSelection)
+        wx.CallAfter(self.tc.SetInsertionPoint, 0)
+
+        # Создаем меню и пункты меню
+        
+        # Создаем пункты меню
+        menu = wx.Menu()
+        
+        # Добавляем пункт 'Настройка страницы'
+        item = menu.Append(-1, "Настройка страницы...\tF5",
+                           "Установка параметров страницы и пр.")
+        
+        # При вызове этого пункта переходим в метод настройки страницы
+        self.Bind(wx.EVT_MENU, self.OnPageSetup, item)
+        
+        # Добавляем пункт 'Настройка печати'
+        item = menu.Append(-1, "Настройка печати...\tF6",
+                           "Установка настроек принтера и т.д.")
+        
+        # Добавляем разделитель
+        menu.AppendSeparator()
+        
+        self.Bind(wx.EVT_MENU, self.OnPrintSetup, item)
+        
+        # Добавляем пункт 'Предварительный просмотр'
+        item = menu.Append(-1, "Предварительный просмотр...\tF7",
+                           "View the printout on-screen")
+        
+        self.Bind(wx.EVT_MENU, self.OnPrintPreview, item)
+        
+        # Добавляем пункт 'Печать'
+        item = menu.Append(-1, "Печать...\tF8", "Печать документа")
+        
+        self.Bind(wx.EVT_MENU, self.OnPrint, item)
+        
+        # Создаем меню
+        menubar = wx.MenuBar()
+        
+        filemenu = wx.Menu()
+        
+        quit =filemenu.Append(-1, "Выход", "Выйти из приложения")
+        
+        # Выходим из программы
+        self.Bind(wx.EVT_MENU, self.OnExit, quit)
+        
+        # Создаем меню 'Файл'
+        menubar.Append(filemenu, "&Файл")
+
+        # Создаем пункт меню 'Настройки'
+        menubar.Append(menu, "&Настройки")
+        
+        self.SetMenuBar(menubar)
+        
+        # Инициализируем данные печати и устанавливаем ряд параметров по умолчанию
+        
+        self.pdata = wx.PrintData()
+        
+        # Задаем размер бумаги
+        self.pdata.SetPaperId(wx.PAPER_LETTER)
+        
+        # Задаем ориентацию полей
+        self.pdata.SetOrientation(wx.PORTRAIT)
+        
+        # Устанавливаем отступы полей
+        self.margins = (wx.Point(15,15), wx.Point(15,15))
+
+#-------------------------------------------------------------------------------------
+# Выходим из редактора
+
+    def OnExit(self, evt):
+        self.Close()
+
+#--------------------------------------------------------------------------------------
+    def OnClearSelection(self, evt):
+        evt.Skip()
+        wx.CallAfter(self.tc.SetInsertionPoint, self.tc.GetInsertionPoint())
+
+#--------------------------------------------------------------------------------------
+# Настраиваем страницу
+
+    def OnPageSetup(self, evt):
+        data = wx.PageSetupDialogData()
+        data.SetPrintData(self.pdata)
+
+        data.SetDefaultMinMargins(True)
+        data.SetMarginTopLeft(self.margins[0])
+        data.SetMarginBottomRight(self.margins[1])
+
+        dlg = wx.PageSetupDialog(self, data)
+        if dlg.ShowModal() == wx.ID_OK:
+            data = dlg.GetPageSetupData()
+            self.pdata = wx.PrintData(data.GetPrintData()) # force a copy
+            self.pdata.SetPaperId(data.GetPaperId())
+            self.margins = (data.GetMarginTopLeft(), data.GetMarginBottomRight())
+        dlg.Destroy()
+
+#------------------------------------------------------------------------------------------------
+    def OnPrintSetup(self, evt):
+        data = wx.PrintDialogData(self.pdata)
+        dlg = wx.PrintDialog(self, data)
+        dlg.GetPrintDialogData().SetSetupDialog(True)
+        dlg.ShowModal()
+        data = dlg.GetPrintDialogData()
+        self.pdata = wx.PrintData(data.GetPrintData()) # force a copy
+        dlg.Destroy()
+
+#-------------------------------------------------------------------------------------------------
+# Открываем предварительный просмотр
+
+    def OnPrintPreview(self, evt):
+        data = wx.PrintDialogData(self.pdata)
+        text = self.tc.GetValue() 
+        printout1 = TextDocPrintout(text, "название", self.margins)
+#         printout2 = None
+        printout2 = TextDocPrintout(text, "название", self.margins)
+        preview = wx.PrintPreview(printout1, printout2, data)
+
+        if not preview.Ok():
+            wx.MessageBox("Невозможно открыть предварительный просмотр!", "Ошибка", style=wx.ICON_ERROR|wx.OK)
+        else:
+            # create the preview frame such that it overlays the app frame
+            frame = wx.PreviewFrame(preview, self, "Предварительный просмотр", pos=self.GetPosition(), size=self.GetSize())
+#             frame = wx.PreviewFrame(preview, self, "Предварительный просмотр",  wx.Point(100, 100), wx.Size(600, 650))
+
+            # размеры
+#             dsize = wx.GetDisplaySize()
+#             width = self.parent.GetSize()[0]
+#             height = dsize.GetHeight() - 100
+#             frame.SetInitialSize((width, height))
+            frame.Initialize()
+            frame.Show()
+
+#--------------------------------------------------------------------------------------------
+# Отправляем документ на печать
+
+    def OnPrint(self, evt):
+        data = wx.PrintDialogData(self.pdata)
+        printer = wx.Printer(data)
+        text = self.tc.GetValue() 
+        printout = TextDocPrintout(text, "название", self.margins)
+        useSetupDialog = True
+        
+        if not printer.Print(self, printout, useSetupDialog) \
+           and printer.GetLastError() == wx.PRINTER_ERROR:
+            wx.MessageBox(
+                "Возникла проблема при печати.\n"
+                "Возможно Ваш текущий принтер не настроен корректно?",
+                "Ошибка печати", style=wx.ICON_ERROR|wx.OK)
+        else:
+            data = printer.GetPrintDialogData()        # сохраняем копию данных для печати в будущем
+            self.pdata = wx.PrintData(data.GetPrintData()) # force a copy
+        printout.Destroy()
+
+##################################################################################################  
+#------------------------------------------- 'Помощь' -------------------------------------------#
+##################################################################################################
+
+class HelpWindow(wx.Frame):
+
+    def __init__(self, *args, **kw):
+        super(HelpWindow, self).__init__(*args, **kw)
+
+        self.InitUI()
+
+    def InitUI(self):
+
+        toolbar = self.CreateToolBar()
+        toolbar.AddTool(1, 'Выход', wx.Bitmap('texit.png'))
+        toolbar.AddTool(2, 'Помощь', wx.Bitmap('help.png'))
+        
+        toolbar.Realize()
+
+        self.splitter = wx.SplitterWindow(self)
+        
+        self.panelLeft = wx.Panel(self.splitter, wx.ID_ANY, style=wx.BORDER_SUNKEN)
+
+        self.panelRight = wx.Panel(self.splitter)
+        vbox2 = wx.BoxSizer(wx.VERTICAL)
+        
+        header = wx.Panel(self.panelRight, wx.ID_ANY)
+
+        header.SetBackgroundColour('#6f6a59')
+        header.SetForegroundColour('white')
+        
+        # Размещаем картинку
+        icon = wx.Icon('help icon.png', wx.BITMAP_TYPE_PNG)
+        # Показываем в окне
+        self.SetIcon(icon)
+
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+
+        st = wx.StaticText(header, wx.ID_ANY, 'Помощь')
+        font = st.GetFont()
+        font.SetFamily(wx.FONTFAMILY_ROMAN)
+        font.SetPointSize(11)
+        st.SetFont(font)
+
+        hbox.Add(st, 1, wx.TOP | wx.BOTTOM | wx.LEFT, 8)
+
+        closeBtn = wx.BitmapButton(header, wx.ID_ANY, wx.Bitmap('close.png', wx.BITMAP_TYPE_PNG), style=wx.NO_BORDER)
+        
+        closeBtn.SetBackgroundColour('#6f6a59')
+        
+        hbox.Add(closeBtn, 0, wx.TOP|wx.BOTTOM, 8)
+        header.SetSizer(hbox)
+
+        vbox2.Add(header, 0, wx.EXPAND)
+
+        helpWin = html.HtmlWindow(self.panelRight, style=wx.NO_BORDER)
+        
+        helpWin.LoadPage('help.html')
+
+        vbox2.Add(helpWin, 1, wx.EXPAND)
+
+        self.panelRight.SetSizer(vbox2)
+        self.panelLeft.SetFocus()
+
+        self.splitter.SplitVertically(self.panelLeft, self.panelRight)
+        self.splitter.Unsplit()
+
+        self.Bind(wx.EVT_BUTTON, self.CloseHelp, id=closeBtn.GetId())
+        self.Bind(wx.EVT_TOOL, self.OnCloseHelp, id=1)
+        self.Bind(wx.EVT_TOOL, self.OnHelp, id=2)
+
+        self.panelLeft.Bind(wx.EVT_KEY_DOWN, self.OnKeyPressed)
+        self.panelLeft.SetFocus()
+
+        self.CreateStatusBar()
+
+        self.SetTitle('Помощь')
+        self.Centre()
+
+    def OnCloseHelp(self, e): 
+        self.Close()
+
+    def OnHelp(self, e):
+
+        self.splitter.SplitVertically(self.panelLeft, self.panelRight, 0)
+        self.panelLeft.SetFocus()
+
+    def CloseHelp(self, e):
+
+        self.splitter.Unsplit()
+        self.panelLeft.SetFocus()
+
+    def OnKeyPressed(self, e):
+
+        keycode = e.GetKeyCode()
+        print(keycode)
+
+        if keycode == wx.WXK_F1:
+
+            self.splitter.SplitVertically(self.panelLeft, self.panelRight, 0)
+            self.panelLeft.SetFocus()
+            
+####################################################################################################
+# Главный цикл
+if __name__ == '__main__':
+    main()
