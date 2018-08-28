@@ -19,7 +19,7 @@ import wx.html as html
 
 import os
 import wx.lib.agw.aui as aui
-# import wx.xrc
+
 import wx.aui
 
 from time import strftime
@@ -28,12 +28,12 @@ import logging
 import wx.lib.plot as plot
 
 import wx.adv
-# from wx.lib.wordwrap import wordwrap
+
 
 from __future__ import print_function
 
 import matplotlib 
-# import matplotlib.pyplot as plt 
+
 matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigCanvas
   
@@ -132,18 +132,19 @@ class MainFrame(wx.Frame):
         toolbar = self.CreateToolBar()
         
         # Добавляем картинку значка
-        ToolBarIcon = toolbar.AddTool(wx.ID_ANY, 'Data', wx.Bitmap('data.jpg'))
+        ToolBarFirstIcon = toolbar.AddTool(wx.ID_ANY, 'Data', wx.Bitmap('data.jpg'), shortHelp="обогрев скважины с ЭЦН")
+        
+        ToolBarSecondIcon = toolbar.AddTool(wx.ID_ANY, 'Data', wx.Bitmap('data1.jpg'), 
+                                      shortHelp="обогрев скважины со станком-качалкой")
+        
         
         # Делаем пенель видимой
         toolbar.Realize()
-        
-        # Выводим всплывающую подсказку
-        self.SetToolTip(wx.ToolTip("создать новый расчет"))
-        
+
 #------------ Вызываем функциональное окно программы -------------------------------------------
 
         # Кликаем мышкой по иконке - вызываем процедуру OnRibbonBar
-        self.Bind(wx.EVT_TOOL, self.OnRibbonBar, ToolBarIcon)
+        self.Bind(wx.EVT_TOOL, self.OnRibbonBar, ToolBarFirstIcon)
         
 #-------- Задаем параметры главного окна --------------------------------------------------
         
@@ -244,6 +245,8 @@ class RibbonBar(wx.Dialog):
     def __init__(self, *ls, **kw):
         wx.Dialog.__init__(self, *ls, **kw)
         
+        global setCalcPanel, setResult
+        
 #****************************** Создаем вкладку Главная **********************************************************
 
         """ В данной вкладке находятся стандартные 
@@ -292,7 +295,7 @@ class RibbonBar(wx.Dialog):
             - Печать отчета
             
          """
-#--------------------------------------------------------------------------------------------------------------------        
+      
         # Создаем вкладку Инструменты
         ToolsTab = RB.RibbonPage(ribbonBar, wx.ID_ANY, "Инструменты")
         
@@ -319,16 +322,18 @@ class RibbonBar(wx.Dialog):
         CalcPanel = RB.RibbonPanel(ToolsTab, wx.ID_ANY, u"Расчет")
      
         # Размещаем панель на вкладке
-        self.setCalcPanel = RB.RibbonButtonBar(CalcPanel)
+        setCalcPanel = RB.RibbonButtonBar(CalcPanel)
         
         # Задаем рисунок значка
         ToolsIconRunButton = wx.Bitmap( "menu icons/run1.jpg", wx.BITMAP_TYPE_ANY)
         
+#-------------------------- Создаем панель Пуск ---------------------------------------------------------------------
+        
         # Задаем название кнопки и значок
-        self.setCalcPanel.AddSimpleButton(ID_Run, u"Пуск", ToolsIconRunButton, 'запустить расчет')
+        setCalcPanel.AddSimpleButton(ID_Run, u"Пуск", ToolsIconRunButton, 'запустить расчет')
         
         # Вызываем окно 'Пуск'
-        self.setCalcPanel.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.OnRunCalculation, id=ID_Run)
+        setCalcPanel.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.OnRunCalculation, id=ID_Run)
         
 #------------------------ Создаем панель Результаты расчета -------------------------------------------------------
 
@@ -340,36 +345,38 @@ class RibbonBar(wx.Dialog):
         # Задаем рисунок значка
         TooslIconPlot = wx.Bitmap( "menu icons/plot.jpg", wx.BITMAP_TYPE_ANY)
         
-        # Создаем кнопку Построить график
-        setResult.AddSimpleButton(ID_Plot, u"График", TooslIconPlot, 'построить график')
-
+#------------------------ Создаем кнопку Создать отчет -----------------------------------------------------------------
         # Задаем рисунок значка
         ToolsIconReport = wx.Bitmap( "menu icons/report.jpg", wx.BITMAP_TYPE_ANY )
+    
+        # Создаем кнопку Создать отчет
+        setResult.AddSimpleButton(ID_CreateReport, u"Создать отчет", ToolsIconReport, 'создать отчет')
+      
+         # Вызываем окно 'Создать отчет'
+        setResult.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.OnCreateReport, id=ID_CreateReport)
+        
+#----------------------------- Создаем кнопку Просмотр отчета ---------------------------------------------------------- 
+        # Задаем рисунок значка
+        ToolsIconReview = wx.Bitmap( "menu icons/open.jpg", wx.BITMAP_TYPE_ANY )
+       
+        # Создаем кнопку Просмотр отчета
+        setResult.AddSimpleButton(ID_ViewReport, u"Просмотр отчета", ToolsIconReview, 'открыть отчет для просмотра')
+      
+        # Вызываем окно 'Просмотр отчета'
+        setResult.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.OnOpenViewer, id=ID_ViewReport)  
+        
+#----------------------------- Создаем кнопку Построить график -------------------------------------------------------------        
+        
+    # Создаем кнопку Построить график
+        setResult.AddSimpleButton(ID_Plot, u"График", TooslIconPlot, 'построить график')
         
         # Вызываем окно 'Построить график'        
         setResult.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.OnPlotGraph, id=ID_Plot)
 
-#----------------------------------------------------------------------------------------------------------------------        
-        # Создаем кнопку Создать отчет
-        setResult.AddSimpleButton(ID_CreateReport, u"Создать отчет", ToolsIconReport, 'создать отчет')
-        
-       # Задаем рисунок значка
-        ToolsIconReview = wx.Bitmap( "menu icons/open.jpg", wx.BITMAP_TYPE_ANY )
-        
-         # Вызываем окно 'Создать отчет'
-        setResult.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.OnCreateReport, id=ID_CreateReport)
-        
-#---------------------------------------------------------------------------------------------------------------------        
-        # Создаем кнопку Просмотр отчета
-        setResult.AddSimpleButton(ID_ViewReport, u"Просмотр отчета", ToolsIconReview, 'открыть отчет для просмотра')
-      
+#----------------------------- Создаем кнопку Печать отчета -------------------------------------------------------------
         # Задаем рисунок значка
         ToolsIconPrint = wx.Bitmap( "menu icons/print2.jpg", wx.BITMAP_TYPE_ANY )
         
-        # Вызываем окно 'Просмотр отчета'
-        setResult.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.OnOpenViewer, id=ID_ViewReport)
-        
-#----------------------------------------------------------------------------------------------------------------------
         # Создаем кнопку Печать отчета
         setResult.AddSimpleButton(ID_PrintReport, u"Печать отчета", ToolsIconPrint, 'напечатать отчет')       
         
@@ -396,8 +403,7 @@ class RibbonBar(wx.Dialog):
         # Вызываем меню 'Помощь'
         helpinfo.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.onOpenHelpWindow, id=ID_Help)
         
-#--------------------- Показываем панель -------------------------------------------
-
+        # Показываем панель 
         ribbonBar.Realize()
         
         # Выравниваем        
@@ -407,6 +413,7 @@ class RibbonBar(wx.Dialog):
         
 #---------------------------------------------------------------------------------------------------------------------        
  # Управляем видимостью иконок на функциональной панели
+    
  # Начальная установка кнопок - активны только 'Ввод данных' и 'Помощь'
     
         # Активность кнопки 'Открыть'  
@@ -419,27 +426,25 @@ class RibbonBar(wx.Dialog):
         setDataPanel.EnableButton(ID_SetData, True)
         
         # Активность кнопки 'Пуск'  
-        self.setCalcPanel.EnableButton(ID_Run, False)
-        
-        # Активность кнопки 'Построить график'  
-        setResult.EnableButton(ID_Plot, True)
+        setCalcPanel.EnableButton(ID_Run, False)
         
         # Активность кнопки 'Создать отчет' 
-        setResult.EnableButton(ID_CreateReport, True)
+        setResult.EnableButton(ID_CreateReport, False)
         
         # Активность кнопки 'Просмотр отчета' 
-        setResult.EnableButton(ID_ViewReport, True)
+        setResult.EnableButton(ID_ViewReport, False)
+        
+        
+        # Активность кнопки 'Построить график'  
+        setResult.EnableButton(ID_Plot, False)
         
         # Активность кнопки 'Печать отчета' 
-        setResult.EnableButton(ID_PrintReport, True)
+        setResult.EnableButton(ID_PrintReport, False)
         
         # Активность кнопки 'Помощь' 
         helpinfo.EnableButton(ID_Help, True)
 
-#**********************************************************************************************************
-# Методы классов
 #*********************************************************************************************************
-#----------------------------------------------------------------------------------------------------------------
 # Открываем файл для просмотра
    
     def OnOpenFileRibbon(self, event):
@@ -459,6 +464,7 @@ class RibbonBar(wx.Dialog):
         
         # Создаем окно многострочного текста и открываем его во фрейме
         self.my_text = wx.TextCtrl(frame, style=wx.TE_MULTILINE)
+        
         self.my_text.SetFont(wx.Font(FONTSIZE, wx.FONTFAMILY_TELETYPE, wx.NORMAL, wx.NORMAL))
        
         # Выбираем текущую рабочую директорию
@@ -522,15 +528,6 @@ class RibbonBar(wx.Dialog):
         dialog = MyProgressDialog()
         dialog.Show()
         dialog.Destroy()
-    
-#----------------------------------------------------------------------------------------------------------    
-# Открываем окно рисования графика
-
-    def OnPlotGraph(self, event):
-        """ строим график """
-        
-        fig = PlotFrame()
-        fig.Show(True)
         
 #----------------------------------------------------------------------------------------------------------     
 
@@ -549,6 +546,15 @@ class RibbonBar(wx.Dialog):
         
         frame = Viewer(None, 'Файловый просмотрщик')
         frame.Show()
+    
+#----------------------------------------------------------------------------------------------------------    
+# Открываем окно рисования графика
+
+    def OnPlotGraph(self, event):
+        """ строим график """
+        
+        fig = PlotFrame()
+        fig.Show(True)
 
 #--------------------------------------------------------------------------------------------------------
 # Открываем окно печати
@@ -584,94 +590,252 @@ class TabPanelOne(wx.Panel):
         """ """
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         
+        # Объявляем глобальные переменные
+        global txt14
+        
+#---- Первое поле ------- 
+
+        # Задаем сайзеры для первого поля
+        sizer_vert = wx.BoxSizer(wx.VERTICAL)
+        sizer_hor1 = wx.BoxSizer(wx.HORIZONTAL)
+        
+        # Добавляем небольшой отступ сверху
+        sizer_vert.AddSpacer(10)
+        
+        # Задаем параметры шрифта
+        font = wx.Font(13, wx.ROMAN, wx.ITALIC, wx.BOLD, False, u'Consolas')
+        # Рисуем название поля
+        text = wx.StaticText(self, wx.ID_ANY, "Для скважин с установленными УЭЦН")
+        sizer_vert.Add(text, flag = wx.ALIGN_CENTER)
+        # Применяем шрифт
+        text.SetFont(font)
+        
+        # Добавляем небольшой отступ сверху
+        sizer_vert.AddSpacer(40)
+       
+        # Добавляем горизонтальный сайзер в вертикальный
+        sizer_vert.Add(sizer_hor1)
+        
+        # Добавляем пустых строк слева
+        sizer_hor1.AddSpacer(20)
+          
         font14 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')   
-        text14 = wx.StaticText(self, wx.ID_ANY, "Глубина забоя, м", (40,50))
+        text14 = wx.StaticText(self, wx.ID_ANY, "Глубина забоя, м")
         text14.SetFont(font14)
         text14.SetForegroundColour('black')
         self.Show(True)
-                
+        
+        # Рисуем поля ввода значений
+        txt14 = wx.TextCtrl(self, wx.ID_ANY, "")
+        # Устанавливаем фон поля
+#         self.txt14.SetBackgroundColour("#FFFFE8")
+
+        # Рисуем поля
+        sizer_hor1.Add(text14, flag = wx.ALL, border = 10)
+        sizer_hor1.Add(txt14, flag = wx.ALL, border = 10)
+        
+#------ Второе поле ----------
+
+        # Сайзер второго поля
+        sizer_hor2 = wx.BoxSizer(wx.HORIZONTAL)
+    
+        # Добавляем горизонтальный сайзер в вертикальный
+        sizer_vert.Add(sizer_hor2)
+        # Добавляем пустых строк слева
+        sizer_hor2.AddSpacer(20)
+
         font15 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')   
-        text15 = wx.StaticText(self, wx.ID_ANY, "Длина эксплуатационной колонны, м", (40,100))
+        text15 = wx.StaticText(self, wx.ID_ANY, "Длина эксплуатационной колонны (с хвостовиком), м")
         text15.SetFont(font15)
         text15.SetForegroundColour('black')
         self.Show(True)
         
+        # Рисуем поля ввода значений
+        self.txt15 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Рисуем поля
+        sizer_hor2.Add(text15, flag = wx.ALL, border = 10)
+        sizer_hor2.Add(self.txt15, flag = wx.ALL, border = 10)
+        
+#-------- Третье поле --------
+
+        # Сайзер третьего поля
+        sizer_hor3 = wx.BoxSizer(wx.HORIZONTAL)
+    
+        # Добавляем горизонтальный сайзер в вертикальный
+        sizer_vert.Add(sizer_hor3)
+        
+        # Добавляем пустых строк слева
+        sizer_hor3.AddSpacer(20)
+
         font16 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text16 = wx.StaticText(self, wx.ID_ANY, "Диаметр эксплуатационной колонны, м", (40,150))
+        text16 = wx.StaticText(self, wx.ID_ANY, "Диаметр эксплуатационной колонны, м")
         text16.SetFont(font16)
         text16.SetForegroundColour('black')
         self.Show(True)
+       
+        self.txt16 = wx.TextCtrl(self, wx.ID_ANY, "")
         
+        sizer_hor3.Add(text16, flag = wx.ALL, border = 10)
+        sizer_hor3.Add(self.txt16, flag = wx.ALL, border = 10)
         
+        # Задаем отступ сверху
+        sizer_vert.AddSpacer(40)
+
+#-------- Четвертое поле -----------
+
+        # Сайзер четвертого поля
+        sizer_hor4 = wx.BoxSizer(wx.HORIZONTAL)
+        
+        # Добавляем горизонтальный сайзер в вертикальный
+        sizer_vert.Add(sizer_hor4)
+       
+        # Задаем отступ слева
+        sizer_hor4.AddSpacer(120)
+
         font17 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text17 = wx.StaticText(self, wx.ID_ANY, "Длина колонны НКТ, м", (150,230))
+        text17 = wx.StaticText(self, wx.ID_ANY, "Длина колонны НКТ, м")
         text17.SetFont(font17)
         text17.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt17 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        sizer_hor4.Add(text17, flag = wx.ALL, border = 10)
+        sizer_hor4.Add(self.txt17, flag = wx.ALL, border = 10)
+
+#---------- Пятое поле --------
+
+        # Сайзер поля
+        sizer_hor5 = wx.BoxSizer(wx.HORIZONTAL)
+        
+        # Добавляем горизонтальный сайзер в вертикальный
+        sizer_vert.Add(sizer_hor5)
+       
+        # Задаем отступ слева
+        sizer_hor5.AddSpacer(120)
+
         font18 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text18 = wx.StaticText(self, wx.ID_ANY, "Диаметр колонны НКТ, м", (150,280))
+        text18 = wx.StaticText(self, wx.ID_ANY, "Диаметр колонны НКТ, м")
         text18.SetFont(font18)
         text18.SetForegroundColour('black')
         self.Show(True)
         
-#         font19 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-#         text19 = wx.StaticText(self, wx.ID_ANY, "Статический уровень флюида в скважине, м", (40,300))
-#         text19.SetFont(font19)
-#         text19.SetForegroundColour('black')
-#         self.Show(True)
+        self.txt18 = wx.TextCtrl(self, wx.ID_ANY, "")
         
+        sizer_hor5.Add(text18, flag = wx.ALL, border = 10)
+        sizer_hor5.Add(self.txt18, flag = wx.ALL, border = 10)
+
+#-------- Добавляем еще одно поле ----------
+
+        # Сайзер поля
+        sizer_hor6 = wx.BoxSizer(wx.HORIZONTAL)
+        
+        # Добавляем горизонтальный сайзер в вертикальный
+        sizer_vert.Add(sizer_hor6)
+       
+        # Задаем отступ слева
+        sizer_hor6.AddSpacer(120)
+
+        add_font = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        add_text = wx.StaticText(self, wx.ID_ANY, "Толщина стенки НКТ, м")
+        add_text.SetFont(add_font)
+        add_text.SetForegroundColour('black')
+        self.Show(True)
+        
+        self.add = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        sizer_hor6.Add(add_text, flag = wx.ALL, border = 10)
+        sizer_hor6.Add(self.add, flag = wx.ALL, border = 10)
+        
+
+        # Задаем отступ сверху
+        sizer_vert.AddSpacer(50)
+        
+#----------- Шестое поле ----------
+
+        # Сайзер поля
+        sizer_hor7 = wx.BoxSizer(wx.HORIZONTAL)
+        
+        # Добавляем горизонтальный сайзер в вертикальный
+        sizer_vert.Add(sizer_hor7)
+       
+        # Задаем отступ слева
+        sizer_hor7.AddSpacer(220)
+
         font62 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text62 = wx.StaticText(self, wx.ID_ANY, "Напряжение питания ПЭД, В", (240, 380))
+        text62 = wx.StaticText(self, wx.ID_ANY, "Напряжение питания ПЭД, В")
         text62.SetFont(font62)
         text62.SetForegroundColour('black')
         self.Show(True)
+       
+        self.txt62 = wx.TextCtrl(self, wx.ID_ANY, "")
         
+        sizer_hor7.Add(text62, flag = wx.ALL, border = 10)
+        sizer_hor7.Add(self.txt62, flag = wx.ALL, border = 10)
+
+#---------- Седьмое поле ---------
+
+        # Сайзер поля
+        sizer_hor8 = wx.BoxSizer(wx.HORIZONTAL)
+        
+        # Добавляем горизонтальный сайзер в вертикальный
+        sizer_vert.Add(sizer_hor8)
+       
+        # Задаем отступ слева
+        sizer_hor8.AddSpacer(220)
+
         font63 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text63 = wx.StaticText(self, wx.ID_ANY, "Частота питающего напряжения, Гц", (240, 430))
+        text63 = wx.StaticText(self, wx.ID_ANY, "Частота питающего напряжения, Гц")
         text63.SetFont(font63)
         text63.SetForegroundColour('black')
         self.Show(True)
+       
+        self.txt63 = wx.TextCtrl(self, wx.ID_ANY, "")
         
+        sizer_hor8.Add(text63, flag = wx.ALL, border = 10)
+        sizer_hor8.Add(self.txt63, flag = wx.ALL, border = 10)
+
+#------ Восьмое поле -----------
+
+        # Сайзер поля
+        sizer_hor9 = wx.BoxSizer(wx.HORIZONTAL)
+        
+        # Добавляем горизонтальный сайзер в вертикальный
+        sizer_vert.Add(sizer_hor9)
+       
+        # Задаем отступ слева
+        sizer_hor9.AddSpacer(220)
+
         font64 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text64 = wx.StaticText(self, wx.ID_ANY, "Ток потребления ПЭД, А", (240, 480))
+        text64 = wx.StaticText(self, wx.ID_ANY, "Ток потребления ПЭД, А")
         text64.SetFont(font64)
         text64.SetForegroundColour('black')
         self.Show(True)
         
-        # Рисуем поля ввода значений
-        self.txt14 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(180, 50))
-        # Устанавливаем фон поля
-#         self.txt14.SetBackgroundColour("#FFFFE8")
-        # Устанавливаем фокус
-#         self.txt14.SetFocus()
+        self.txt64 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        sizer_hor9.Add(text64, flag = wx.ALL, border = 10)
+        sizer_hor9.Add(self.txt64, flag = wx.ALL, border = 10)
 
-        self.txt15 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(320, 100))
-        self.txt16 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(330, 150))
-        self.txt17 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(340, 230))
-        self.txt18 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(340, 280))
-        
-        self.txt62 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(450, 380))
-        self.txt63 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(510, 430))
-        self.txt64 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(430, 480))
-        
+#---------------------------------------------------------------------------------------------------------------
         # Обрабатываем событие (меняем подсветку полей ввода)
-        self.txt14.Bind(wx.EVT_SET_FOCUS, self.FirstFieldOn)
-        self.txt15.Bind(wx.EVT_SET_FOCUS, self.SecondFieldOn)
-        self.txt16.Bind(wx.EVT_SET_FOCUS, self.ThirdFieldOn)
+#         txt14.Bind(wx.EVT_SET_FOCUS, self.FirstFieldOn)
+#         self.txt15.Bind(wx.EVT_SET_FOCUS, self.SecondFieldOn)
+#         self.txt16.Bind(wx.EVT_SET_FOCUS, self.ThirdFieldOn)
 #         self.txt17.Bind(wx.EVT_SET_FOCUS, self.FourthFieldOn)
 #         self.txt18.Bind(wx.EVT_SET_FOCUS, self.FifthFieldOn)
 #         self.txt62.Bind(wx.EVT_SET_FOCUS, self.SixthFieldOn)
 #         self.txt63.Bind(wx.EVT_SET_FOCUS, self.SeventhFieldOn)
 #         self.txt64.Bind(wx.EVT_SET_FOCUS, self.EighthFieldOn)
-                
+#--------------------------------------------------------------------------------------------------------------------                
         
         # Рисуем резделительную линию
         wx.StaticLine(self, pos=(30, 600), size=(950,2))
         
             
         # Рисуем кнопку 'следующая'
-        self.btn_next1 = wx.Button(self, wx.ID_OK, label="следующая>>", pos=(500, 710))
+        self.btn_next1 = wx.Button(self, wx.ID_OK, label="следующая>", pos=(500, 710))
         
         # Делаем ее видимой
 #         self.btn_next1.Enable()
@@ -688,50 +852,52 @@ class TabPanelOne(wx.Panel):
         """ после проверки заполнения всех полей на первой вкладке (в случае заполнения всех пустых полей)
             переходим к заполнению полей следующей вкладки
         """
-
+        self.SetSizer(sizer_vert)
+        self.Layout()
+        
 #----------------------------------------------------------------------------------------------------------------
 # Управляем подсветкой полей ввода на первой вкладке
 
-    def FirstFieldOn(self, event):
-        """  """
-        # Устанавливаем белый фон для остальных полей
-        self.txt15.SetBackgroundColour("white")
-        self.txt15.Refresh()
+#     def FirstFieldOn(self, event):
+#         """  """
+#         # Устанавливаем белый фон для остальных полей
+#         self.txt15.SetBackgroundColour("white")
+#         self.txt15.Refresh()
         
-        self.txt16.SetBackgroundColour("white")
-        self.txt16.Refresh()
+#         self.txt16.SetBackgroundColour("white")
+#         self.txt16.Refresh()
         
-        # Устанавливаем желтый фон для текущего поля
-        self.txt14.SetBackgroundColour("#FFFFE8")
-        self.txt14.SetFocus()
-        self.txt14.Refresh()
+#         # Устанавливаем желтый фон для текущего поля
+#         self.txt14.SetBackgroundColour("#FFFFE8")
+#         self.txt14.SetFocus()
+#         self.txt14.Refresh()
          
-    def SecondFieldOn(self, event):
-        """  """
-        # Устанавливаем белый фон для остальных полей
-        self.txt14.SetBackgroundColour("white")
-        self.txt14.Refresh()
+#     def SecondFieldOn(self, event):
+#         """  """
+#         # Устанавливаем белый фон для остальных полей
+#         self.txt14.SetBackgroundColour("white")
+#         self.txt14.Refresh()
         
-        self.txt16.SetBackgroundColour("white")
-        self.txt16.Refresh()
+#         self.txt16.SetBackgroundColour("white")
+#         self.txt16.Refresh()
         
-        # Устанавливаем желтый фон для текущего поля
-        self.txt15.SetBackgroundColour("#FFFFE8")
-        self.txt15.Refresh()
+#         # Устанавливаем желтый фон для текущего поля
+#         self.txt15.SetBackgroundColour("#FFFFE8")
+#         self.txt15.Refresh()
     
     
-    def ThirdFieldOn(self, event):
-        """  """
-        # Устанавливаем белый фон для остальных полей
-        self.txt15.SetBackgroundColour("white")
-        self.txt15.Refresh()
+#     def ThirdFieldOn(self, event):
+#         """  """
+#         # Устанавливаем белый фон для остальных полей
+#         self.txt15.SetBackgroundColour("white")
+#         self.txt15.Refresh()
         
-        self.txt14.SetBackgroundColour("white")
-        self.txt14.Refresh()
+#         self.txt14.SetBackgroundColour("white")
+#         self.txt14.Refresh()
         
-        #  Устанавливаем желтый фон для текущего поля
-        self.txt16.SetBackgroundColour("#FFFFE8")
-        self.txt16.Refresh()
+#         #  Устанавливаем желтый фон для текущего поля
+#         self.txt16.SetBackgroundColour("#FFFFE8")
+#         self.txt16.Refresh()
          
 #     def FourthFieldOn(self, event):
 #         """  """
@@ -742,8 +908,7 @@ class TabPanelOne(wx.Panel):
 #         #
 #         self.txt15.SetBackgroundColour("#FFFFE8")
 #         self.txt15.Refresh()        
-        
-        
+ 
 #-----------------------------------------------------------------------------------------------------------------        
 # Закрываем окно 
 
@@ -759,7 +924,7 @@ class TabPanelOne(wx.Panel):
         """ проверяем все ли поля заполнены """
         
         # Контрольные значения
-        self.h_bhole = self.txt14.GetValue()
+        h_bhole = txt14.GetValue()
         self.h_obs = self.txt15.GetValue()
         self.d_vnesh_obs = self.txt16.GetValue()
 #         fourth = self.txt17.GetValue()
@@ -768,14 +933,14 @@ class TabPanelOne(wx.Panel):
 #         seventh = self.txt63.GetValue()
 #         eighth = self.txt64.GetValue()
         
-        if self.h_bhole and self.h_obs and self.d_vnesh_obs != '':
+        if h_bhole and self.h_obs and self.d_vnesh_obs != '':
             
             # Переходим на следующую вкладку
             self.notebook = self.GetParent()
             self.notebook.SetSelection(1)
             
             # Если все поля заполнены - делаем кнопку 'следующая' неактивной
-#             self.btn_next1.Disable()
+            self.btn_next1.Disable()
             
             # Делаем первую вкладку неактивной
             self.notebook.EnableTab(0, False)
@@ -798,41 +963,103 @@ class TabPanelTwo(wx.Panel):
         """"""
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         
+# ------- Первое поле -----------
+
+        # Задаем сайзеры (вертикальный и горизонтальный)
+        self.sizer_vert = wx.BoxSizer(wx.VERTICAL)
+        sizer_horiz1 = wx.BoxSizer(wx.HORIZONTAL) 
         
-        font22 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')   
-        text22 = wx.StaticText(self, wx.ID_ANY, "Глубина вечномерзлых грунтов, м", (40, 50))
+        self.sizer_vert.AddSpacer(30)
+        sizer_horiz1.AddSpacer(20)
+              
+        # Задаем параметры шрифта
+        font22 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas') 
+        # Выводим название пункта
+        text22 = wx.StaticText(self, wx.ID_ANY, "Глубина вечномерзлых грунтов, м")
+        # Устанавливаем шрифт
         text22.SetFont(font22)
+        # Задаем цвет шрифта
         text22.SetForegroundColour('black')
+        # Делаем надпись видимой
         self.Show(True)
         
+        # Выводим поле значения
+        self.txt22 = wx.TextCtrl(self, wx.ID_ANY, "")
+   
+        # Задаем дистанцию между текстом и полем 
+        sizer_horiz1.Add(text22, flag = wx.ALL, border = 10)
+        sizer_horiz1.Add(self.txt22, flag = wx.ALL, border = 10)
+    
+#------- Второе поле ---------
+        
+        # Задаем сайзер для расстояния между строк
+        sizer_horiz2 = wx.BoxSizer(wx.HORIZONTAL)
+        
+        # Размещаем горизонтальный сайзер в вертикальном
+        self.sizer_vert.Add (sizer_horiz1)
+        self.sizer_vert.Add (sizer_horiz2)
+        
+        # Добавляем пробелов
+        sizer_horiz2.AddSpacer(20)
+       
+        # Задаем параметры шрифта
         font23 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text23 = wx.StaticText(self, wx.ID_ANY, "Средняя температура наиболее холодного месяца, град. С", (40, 100))
+        # Выводим название пункта
+        text23 = wx.StaticText(self, wx.ID_ANY, "Средняя температура наиболее холодного месяца, град. С")
+        # Устанавливаем шрифт
         text23.SetFont(font23)
+        
         text23.SetForegroundColour('black')
         self.Show(True)
+    
+        # Рисуем поле для ввода
+        self.txt23 = wx.TextCtrl(self, wx.ID_ANY, "")
         
+        # Расстояние между текстом и полем
+        sizer_horiz2.Add(text23, flag = wx.ALL, border = 10)
+        sizer_horiz2.Add(self.txt23, flag = wx.ALL, border = 10)
+        
+# ----- Третье поле ---------
+
+        # Интервал между вторым и третьим полем 
+        sizer_horiz3 = wx.BoxSizer(wx.HORIZONTAL)
+        self.sizer_vert.Add (sizer_horiz3, flag = wx.ALL, border = 10)   
+        
+        # Добавляем слева пустых строк
+        sizer_horiz3.AddSpacer(10)
+
         font24 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text24 = wx.StaticText(self, wx.ID_ANY, "Максимальная температура наиболее теплого месяца, град. С", (40, 150))
+        text24 = wx.StaticText(self, wx.ID_ANY, "Максимальная температура наиболее теплого месяца, град. С")
         text24.SetFont(font24)
         text24.SetForegroundColour('black')
         self.Show(True)
+       
+        self.txt24 = wx.TextCtrl(self, wx.ID_ANY, "")
+      
+        # Расстояние между названием и полем
+        sizer_horiz3.Add(text24, flag = wx.ALL, border = 10)
+        sizer_horiz3.Add(self.txt24, flag = wx.ALL, border = 10)
         
-        self.txt22 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(300, 50))
-        self.txt23 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(490, 100))
-        self.txt24 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(510, 150))
+        StaticLine = wx.StaticLine(self, pos=(30, 400), size=(950,2))
+
+#------- Кнопки --------
+          
+        self.btn_next2 = wx.Button(self, wx.ID_OK, label="следующая>", pos=(500, 710))
         
-        wx.StaticLine(self, pos=(30, 300), size=(950,2))
-        
-#         self.btn_previous1 = wx.Button(self, wx.ID_OK, label="<<предыдущая", pos=(350, 710))
-        self.btn_next2 = wx.Button(self, wx.ID_OK, label="следующая>>", pos=(500, 710))
-    
+#         sizer_nextButton.Add(self.btn_next2, flag = wx.ALL, border = 500)
+
 #         self.btn_next2.Enable()
-#         self.Bind(wx.EVT_BUTTON, self.ReturnOnFirstTab, self.btn_previous1)
 
         self.Bind(wx.EVT_BUTTON, self.OnCheckSecondTab, self.btn_next2)
-        
+    
+    
         self.btn_close2 = wx.Button(self, wx.ID_OK, label="Закрыть", pos=(650, 710))
+        
         self.btn_close2.Bind(wx.EVT_BUTTON, self.onCloseDataTabTwo, self.btn_close2)
+        
+        
+        self.SetSizer(self.sizer_vert)
+        self.Layout()
 #-----------------------------------------------------------------------------------------------------------------        
 # Закрываем окно ноутбука
 
@@ -842,7 +1069,7 @@ class TabPanelTwo(wx.Panel):
         self.GetTopLevelParent().Destroy()
     
 #-----------------------------------------------------------------------------------------------------------------
-# # Возвращаемся назад на перыдущую вкладку
+# Возвращаемся назад на перыдущую вкладку
 #     def ReturnOnFirstTab(self, event):
         
 #         # Переходим на следующую вкладку
@@ -909,75 +1136,153 @@ class TabPanelTwo(wx.Panel):
 class TabPanelThree(wx.Panel):
     """
     Третья вкладка
+    
     """
-    #----------------------------------------------------------------------
+#----------------------------------------------------------------------
     def __init__(self, parent):
         """"""
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
-
+        
+#---------- Первое поле --------------
+        
+        # Задаем сайзеры (вертикальный и горизонтальный)
+        ThirdSizer_vert = wx.BoxSizer(wx.VERTICAL)
+        ThirdSizer_horiz1 = wx.BoxSizer(wx.HORIZONTAL) 
+        
+        ThirdSizer_vert.AddSpacer(50)
+        ThirdSizer_horiz1.AddSpacer(60)
+        
+        ThirdSizer_vert.Add (ThirdSizer_horiz1)
+        
         font31 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')   
-        text31 = wx.StaticText(self, wx.ID_ANY, "Плотность нефтяного флюида в условиях пласта, кг/м3", (40,50))
+        text31 = wx.StaticText(self, wx.ID_ANY, "Плотность нефтяного флюида в условиях пласта, кг/м3")
         text31.SetFont(font31)
         text31.SetForegroundColour('black')
         self.Show(True)
-                
+        
+        self.txt31 = wx.TextCtrl(self, wx.ID_ANY, "")
+       
+        # Задаем дистанцию между текстом и полем 
+        ThirdSizer_horiz1.Add(text31, flag = wx.ALL, border = 10)
+        ThirdSizer_horiz1.Add(self.txt31, flag = wx.ALL, border = 10)
+        
+#--------- Второе поле ----------                
+
+        ThirdSizer_horiz2 = wx.BoxSizer(wx.HORIZONTAL) 
+
+        ThirdSizer_vert.Add (ThirdSizer_horiz2)
+        
+        # Добавляем пробелов
+        ThirdSizer_horiz2.AddSpacer(80)
+    
         font32 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')   
-        text32 = wx.StaticText(self, wx.ID_ANY, "Вязкость нефтяного флюида, мПа*с", (40,100))
+        text32 = wx.StaticText(self, wx.ID_ANY, "Вязкость нефтяного флюида, мПа*с")
         text32.SetFont(font32)
         text32.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt32 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        ThirdSizer_horiz2.Add(text32, flag = wx.ALL, border = 10)
+        ThirdSizer_horiz2.Add(self.txt32, flag = wx.ALL, border = 10)
+        
+#--------- Третье поле ----------- 
+
+        ThirdSizer_horiz3 = wx.BoxSizer(wx.HORIZONTAL) 
+
+        ThirdSizer_vert.Add (ThirdSizer_horiz3)
+        
+        # Добавляем пробелов
+        ThirdSizer_horiz3.AddSpacer(100)
+       
         font33 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text33 = wx.StaticText(self, wx.ID_ANY, "Давление насыщения в условиях пласта, МПа", (40,150))
+        text33 = wx.StaticText(self, wx.ID_ANY, "Давление насыщения в условиях пласта, МПа")
         text33.SetFont(font33)
         text33.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt33 = wx.TextCtrl(self, wx.ID_ANY, "")
         
+        # Задаем дистанцию между текстом и полем 
+        ThirdSizer_horiz3.Add(text33, flag = wx.ALL, border = 15)
+        ThirdSizer_horiz3.Add(self.txt33, flag = wx.ALL, border = 15)
+        
+#--------- Четвертое поле ----------- 
+
+        ThirdSizer_horiz4 = wx.BoxSizer(wx.HORIZONTAL) 
+
+        ThirdSizer_vert.Add (ThirdSizer_horiz4)
+        
+        # Добавляем пробелов
+        ThirdSizer_horiz4.AddSpacer(60)
+
         font34 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text34 = wx.StaticText(self, wx.ID_ANY, "Температурный коэффициент давления насыщения", (40,200))
+        text34 = wx.StaticText(self, wx.ID_ANY, "Температурный коэффициент давления насыщения")
         text34.SetFont(font34)
         text34.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt34 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        ThirdSizer_horiz4.Add(text34, flag = wx.ALL, border = 15)
+        ThirdSizer_horiz4.Add(self.txt34, flag = wx.ALL, border = 15)
+        
+#--------- Пятое поле -----------
+
+        ThirdSizer_horiz5 = wx.BoxSizer(wx.HORIZONTAL) 
+
+        ThirdSizer_vert.Add (ThirdSizer_horiz5)
+        
+        # Добавляем пробелов
+        ThirdSizer_horiz5.AddSpacer(80)
+        
         font35 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text35 = wx.StaticText(self, wx.ID_ANY, "Газосодержание пластовой жидкости, м3/м3", (40,250))
+        text35 = wx.StaticText(self, wx.ID_ANY, "Газосодержание пластовой жидкости, м3/м3")
         text35.SetFont(font35)
         text35.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt35 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        ThirdSizer_horiz5.Add(text35, flag = wx.ALL, border = 15)
+        ThirdSizer_horiz5.Add(self.txt35, flag = wx.ALL, border = 15)
+        
+#--------- Шестое поле -----------
+
+        ThirdSizer_horiz6 = wx.BoxSizer(wx.HORIZONTAL) 
+
+        ThirdSizer_vert.Add (ThirdSizer_horiz6)
+        
+        # Добавляем пробелов
+        ThirdSizer_horiz6.AddSpacer(100)
+
         font21 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')   
-        text21 = wx.StaticText(self, wx.ID_ANY, "Температура нефтяного пласта, град. С", (40,300))
+        text21 = wx.StaticText(self, wx.ID_ANY, "Температура нефтяного пласта, град. С")
         text21.SetFont(font21)
         text21.SetForegroundColour('black')
         self.Show(True)
        
-        self.txt31 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(460, 50))
-        self.txt32 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(310, 100))
-        self.txt33 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(390, 150))
-        self.txt34 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(410, 200))
-        self.txt35 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(380, 250))
+        self.txt21 = wx.TextCtrl(self, wx.ID_ANY, "")
         
-        self.txt21 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(350, 300))
+        # Задаем дистанцию между текстом и полем 
+        ThirdSizer_horiz6.Add(text21, flag = wx.ALL, border = 15)
+        ThirdSizer_horiz6.Add(self.txt21, flag = wx.ALL, border = 15)
+        
+#-------------------------------------------------------------------------------------------------------
         
         wx.StaticLine(self, pos=(30, 400), size=(950,2))
         
-#         sizer = wx.BoxSizer(wx.VERTICAL)
-#         txtOne = wx.TextCtrl(self, wx.ID_ANY, "")
-#         txtTwo = wx.TextCtrl(self, wx.ID_ANY, "")
-
-#         sizer = wx.BoxSizer(wx.VERTICAL)
-#         sizer.Add(txtOne, 0, wx.ALL, 5)
-#         sizer.Add(txtTwo, 0, wx.ALL, 5)
-
-#         self.SetSizer(sizer)
-
 #         self.btn_previous2 = wx.Button(self, wx.ID_OK, label="<<предыдущая", pos=(350, 710))
-        self.btn_next3 = wx.Button(self, wx.ID_OK, label="следующая>>", pos=(500, 710))
+        self.btn_next3 = wx.Button(self, wx.ID_OK, label="следующая>", pos=(500, 710))
         self.btn_next3.Enable()
         
         self.btn_close3 = wx.Button(self, wx.ID_OK, label="Закрыть", pos=(650, 710))
         self.btn_close3.Bind(wx.EVT_BUTTON, self.onCloseDataTabThree, self.btn_close3)
+        
+        self.SetSizer(ThirdSizer_vert)
 #-----------------------------------------------------------------------------------------------------------------        
 # Закрываем окно ноутбука
 
@@ -985,7 +1290,6 @@ class TabPanelThree(wx.Panel):
         """ Закрываем ноутбук с данными """      
   
         self.GetTopLevelParent().Destroy()
-
         
 ########################################################################
 class TabPanelFour(wx.Panel):
@@ -996,88 +1300,232 @@ class TabPanelFour(wx.Panel):
     def __init__(self, parent):
         """"""
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
+        
+#---------- Первое поле --------------
 
+        # Задаем сайзеры (вертикальный и горизонтальный)
+        FourthSizer_vert = wx.BoxSizer(wx.VERTICAL)
+        FourthSizer_horiz1 = wx.BoxSizer(wx.HORIZONTAL) 
+        
+        FourthSizer_vert.AddSpacer(40)
+        FourthSizer_horiz1.AddSpacer(40)
+        
+        FourthSizer_vert.Add (FourthSizer_horiz1)
+        
         font41 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')   
-        text41 = wx.StaticText(self, wx.ID_ANY, "Дебит по жидкости (с чистой НКТ), м3/сут", (40,50))
+        text41 = wx.StaticText(self, wx.ID_ANY, "Дебит по жидкости (с чистой НКТ), м3/сут")
         text41.SetFont(font41)
         text41.SetForegroundColour('black')
         self.Show(True)
+             
+        self.txt41 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        FourthSizer_horiz1.Add(text41, flag = wx.ALL, border = 15)
+        FourthSizer_horiz1.Add(self.txt41, flag = wx.ALL, border = 15)
+        
+#---------- Второе поле ---------
+
+        # Задаем сайзеры (вертикальный и горизонтальный)
+        FourthSizer_horiz2 = wx.BoxSizer(wx.HORIZONTAL) 
+        
+        FourthSizer_horiz2.AddSpacer(40)
+        
+        FourthSizer_vert.Add (FourthSizer_horiz2)
                 
         font42 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')   
-        text42 = wx.StaticText(self, wx.ID_ANY, "Дебит по нефти, т/сут", (40,100))
+        text42 = wx.StaticText(self, wx.ID_ANY, "Дебит по нефти, т/сут")
         text42.SetFont(font42)
         text42.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt42 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        FourthSizer_horiz2.Add(text42, flag = wx.ALL, border = 15)
+        FourthSizer_horiz2.Add(self.txt42, flag = wx.ALL, border = 15)
+        
+#---------- Третье поле ---------
+        
+        # Задаем сайзеры (вертикальный и горизонтальный)
+        FourthSizer_horiz3 = wx.BoxSizer(wx.HORIZONTAL) 
+        
+        FourthSizer_horiz3.AddSpacer(40)
+        
+        FourthSizer_vert.Add (FourthSizer_horiz3)
+
         font43 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text43 = wx.StaticText(self, wx.ID_ANY, "Газовый фактор, м3/м3", (40,150))
+        text43 = wx.StaticText(self, wx.ID_ANY, "Газовый фактор, м3/м3")
         text43.SetFont(font43)
         text43.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt43 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        FourthSizer_horiz3.Add(text43, flag = wx.ALL, border = 15)
+        FourthSizer_horiz3.Add(self.txt43, flag = wx.ALL, border = 15)
+        
+#---------- Четвертое поле ---------
+
+        # Задаем сайзеры (вертикальный и горизонтальный)
+        FourthSizer_horiz4 = wx.BoxSizer(wx.HORIZONTAL) 
+        
+        FourthSizer_horiz4.AddSpacer(40)
+        
+        FourthSizer_vert.Add (FourthSizer_horiz4)
         
         font44 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text44 = wx.StaticText(self, wx.ID_ANY, "Содержание воды, массовая доля, %", (40, 200))
+        text44 = wx.StaticText(self, wx.ID_ANY, "Содержание воды, массовая доля, %")
         text44.SetFont(font44)
         text44.SetForegroundColour('black')
         self.Show(True)
+
+        self.txt44 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        FourthSizer_horiz4.Add(text44, flag = wx.ALL, border = 15)
+        FourthSizer_horiz4.Add(self.txt44, flag = wx.ALL, border = 15)
+        
+#---------- Пятое поле ---------
+
+        # Задаем сайзеры (вертикальный и горизонтальный)
+        FourthSizer_horiz5 = wx.BoxSizer(wx.HORIZONTAL) 
+        
+        FourthSizer_horiz5.AddSpacer(40)
+        
+        FourthSizer_vert.Add (FourthSizer_horiz5)
         
         font45 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text45 = wx.StaticText(self, wx.ID_ANY, "Динамический уровень, м", (40, 250))
+        text45 = wx.StaticText(self, wx.ID_ANY, "Динамический уровень, м")
         text45.SetFont(font45)
         text45.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt45 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+         # Задаем дистанцию между текстом и полем 
+        FourthSizer_horiz5.Add(text45, flag = wx.ALL, border = 15)
+        FourthSizer_horiz5.Add(self.txt45, flag = wx.ALL, border = 15)
+        
+#---------- Шестое поле ---------
+
+        # Задаем сайзеры (вертикальный и горизонтальный)
+        FourthSizer_horiz6 = wx.BoxSizer(wx.HORIZONTAL) 
+        
+        FourthSizer_horiz6.AddSpacer(40)
+        
+        FourthSizer_vert.Add (FourthSizer_horiz6)
+        
+
         font46 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text46 = wx.StaticText(self, wx.ID_ANY, "Давление на устье, МПа", (40, 300))
+        text46 = wx.StaticText(self, wx.ID_ANY, "Давление на устье, МПа")
         text46.SetFont(font46)
         text46.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt46 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        FourthSizer_horiz6.Add(text46, flag = wx.ALL, border = 15)
+        FourthSizer_horiz6.Add(self.txt46, flag = wx.ALL, border = 15)
+
+#---------- Седьмое поле ---------
+
+        # Задаем сайзеры (вертикальный и горизонтальный)
+        FourthSizer_horiz7 = wx.BoxSizer(wx.HORIZONTAL) 
+        
+        FourthSizer_horiz7.AddSpacer(40)
+        
+        FourthSizer_vert.Add (FourthSizer_horiz7)
+    
         font47 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text47 = wx.StaticText(self, wx.ID_ANY, "Температура жидкости на выходе из скважины, МПа", (40, 350))
+        text47 = wx.StaticText(self, wx.ID_ANY, "Температура жидкости на выходе из скважины, МПа")
         text47.SetFont(font47)
         text47.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt47 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        FourthSizer_horiz7.Add(text47, flag = wx.ALL, border = 15)
+        FourthSizer_horiz7.Add(self.txt47, flag = wx.ALL, border = 15)
+
+#---------- Восьмое поле ---------
+
+        # Задаем сайзеры (вертикальный и горизонтальный)
+        FourthSizer_horiz8 = wx.BoxSizer(wx.HORIZONTAL) 
+        
+        FourthSizer_horiz8.AddSpacer(40)
+        
+        FourthSizer_vert.Add (FourthSizer_horiz8)
+        
         font48 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text48 = wx.StaticText(self, wx.ID_ANY, "Минимальный дебит по жидкости, м3/сут", (40, 400))
+        text48 = wx.StaticText(self, wx.ID_ANY, "Минимальный дебит по жидкости, м3/сут")
         text48.SetFont(font48)
         text48.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt48 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        FourthSizer_horiz8.Add(text48, flag = wx.ALL, border = 15)
+        FourthSizer_horiz8.Add(self.txt48, flag = wx.ALL, border = 15)
+
+#---------- Девятое поле ---------
+
+        # Задаем сайзеры (вертикальный и горизонтальный)
+        FourthSizer_horiz9 = wx.BoxSizer(wx.HORIZONTAL) 
+        
+        FourthSizer_horiz9.AddSpacer(40)
+        
+        FourthSizer_vert.Add (FourthSizer_horiz9)
+
         font49 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text49 = wx.StaticText(self, wx.ID_ANY, "Глубина спуска скребка при механической очистке, м", (40, 450))
+        text49 = wx.StaticText(self, wx.ID_ANY, "Глубина спуска скребка при механической очистке, м")
         text49.SetFont(font48)
         text49.SetForegroundColour('black')
         self.Show(True)
         
-           
+        self.txt49 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        FourthSizer_horiz9.Add(text49, flag = wx.ALL, border = 15)
+        FourthSizer_horiz9.Add(self.txt49, flag = wx.ALL, border = 15)
+        
+#---------- Десятое поле ---------
+
+        # Задаем сайзеры (вертикальный и горизонтальный)
+        FourthSizer_horiz10 = wx.BoxSizer(wx.HORIZONTAL) 
+        
+        FourthSizer_horiz10.AddSpacer(40)
+        
+        FourthSizer_vert.Add (FourthSizer_horiz10)
+
         font410 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text410 = wx.StaticText(self, wx.ID_ANY, "Максимальная глубина отложения АСПО (по данным КРС), м", (40, 500))
+        text410 = wx.StaticText(self, wx.ID_ANY, "Максимальная глубина отложения АСПО (по данным КРС), м")
         text410.SetFont(font410)
         text410.SetForegroundColour('black')
         self.Show(True)
+       
+        self.txt410 = wx.TextCtrl(self, wx.ID_ANY, "")
         
-        self.txt41 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(370, 50))
-        self.txt42 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(230, 100))
-        self.txt43 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(230, 150))
-        self.txt44 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(320, 200))
-        self.txt45 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(240, 250))
-        self.txt46 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(240, 300))
-        self.txt47 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(430, 350))
-        self.txt48 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(360, 400))
-        self.txt49 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(450, 450))
-        self.txt410 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(480, 500))
+        # Задаем дистанцию между текстом и полем 
+        FourthSizer_horiz10.Add(text410, flag = wx.ALL, border = 15)
+        FourthSizer_horiz10.Add(self.txt410, flag = wx.ALL, border = 15)
+#------------------------------------------------------------------------------
 
         wx.StaticLine(self, pos=(30, 600), size=(950,2))
         
 #         self.btn_previous3 = wx.Button(self, wx.ID_OK, label="<<предыдущая", pos=(350, 710))
-        self.btn_next4 = wx.Button(self, wx.ID_OK, label="следующая>>", pos=(500, 710))
+        self.btn_next4 = wx.Button(self, wx.ID_OK, label="следующая>", pos=(500, 710))
         self.btn_next4.Enable()
         
         self.btn_close4 = wx.Button(self, wx.ID_OK, label="Закрыть", pos=(650, 710))
         self.btn_close4.Bind(wx.EVT_BUTTON, self.onCloseDataTabFour, self.btn_close4)
+        
+        self.SetSizer(FourthSizer_vert)
+
 #-----------------------------------------------------------------------------------------------------------------        
 # Закрываем окно ноутбука
 
@@ -1091,92 +1539,225 @@ class TabPanelFive(wx.Panel):
     """
     Пятая вкладка
     """
-    #----------------------------------------------------------------------
+#----------------------------------------------------------------------
     def __init__(self, parent):
         """"""
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
+        
+#------ Первое поле ----------
+
+        FifthSizer_vert = wx.BoxSizer(wx.VERTICAL) 
+        FifthSizer_horiz1 = wx.BoxSizer(wx.HORIZONTAL) 
+        
+        FifthSizer_vert.AddSpacer(40)
+        FifthSizer_horiz1.AddSpacer(40)
+        
+        FifthSizer_vert.Add (FifthSizer_horiz1)
 
         font51 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')   
-        text51 = wx.StaticText(self, wx.ID_ANY, "Плотность дегазированной нефти в норм. условиях, кг/м3", (40,50))
+        text51 = wx.StaticText(self, wx.ID_ANY, "Плотность дегазированной нефти в норм. условиях, кг/м3")
         text51.SetFont(font51)
         text51.SetForegroundColour('black')
         self.Show(True)
-                
+        
+        self.txt51 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        FifthSizer_horiz1.Add(text51, flag = wx.ALL, border = 15)
+        FifthSizer_horiz1.Add(self.txt51, flag = wx.ALL, border = 15)
+        
+#------ Второе поле ----------
+
+        FifthSizer_horiz2 = wx.BoxSizer(wx.HORIZONTAL)
+    
+        FifthSizer_horiz2.AddSpacer(40)
+        
+        FifthSizer_vert.Add (FifthSizer_horiz2)
+    
         font52 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')   
-        text52 = wx.StaticText(self, wx.ID_ANY, "Вязкость дегазированной нефти, мПа*с", (40,100))
+        text52 = wx.StaticText(self, wx.ID_ANY, "Вязкость дегазированной нефти, мПа*с")
         text52.SetFont(font52)
         text52.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt52 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+         # Задаем дистанцию между текстом и полем 
+        FifthSizer_horiz2.Add(text52, flag = wx.ALL, border = 15)
+        FifthSizer_horiz2.Add(self.txt52, flag = wx.ALL, border = 15) 
+        
+#------ Третье поле ----------
+
+        FifthSizer_horiz3 = wx.BoxSizer(wx.HORIZONTAL)
+    
+        FifthSizer_horiz3.AddSpacer(40)
+        
+        FifthSizer_vert.Add (FifthSizer_horiz3)
+
         font53 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text53 = wx.StaticText(self, wx.ID_ANY, "Содержание парафина, массовая доля, %", (40,150))
+        text53 = wx.StaticText(self, wx.ID_ANY, "Содержание парафина, массовая доля, %")
         text53.SetFont(font53)
         text53.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt53 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        FifthSizer_horiz3.Add(text53, flag = wx.ALL, border = 15)
+        FifthSizer_horiz3.Add(self.txt53, flag = wx.ALL, border = 15)
+        
+#------ Четвертое поле ----------
+
+        FifthSizer_horiz4 = wx.BoxSizer(wx.HORIZONTAL)
+    
+        FifthSizer_horiz4.AddSpacer(40)
+        
+        FifthSizer_vert.Add (FifthSizer_horiz4)
         
         font54 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text54 = wx.StaticText(self, wx.ID_ANY, "Содержание асфальтенов, массовая доля, %", (40, 200))
+        text54 = wx.StaticText(self, wx.ID_ANY, "Содержание асфальтенов, массовая доля, %")
         text54.SetFont(font54)
         text54.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt54 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        FifthSizer_horiz4.Add(text54, flag = wx.ALL, border = 15)
+        FifthSizer_horiz4.Add(self.txt54, flag = wx.ALL, border = 15)
+        
+#------ Пятое поле ----------
+
+        FifthSizer_horiz5 = wx.BoxSizer(wx.HORIZONTAL)
+    
+        FifthSizer_horiz5.AddSpacer(40)
+        
+        FifthSizer_vert.Add (FifthSizer_horiz5)
+        
         font55 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text55 = wx.StaticText(self, wx.ID_ANY, "Содержание смол селикогелевых, массовая доля, %", (40, 250))
+        text55 = wx.StaticText(self, wx.ID_ANY, "Содержание смол селикогелевых, массовая доля, %")
         text55.SetFont(font55)
         text55.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt55 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+         # Задаем дистанцию между текстом и полем 
+        FifthSizer_horiz5.Add(text55, flag = wx.ALL, border = 15)
+        FifthSizer_horiz5.Add(self.txt55, flag = wx.ALL, border = 15)
+                
+#------ Шестое поле ----------
+
+        FifthSizer_horiz6 = wx.BoxSizer(wx.HORIZONTAL)
+    
+        FifthSizer_horiz6.AddSpacer(40)
+        
+        FifthSizer_vert.Add (FifthSizer_horiz6)
+        
         font56 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text56 = wx.StaticText(self, wx.ID_ANY, "Температура застывания нефти, град. С", (40, 300))
+        text56 = wx.StaticText(self, wx.ID_ANY, "Температура застывания нефти, град. С")
         text56.SetFont(font56)
         text56.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt56 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        FifthSizer_horiz6.Add(text56, flag = wx.ALL, border = 15)
+        FifthSizer_horiz6.Add(self.txt56, flag = wx.ALL, border = 15)
+                
+#------ Седьмое поле ----------
+        
+        FifthSizer_horiz7 = wx.BoxSizer(wx.HORIZONTAL)
+    
+        FifthSizer_horiz7.AddSpacer(40)
+        
+        FifthSizer_vert.Add (FifthSizer_horiz7)
+        
         font57 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text57 = wx.StaticText(self, wx.ID_ANY, "Температура насыщения нефти парафином, град. С", (40, 350))
+        text57 = wx.StaticText(self, wx.ID_ANY, "Температура насыщения нефти парафином, град. С")
         text57.SetFont(font57)
         text57.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt57 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        FifthSizer_horiz7.Add(text57, flag = wx.ALL, border = 15)
+        FifthSizer_horiz7.Add(self.txt57, flag = wx.ALL, border = 15)
+        
+#------ Восьмое поле ----------
+
+        FifthSizer_horiz8 = wx.BoxSizer(wx.HORIZONTAL)
+    
+        FifthSizer_horiz8.AddSpacer(40)
+        
+        FifthSizer_vert.Add (FifthSizer_horiz8)
+        
         font58 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text58 = wx.StaticText(self, wx.ID_ANY, "Температура плавления парафинов, град. С", (40, 400))
+        text58 = wx.StaticText(self, wx.ID_ANY, "Температура плавления парафинов, град. С")
         text58.SetFont(font58)
         text58.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt58 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        FifthSizer_horiz8.Add(text58, flag = wx.ALL, border = 15)
+        FifthSizer_horiz8.Add(self.txt58, flag = wx.ALL, border = 15)
+                
+#------ Девятое поле ----------
+
+        FifthSizer_horiz9 = wx.BoxSizer(wx.HORIZONTAL)
+    
+        FifthSizer_horiz9.AddSpacer(40)
+        
+        FifthSizer_vert.Add (FifthSizer_horiz9)
+        
         font59 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text59 = wx.StaticText(self, wx.ID_ANY, "Плотность сопутствующего газа, кг/м3", (40, 450))
+        text59 = wx.StaticText(self, wx.ID_ANY, "Плотность сопутствующего газа, кг/м3")
         text59.SetFont(font58)
         text59.SetForegroundColour('black')
         self.Show(True)
         
-           
+        self.txt59 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        FifthSizer_horiz9.Add(text59, flag = wx.ALL, border = 15)
+        FifthSizer_horiz9.Add(self.txt59, flag = wx.ALL, border = 15)
+                
+#------ Десятое поле ----------
+
+        FifthSizer_horiz10 = wx.BoxSizer(wx.HORIZONTAL)
+    
+        FifthSizer_horiz10.AddSpacer(40)
+        
+        FifthSizer_vert.Add (FifthSizer_horiz10)
+            
         font510 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text510 = wx.StaticText(self, wx.ID_ANY, "Плотность сопутствующей воды, кг/м3", (40, 500))
+        text510 = wx.StaticText(self, wx.ID_ANY, "Плотность сопутствующей воды, кг/м3")
         text510.SetFont(font510)
         text510.SetForegroundColour('black')
         self.Show(True)
         
-        self.txt51 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(480, 50))
-        self.txt52 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(340, 100))
-        self.txt53 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(360, 150))
-        self.txt54 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(380, 200))
-        self.txt55 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(430, 250))
-        self.txt56 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(350, 300))
-        self.txt57 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(420, 350))
-        self.txt58 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(370, 400))
-        self.txt59 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(340, 450))
-        self.txt510 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(340, 500))
+        self.txt510 = wx.TextCtrl(self, wx.ID_ANY, "")
         
+        # Задаем дистанцию между текстом и полем 
+        FifthSizer_horiz10.Add(text510, flag = wx.ALL, border = 15)
+        FifthSizer_horiz10.Add(self.txt510, flag = wx.ALL, border = 15)
+        
+#------------------------------------------------------------------------------------------------        
+      
         wx.StaticLine(self, pos=(30, 600), size=(950,2))
         
 #         self.btn_previous4 = wx.Button(self, wx.ID_OK, label="<<предыдущая", pos=(350, 710))
-        self.btn_next5 = wx.Button(self, wx.ID_OK, label="следующая>>", pos=(500, 710))
+        self.btn_next5 = wx.Button(self, wx.ID_OK, label="следующая>", pos=(500, 710))
         self.btn_next5.Enable()
         
         self.btn_close5 = wx.Button(self, wx.ID_OK, label="Закрыть", pos=(650, 710))
         self.btn_close5.Bind(wx.EVT_BUTTON, self.onCloseDataTabFive, self.btn_close5)
+        
+        self.SetSizer(FifthSizer_vert)
 #-----------------------------------------------------------------------------------------------------------------        
 # Закрываем окно ноутбука
 
@@ -1194,101 +1775,275 @@ class TabPanelSix(wx.Panel):
     def __init__(self, parent):
         """"""
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
+        
+#------ Первое поле ----------
+
+        SixthSizer_vert = wx.BoxSizer(wx.VERTICAL) 
+        SixthSizer_horiz1 = wx.BoxSizer(wx.HORIZONTAL) 
+        
+        SixthSizer_vert.AddSpacer(40)
+        SixthSizer_horiz1.AddSpacer(40)
+        
+        SixthSizer_vert.Add (SixthSizer_horiz1)
 
         font61 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')   
-        text61 = wx.StaticText(self, wx.ID_ANY, "Допустимое газосодержание при откачке нефтегазовой смеси по объему, %", (40,50))
+        text61 = wx.StaticText(self, wx.ID_ANY, "Допустимое газосодержание при откачке нефтегазовой смеси по объему, %")
         text61.SetFont(font61)
         text61.SetForegroundColour('black')
         self.Show(True)
-                
+        
+        self.txt61 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        SixthSizer_horiz1.Add(text61, flag = wx.ALL, border = 10)
+        SixthSizer_horiz1.Add(self.txt61, flag = wx.ALL, border = 10)
+        
+#------ Второе поле ----------
+
+        SixthSizer_horiz2 = wx.BoxSizer(wx.HORIZONTAL)
+    
+        SixthSizer_horiz2.AddSpacer(40)
+        
+        SixthSizer_vert.Add (SixthSizer_horiz2) 
+
         font62 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')   
-        text62 = wx.StaticText(self, wx.ID_ANY, "Внутренний диаметр НКТ, м", (40,100))
+        text62 = wx.StaticText(self, wx.ID_ANY, "Внутренний диаметр НКТ, м")
         text62.SetFont(font62)
         text62.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt62 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        SixthSizer_horiz2.Add(text62, flag = wx.ALL, border = 10)
+        SixthSizer_horiz2.Add(self.txt62, flag = wx.ALL, border = 10)
+        
+        
+#------ Третье поле ----------
+
+        SixthSizer_horiz3 = wx.BoxSizer(wx.HORIZONTAL)
+    
+        SixthSizer_horiz3.AddSpacer(40)
+        
+        SixthSizer_vert.Add (SixthSizer_horiz3) 
+
         font63 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text63 = wx.StaticText(self, wx.ID_ANY, "Внутренний диаметр обсадной трубы, м", (40,150))
+        text63 = wx.StaticText(self, wx.ID_ANY, "Внутренний диаметр обсадной трубы, м")
         text63.SetFont(font63)
         text63.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt63 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        SixthSizer_horiz3.Add(text63, flag = wx.ALL, border = 10)
+        SixthSizer_horiz3.Add(self.txt63, flag = wx.ALL, border = 10)
+        
+#------ Четвертое поле ----------  
+
+        SixthSizer_horiz4 = wx.BoxSizer(wx.HORIZONTAL)
+    
+        SixthSizer_horiz4.AddSpacer(40)
+        
+        SixthSizer_vert.Add (SixthSizer_horiz4) 
         
         font64 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text64 = wx.StaticText(self, wx.ID_ANY, "Теплоемкость нефти, Дж/кг*К", (40, 200))
+        text64 = wx.StaticText(self, wx.ID_ANY, "Теплоемкость нефти, Дж/кг*К")
         text64.SetFont(font64)
         text64.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt64 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        SixthSizer_horiz4.Add(text64, flag = wx.ALL, border = 10)
+        SixthSizer_horiz4.Add(self.txt64, flag = wx.ALL, border = 10)
+        
+#------ Пятое поле ----------
+
+        SixthSizer_horiz5 = wx.BoxSizer(wx.HORIZONTAL)
+    
+        SixthSizer_horiz5.AddSpacer(40)
+        
+        SixthSizer_vert.Add (SixthSizer_horiz5) 
+        
         font65 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text65 = wx.StaticText(self, wx.ID_ANY, "Отношение длины верхней части к полной. 1 = одна ступень", (40, 250))
+        text65 = wx.StaticText(self, wx.ID_ANY, "Отношение длины верхней части к полной. 1 = одна ступень")
         text65.SetFont(font65)
         text65.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt65 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        SixthSizer_horiz5.Add(text65, flag = wx.ALL, border = 10)
+        SixthSizer_horiz5.Add(self.txt65, flag = wx.ALL, border = 10)
+        
+        
+#------ Шестое поле ----------
+
+        SixthSizer_horiz6 = wx.BoxSizer(wx.HORIZONTAL)
+    
+        SixthSizer_horiz6.AddSpacer(40)
+        
+        SixthSizer_vert.Add (SixthSizer_horiz6) 
+        
         font66 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text66 = wx.StaticText(self, wx.ID_ANY, "Длина холодного конца, м", (40, 300))
+        text66 = wx.StaticText(self, wx.ID_ANY, "Длина холодного конца, м")
         text66.SetFont(font66)
         text66.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt66 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        SixthSizer_horiz6.Add(text66, flag = wx.ALL, border = 10)
+        SixthSizer_horiz6.Add(self.txt66, flag = wx.ALL, border = 10)
+        
+        
+#------ Седьмое поле ----------
+        
+        SixthSizer_horiz7 = wx.BoxSizer(wx.HORIZONTAL)
+    
+        SixthSizer_horiz7.AddSpacer(40)
+        
+        SixthSizer_vert.Add (SixthSizer_horiz7) 
+        
         font67 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text67 = wx.StaticText(self, wx.ID_ANY, "Толщина термического сопротивления грунта, м", (40, 350))
+        text67 = wx.StaticText(self, wx.ID_ANY, "Толщина термического сопротивления грунта, м")
         text67.SetFont(font67)
         text67.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt67 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        SixthSizer_horiz7.Add(text67, flag = wx.ALL, border = 10)
+        SixthSizer_horiz7.Add(self.txt67, flag = wx.ALL, border = 10)
+        
+        
+#------ Восьмое поле ----------
+        
+        SixthSizer_horiz8 = wx.BoxSizer(wx.HORIZONTAL)
+    
+        SixthSizer_horiz8.AddSpacer(40)
+        
+        SixthSizer_vert.Add (SixthSizer_horiz8) 
+        
         font68 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text68 = wx.StaticText(self, wx.ID_ANY, "Запас по длине обогрева, м", (40, 400))
+        text68 = wx.StaticText(self, wx.ID_ANY, "Запас по длине обогрева, м")
         text68.SetFont(font68)
         text68.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt68 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        SixthSizer_horiz8.Add(text68, flag = wx.ALL, border = 10)
+        SixthSizer_horiz8.Add(self.txt68, flag = wx.ALL, border = 10)
+        
+        
+#------ Девятое поле ----------
+
+        SixthSizer_horiz9 = wx.BoxSizer(wx.HORIZONTAL)
+    
+        SixthSizer_horiz9.AddSpacer(40)
+        
+        SixthSizer_vert.Add (SixthSizer_horiz9) 
+        
         font69 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text69 = wx.StaticText(self, wx.ID_ANY, "Запас по минимальной температуре на выходе, град. С", (40, 450))
+        text69 = wx.StaticText(self, wx.ID_ANY, "Запас по минимальной температуре на выходе, град. С")
         text69.SetFont(font69)
         text69.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt69 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        SixthSizer_horiz9.Add(text69, flag = wx.ALL, border = 10)
+        SixthSizer_horiz9.Add(self.txt69, flag = wx.ALL, border = 10)
+               
+#------ Десятое поле ----------    
+
+        SixthSizer_horiz10 = wx.BoxSizer(wx.HORIZONTAL)
+    
+        SixthSizer_horiz10.AddSpacer(40)
+        
+        SixthSizer_vert.Add (SixthSizer_horiz10) 
            
         font610 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text610 = wx.StaticText(self, wx.ID_ANY, "Диапазон регулирования по температуре на выходе, град. С", (40, 500))
+        text610 = wx.StaticText(self, wx.ID_ANY, "Диапазон регулирования по температуре на выходе, град. С")
         text610.SetFont(font610)
         text610.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt610 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        SixthSizer_horiz10.Add(text610, flag = wx.ALL, border = 10)
+        SixthSizer_horiz10.Add(self.txt610, flag = wx.ALL, border = 10)
+                
+#------ Одиннадцатое поле ----------  
+
+        SixthSizer_horiz11 = wx.BoxSizer(wx.HORIZONTAL)
+    
+        SixthSizer_horiz11.AddSpacer(40)
+        
+        SixthSizer_vert.Add (SixthSizer_horiz11) 
+
         font611 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text611 = wx.StaticText(self, wx.ID_ANY, "Диаметр кабеля, м", (40, 550))
+        text611 = wx.StaticText(self, wx.ID_ANY, "Диаметр кабеля, м")
         text611.SetFont(font611)
         text611.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt611 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        SixthSizer_horiz11.Add(text611, flag = wx.ALL, border = 10)
+        SixthSizer_horiz11.Add(self.txt611, flag = wx.ALL, border = 10)
+
+#------ Двенадцатое поле ----------
+
+        SixthSizer_horiz12 = wx.BoxSizer(wx.HORIZONTAL)
+    
+        SixthSizer_horiz12.AddSpacer(40)
+        
+        SixthSizer_vert.Add (SixthSizer_horiz12) 
+        
         font612 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text612 = wx.StaticText(self, wx.ID_ANY, "Ручной выбор длины обогрева, м", (40, 600))
+        text612 = wx.StaticText(self, wx.ID_ANY, "Ручной выбор длины обогрева, м")
         text612.SetFont(font612)
         text612.SetForegroundColour('black')
         self.Show(True)
         
+        self.txt612 = wx.TextCtrl(self, wx.ID_ANY, "")
+        
+        # Задаем дистанцию между текстом и полем 
+        SixthSizer_horiz12.Add(text612, flag = wx.ALL, border = 10)
+        SixthSizer_horiz12.Add(self.txt612, flag = wx.ALL, border = 10)
+        
+#------ Тринадцатое поле ----------
+        
+        SixthSizer_horiz13 = wx.BoxSizer(wx.HORIZONTAL)
+    
+        SixthSizer_horiz13.AddSpacer(40)
+        
+        SixthSizer_vert.Add (SixthSizer_horiz13) 
+        
         font613 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text613 = wx.StaticText(self, wx.ID_ANY, "Ручной выбор напряжения питания кабеля, В", (40, 650))
+        text613 = wx.StaticText(self, wx.ID_ANY, "Ручной выбор напряжения питания кабеля, В")
         text613.SetFont(font613)
         text613.SetForegroundColour('black')
         self.Show(True)
+      
+        self.txt613 = wx.TextCtrl(self, wx.ID_ANY, "")
         
-        self.txt61 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(600, 50))
-        self.txt62 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(250, 100))
-        self.txt63 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(340, 150))
-        self.txt64 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(270, 200))
-        self.txt65 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(500, 250))
-        self.txt66 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(250, 300))
-        self.txt67 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(400, 350))
-        self.txt68 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(260, 400)) 
-        self.txt69 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(470, 450))
-        self.txt610 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(500, 500))
-        self.txt611 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(190, 550))
-        self.txt612 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(290, 600))
-        self.txt613 = wx.TextCtrl(self, wx.ID_ANY, "", pos=(380, 650))
-        
+        # Задаем дистанцию между текстом и полем 
+        SixthSizer_horiz13.Add(text613, flag = wx.ALL, border = 10)
+        SixthSizer_horiz13.Add(self.txt613, flag = wx.ALL, border = 10)
+#-------------------------------------------------------------------------------------------------- 
+
         # Рисуем линию раздела
         wx.StaticLine(self, pos=(30, 700), size=(950,2))
         
@@ -1300,19 +2055,26 @@ class TabPanelSix(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.onSaveAsData, self.btn1)
         self.Bind(wx.EVT_BUTTON, self.onCloseData, btn2)
         
-        
+        self.SetSizer(SixthSizer_vert)
 #-----------------------------------------------------------------------------------------------------------------        
 # Закрываем окно ноутбука
 
     def onCloseData(self, event):
-        """ Закрываем ноутбук с данными """      
+        """ Закрываем ноутбук с данными """   
         
-        # Включаем кнопку 'Пуск'  
-#         self.setCalcPanel.EnableButton(ID_Run, True)
-#         on_run = OnRunButton()
-          
+        # Делаем активной кнопку пуска
+        setCalcPanel.EnableButton(ID_Run, True)
+            
         # Закрываем ноутбук    
         self.GetTopLevelParent().Destroy()
+        
+#-----------------------------------------------------------------------------------------------------------------        
+# Делаем активной кнопку пуска
+
+#     def RunSwitchOn(self, event):
+        
+#          # Включаем кнопку 'Пуск'  
+#         setCalcPanel.EnableButton(ID_Run, True)
         
 #-----------------------------------------------------------------------------------------------------------------
 # Сохраняем данные ноутбука
@@ -1334,7 +2096,7 @@ class TabPanelSix(wx.Panel):
             
             report = open(path, "w") 
             
-#------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------
  # Считываем значения с полей
         
         """ Ниже приводится список переменных, участвующих в расчетах (цифра - номер пункта анкеты):
@@ -1450,12 +2212,13 @@ class TabPanelSix(wx.Panel):
         """
 # --------------------------- Определяем переменные ----------------------------------------------------
 
-#         page = self.notebook.GetPage(0)
-#         page = self.notebook.GetCurrentPage(0)
-
-#         self.h_bhole = float(self.txt14.GetValue())
+        h_bhole = float(txt14.GetValue())
 
         self.d_vnut_nkt = float(self.txt62.GetValue())
+
+#         self.h_ice = float(self.txt22.GetValue())
+#         self.t_month = float(self.txt23.GetValue())
+#         self.t_maxh = float(self.txt24.GetValue())
            
         
         # Создаем заголовочный файл
@@ -1480,9 +2243,9 @@ class TabPanelSix(wx.Panel):
         
         report.write('\n' + div * 1 + '\n')
         
-#         report.write('\n Глубина забоя, м: %s' % self.h_bhole)
+        report.write('\n Глубина забоя, м: %s' % h_bhole)
         
-#         report.write('\n')
+        report.write('\n')
         
 #         report.write('\n Название пункта: %s' % value2)
         
@@ -1490,9 +2253,16 @@ class TabPanelSix(wx.Panel):
         
 #         report.write('\n Название пункта: %s' % value3)
 
-        report.write('\n')
+#         report.write('\n')
 
         report.write('\n Внутренний диаметр НКТ, м: %s' % self.d_vnut_nkt)
+        
+        report.write('\n')
+        
+#         report.write('\n Глубина вечномерзлых грунтов, м: %s' % self.h_ice)
+        
+#         report.write('\n')
+        
         
 #---------------------------------------------------------------------------------------------------
         # Закрываем файл после записи
@@ -1501,10 +2271,15 @@ class TabPanelSix(wx.Panel):
         # Деактивируем кнопку 'Сохранене данных'
         self.btn1.Disable()
         
+#         if fghgh IsOk():
         # Выводим сообщение об успешности сохранения
         wx.MessageBox(u'Данные успешно сохранены!', u'Сохранение данных', wx.OK | wx.ICON_INFORMATION)
         
-#####################################################################################################################
+#         else:
+        
+#         wx.MessageBox("Невозможно сохранить данные!", "Ошибка", style=wx.ICON_ERROR|wx.OK)
+        
+####################################################################################################################
 class NotebookFrame(wx.Frame):
     """    
     """
@@ -1512,6 +2287,7 @@ class NotebookFrame(wx.Frame):
     def __init__(self, parent):
         wx.Frame.__init__(self, parent, id=wx.ID_ANY, title=u"Ввод данных для расчета", pos=wx.DefaultPosition,
                           size=wx.Size(1030, 820), style=wx.DEFAULT_FRAME_STYLE | wx.TAB_TRAVERSAL)
+        
         
         #------------------ Добавляем иконку в верхний левый угол главного окна ----------------------------
         # Размещаем картинку
@@ -1542,10 +2318,10 @@ class NotebookFrame(wx.Frame):
 
         # Называем вкладки
         self.notebook.AddPage(tab1, "Лифтовое оборудование", False)
-        self.notebook.AddPage(tab2, "Характеристики среды", False)
+        self.notebook.AddPage(tab2, "Окружающая среда", False)
         self.notebook.AddPage(tab3, "Пластовой флюид", False)
         
-        self.notebook.AddPage(tab4, "Параметры скважины", False)
+        self.notebook.AddPage(tab4, "Скважина", False)
         self.notebook.AddPage(tab5, "Свойства флюида", False)
         self.notebook.AddPage(tab6, "Дополнительные параметры", False)
         
@@ -1562,67 +2338,91 @@ class NotebookFrame(wx.Frame):
         self.notebook.EnableTab(3, True)
         self.notebook.EnableTab(4, True)
         self.notebook.EnableTab(5, True)
+        
+#************************************* Рисуем боксы ********************************************************
+# Первая вкладка
 
-#********************************************************************************************************
-# Рисуем боксы
-#--------------------------------------------------------------------------------------
-# 
-        fontlabel1 = wx.Font(10, wx.MODERN, wx.NORMAL, wx.BOLD, False, u'Consolas')  
-        Label = wx.StaticBox(tab1, label='ЭКСПЛУАТАЦИОННАЯ КОЛОННА', pos=(20, 20), size=(440, 170))
-        Label.SetFont(fontlabel1)
-        Label.SetForegroundColour('BLUE')
+  # Рисуем первый бокс
+     
+        fontlabel1 = wx.Font(10, wx.MODERN, wx.NORMAL, wx.BOLD, False, u'Consolas') 
+        Label1 = wx.StaticBox(tab1, label='ОБЩИЕ СВЕДЕНИЯ', pos=(20, 50), size=(540, 150))
+        Label1.SetFont(fontlabel1)
+        Label1.SetForegroundColour('BLUE')
         self.Show(True)
-# 
+
+  # Рисуем второй бокс
+
         fontlabel11 = wx.Font(10, wx.MODERN, wx.NORMAL, wx.BOLD, False, u'Consolas')  
-        Label = wx.StaticBox(tab1, label='НКТ', pos=(120, 210), size=(350, 110))
-        Label.SetFont(fontlabel11)
-        Label.SetForegroundColour('BLUE')
+        Label2 = wx.StaticBox(tab1, label='НКТ', pos=(120, 230), size=(360, 140))
+        Label2.SetFont(fontlabel11)
+        Label2.SetForegroundColour('BLUE')
         self.Show(True)        
-# 
+
+  # Рисуем третий бокс
         fontlabel111 = wx.Font(10, wx.MODERN, wx.NORMAL, wx.BOLD, False, u'Consolas')  
-        Label = wx.StaticBox(tab1, label='НАСОС', pos=(220, 350), size=(430, 180))
-        Label.SetFont(fontlabel111)
-        Label.SetForegroundColour('BLUE')
+        Label3 = wx.StaticBox(tab1, label='ХАРАКТЕРИСТИКИ НАСОСНОГО ОБОРУДОВАНИЯ', pos=(220, 400), size=(430, 150))
+        Label3.SetFont(fontlabel111)
+        Label3.SetForegroundColour('BLUE')
         self.Show(True)         
 #---------------------------------------------------------------------------------------------------------
-        fontlabel2 = wx.Font(10, wx.MODERN, wx.NORMAL, wx.BOLD, False, u'Consolas')  
+# Вторая вкладка
 
-        Label = wx.StaticBox(tab2, label='ПАРАМЕТРЫ СРЕДЫ', pos=(20, 20), size=(630, 200))
-        Label.SetFont(fontlabel2)
-        Label.SetForegroundColour('BLUE')
+#         sizer_Panel1 = wx.BoxSizer(wx.VERTICAL)
+    
+        fontlabel2 = wx.Font(10, wx.MODERN, wx.NORMAL, wx.BOLD, False, u'Consolas')  
+      
+        Label4 = wx.StaticBox(tab2, label='РАСПРЕДЕЛЕНИЕ ТЕМПЕРАТУР ПО ГЛУБИНЕ', pos=(15, 15), size=(630, 160))
+#         Label4 = wx.StaticBox(tab2, label='ПАРАМЕТРЫ СРЕДЫ')
+#         LabelName = wx.StaticBoxSizer(Label4, wx.VERTICAL)
+#         sizer_Panel1.Add(LabelName, flag = wx.ALL, border = 20) 
+        
+        Label4.SetFont(fontlabel2)
+        Label4.SetForegroundColour('BLUE')
         self.Show(True)
-#------------------------------------------------------------------------------------------------------------        
+        
+#         sizer_Panel1.Add(self.sizer_vert) 
+#         self.SetSizer(sizer_Panel1)
+#         self.Layout()
+#------------------------------------------------------------------------------------------------------------   
+# Третья вкладка
+
         fontlabel3 = wx.Font(10, wx.MODERN, wx.NORMAL, wx.BOLD, False, u'Consolas')  
 
-        Label = wx.StaticBox(tab3, label='ПАРАМЕТРЫ', pos=(20, 20), size=(580, 320))
-        Label.SetFont(fontlabel3)
-        Label.SetForegroundColour('BLUE')
+        Label5 = wx.StaticBox(tab3, label='ХАРАКТЕРИСТИКИ ПЛАСТОВОЙ ЖИДКОСТИ', pos=(60, 40), size=(600, 300))
+        Label5.SetFont(fontlabel3)
+        Label5.SetForegroundColour('BLUE')
         self.Show(True)
 #----------------------------------------------------------------------------------------------------------------        
+# Четвертая вкладка
+
         fontlabel4 = wx.Font(10, wx.MODERN, wx.NORMAL, wx.BOLD, False, u'Consolas')  
 
-        Label = wx.StaticBox(tab4, label='ПАРАМЕТРЫ', pos=(20, 20), size=(590, 520))
-        Label.SetFont(fontlabel4)
-        Label.SetForegroundColour('BLUE')
+        Label6 = wx.StaticBox(tab4, label='РЕЖИМ ЭКСПЛУАТАЦИИ СКВАЖИНЫ', pos=(40, 30), size=(600, 540))
+        Label6.SetFont(fontlabel4)
+        Label6.SetForegroundColour('BLUE')
         self.Show(True)
-#---------------------------------------------------------------------------------------------------------------        
+#---------------------------------------------------------------------------------------------------------------
+# Пятая вкладка
+
         fontlabel5 = wx.Font(10, wx.MODERN, wx.NORMAL,  wx.BOLD, False, u'Consolas')  
 
-        Label = wx.StaticBox(tab5, label='ПАРАМЕТРЫ', pos=(20, 20), size=(580, 520))
-        Label.SetFont(fontlabel5)
-        Label.SetForegroundColour('BLUE')
+        Label7 = wx.StaticBox(tab5, label='ХАРАКТЕРИСТИКА СЕПАРИРОВАННОЙ НЕФТИ', pos=(40, 20), size=(600, 550))
+        Label7.SetFont(fontlabel5)
+        Label7.SetForegroundColour('BLUE')
         self.Show(True)
+        
 #---------------------------------------------------------------------------------------------------------------        
+# Шестая вкладка
+
         fontlabel6 = wx.Font(10, wx.MODERN, wx.NORMAL,  wx.BOLD, False, u'Consolas')  
 
-        Label = wx.StaticBox(tab6, label='ПАРАМЕТРЫ', pos=(20, 20), size=(700, 670))
-        Label.SetFont(fontlabel6)
-        Label.SetForegroundColour('BLUE')
+        Label8 = wx.StaticBox(tab6, label='ДОПОЛНИТЕЛЬНЫЕ ПАРАМЕТРЫ', pos=(30, 20), size=(720, 590))
+        Label8.SetFont(fontlabel6)
+        Label8.SetForegroundColour('BLUE')
         self.Show(True)
-   
-       
+
 ##################################################################################################  
-#------------------------------------------ ProgressBar -----------------------------------------#
+#--------------------------------- ProgressBar и Расчет -----------------------------------------#
 ##################################################################################################
 class MyProgressDialog(wx.ProgressDialog):
     
@@ -1642,14 +2442,314 @@ class MyProgressDialog(wx.ProgressDialog):
             wx.Sleep(1)
             keepGoing = self.Update(count)
 
+           #---------------------- вставить сюда строчки для расчета --------------------------#
+
+
+#  После расчета выключаем кнопки
+
+          # Активность кнопки 'Пуск'  
+        setCalcPanel.EnableButton(ID_Run, False)
+        
+# Включаем остальные поля по окончанию расчета
+
+        # Активность кнопки 'Построить график'  
+        setResult.EnableButton(ID_Plot, True)
+        
+        # Активность кнопки 'Создать отчет' 
+        setResult.EnableButton(ID_CreateReport, True)
+        
+        # Активность кнопки 'Просмотр отчета' 
+        setResult.EnableButton(ID_ViewReport, True)
+        
+        # Активность кнопки 'Печать отчета' 
+        setResult.EnableButton(ID_PrintReport, True)
+
+
 ##################################################################################################  
-#---------------------------------------------- Расчет ------------------------------------------#
+#---------------------------------- 'Создать отчет' ---------------------------------------------#
 ##################################################################################################
 
-# --------------- место для строчек кода с расчетом --------------------------
+class ReportWindow(wx.Dialog):
+
+#------------------------------------------------------------------------------------------
+    def __init__(self, *args, **kwargs):
+        super(ReportWindow, self).__init__(*args, **kwargs)
+
+        self.InitUI()
+        
+#------------------------------------------------------------------------------------------
+    def InitUI(self):
+
+        self.SetSize((400, 400))
+        self.SetTitle(u'Данные по месторождению')
+        self.Centre()
+        
+        panel = wx.Panel(self, -1)
+        self.currentDirectory = os.getcwd()
+        
+        wx.StaticText(panel, -1, u"Оператор:", pos=(10, 20)) 
+        wx.StaticText(panel, -1, u"Название месторождения:", pos=(10, 50))       
+        wx.StaticText(panel, -1, u"Номер скважины:", pos=(10, 80)) 
+        self.esp = wx.StaticText(panel, -1, u"Марка ЭЦН:", pos=(10, 115))
+        self.esp.Disable()
+        
+        self.posCtrl1 = wx.TextCtrl(panel, -1, "", pos=(80, 20))
+        self.posCtrl2 = wx.TextCtrl(panel, -1, "", pos=(170, 50))
+        self.posCtrl3 = wx.TextCtrl(panel, -1, "", pos=(120, 80))
+        self.ESPname = wx.TextCtrl(panel, -1, "", pos=(100, 110))
+        self.ESPname.Disable()
+        
+        
+        wx.StaticBox(panel, label = u'Способ эксплуатации', pos=(25, 145), size=(350, 150))
+        
+        self.button1 = wx.Button(panel,label = u"Сохранить данные", pos=(10,320))
+        self.button2 = wx.Button(panel,label = u"Создать отчет", pos=(180,320))
+        self.button3 = wx.Button(panel,label = u"Закрыть", pos=(290,320))
+        
+        # Выключаем кнопку 'Создать отчет'
+        self.button2.Disable()
+        
+#----------------------------------------------------------------------------------------------        
+        method1 = self.radio1 = wx.RadioButton(panel, label = u"Механизированный станок-качалка", pos=(40, 180), 
+                                               style = wx.RB_GROUP)
+        method2 = self.radio2 = wx.RadioButton(panel, label = u"Газлифт", pos=(40, 210))
+        self.method3 = self.radio3 = wx.RadioButton(panel, label = u"Погружной ЭЦН", pos=(40, 240))
+        method3 = self.radio4 = wx.RadioButton(panel, label = u"Винтовой насос", pos=(40, 270))
+
+        self.Bind(wx.EVT_RADIOBUTTON, self.onChoice)
+
+#---------------------------------------------------------------------------------------------
+        self.Bind(wx.EVT_BUTTON, self.onSaveAsFile, self.button1)
+        self.Bind(wx.EVT_BUTTON, self.CreateReport, self.button2)
+        self.Bind(wx.EVT_BUTTON, self.onClose, self.button3)
+
+#----------------------------------------------------------------------------------------------
+    def onChoice(self, event):
+        
+        """ Выбираем способ добычи """
+        
+        btn = event.GetEventObject()
+        
+        if btn == self.method3:
+            self.esp.Enable()
+            self.ESPname.Enable()  
+            self.label = str(self.ESPname.GetValue())
+            print (self.label)
+        else:
+            self.label = btn.GetLabel()
+        
+#---------------------------------------------------------------------------------------------
+    def onSaveAsFile(self, event):
+        """
+        Создаем и показываем диалог Save FileDialog
+        """
+        wildcard = "Text source (*.txt)|*.txt|" \
+            "All files (*.*)|*.*"
+        self.currentDirectory = os.getcwd()
+        dlg = wx.FileDialog(self, message="Сохранение документа", defaultDir=self.currentDirectory, 
+                            defaultFile="", wildcard=wildcard, style=wx.FD_SAVE)
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+            report = open(path, "w") 
+
+# Создаем заголовочный файл
+
+        # Устанавливаем дату и время
+        date = strftime("%a %d-%m-%y %H:%M:%S")
+
+        # Добавляем линию конеца заголовочного файла
+        div = '********************** Конец заголовка ***************************'
+
+        # Записываем заголовочные данные в файл 
+        report.write('\n Программа: Python ver. 2.7')
+        
+        # Добавляем пустую строку
+        report.write('\n')
+        
+        report.write('\n Наименование: Отчет')
+        
+        report.write('\n')
+       
+        self.multiline = """\n Программа позволяет проводится теплотехнический расчет работы нефтяной скважины по данным технологической анкеты.
+\n Вводятся начальные данные по скважине. Строится геотерма скважины. Определяются теплопотери в грунт.
+\n Строится термограмма скважины с учетом характера движения жидкости. Определяется глубина отложения
+\n парафинов и проводится расчет параметров электрического кабеля.
+
+\n Выходными параметрами программы являются:
+- длины обогрева (горячая и холодная зона)
+- электротехнические параметры кабеля (мощность обогрева, ток, напряжение)
+- температура жилы и оболочки """
+        
+        report.write('\n Описание: Программа расчета электрического обогрева нефтяных скважин.\n %s' % self.multiline)  
+        
+        report.write('\n')
+        
+        report.write('\n Разработчик: ООО ОКБ "Гамма"')
+        
+        report.write('\n')
+        
+        report.write('\n Дата расчета: ' + date)
+        
+        report.write('\n')
+        
+        report.write('\n Оператор: %s' % str(self.posCtrl1.GetValue()))
+        
+        report.write('\n')
+        
+        report.write('\n Наименование месторождения: %s' % str(self.posCtrl2.GetValue()))
+        
+        report.write('\n')
+        
+        report.write('\n Номер скважины: %s' % float(self.posCtrl3.GetValue()))
+        
+        report.write('\n')
+        
+               
+        report.write('\n Способ эксплуатации скважины: %s' % self.label)
+    
+        report.write('\n')
+    
+        report.write('\n' + div * 1 + '\n')
+        
+        report.write('\n')        
+#-------------------------------------------------------------------------------------------------------
+        report.write('\n В этом месте будут находиться систематизированные результаты расчета')
+
+#         report.write('\n Способ эксплуатации скважины: %s' % self.label)
+#         report.write('\n')
 
 
+               # сюда добавляем строчки значений искомых величин после расчета
 
+
+#-------------------------------------------------------------------------------------------------------
+        # Закрываем файл после записи
+        report.close()
+    
+        self.button1.Disable()
+        
+        wx.MessageBox(u'Данные по месторождению успешно сохранены!', u'Сохранение данных', wx.OK | wx.ICON_INFORMATION)
+        
+        self.button2.Enable()
+                    
+        dlg.Destroy()
+#--------------------------------------------------------------------------------------------
+
+    def onClose(self, event):
+        """ закрываем окно с данными по месторождению """
+        self.Close()
+
+#--------------------------------------------------------------------------------------------        
+
+    def CreateReport(self, event):
+#---------------------------------------------------------------------
+    # Сюда вставить код для отчета после расчета параметров
+
+#----------------------------------------------------------------------
+        # Закрываем окно с данными
+#         self.Close()
+        self.button2.Disable()
+    
+        # Show message box that's all ok 
+        wx.MessageBox(u'Отчет успешно создан!', u'Создание отчета', wx.OK | wx.ICON_INFORMATION)
+
+##################################################################################################  
+#---------------------------------------- 'Просмотра отчета' ------------------------------------#
+##################################################################################################
+
+class Viewer(wx.Frame):
+    
+#----------------------------------------------------------------------------------------------    
+    def __init__(self, parent, title):
+
+        wx.Frame.__init__(self, parent, title=title, size = (600, 500))
+        
+        style = aui.AUI_NB_DEFAULT_STYLE ^ wx.aui.AUI_NB_BOTTOM
+
+        # Create the notebook 
+             
+        mgr = aui.AuiManager()
+
+        # tell AuiManager to manage this frame
+        mgr.SetManagedWindow(self)
+
+        self.notebook = aui.AuiNotebook(self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, agwStyle=style) 
+    
+        # Добавляем иконку в верхний левый угол главного окна        
+        # Размещаем картинку
+        icon = wx.Icon('viewer.png', wx.BITMAP_TYPE_PNG)
+        # Показываем в окне
+        self.SetIcon(icon)
+
+        # Creating the menubar
+        menu_bar = wx.MenuBar()
+
+        # Setting up the menu
+        file_menu = wx.Menu()
+        # wx.ID_OPEN
+        menu_item = file_menu.Append(wx.ID_OPEN, '&Открыть...\tCtrl+N', 'выбираем нужный файл ')
+        
+        # Bind the "select menu item" event to the OnOpen event handler
+        self.Bind(wx.EVT_MENU, self.OnOpenFile, menu_item)
+    
+
+        # Adding the 'file_menu' to the menu bar
+        menu_bar.Append(file_menu, '&Файл')
+        file_menu.AppendSeparator()
+      
+        qmi = wx.MenuItem(file_menu, wx.ID_EXIT, '&Выход\tCtrl+Q', 'входим из программы')
+        file_menu.Append(qmi)
+        self.Bind(wx.EVT_MENU, self.OnQuitViewer, qmi)
+        
+        # Adding the menu bar to the frame content
+        self.SetMenuBar(menu_bar)
+        self.Center()
+        self.Show()
+        
+        # Создаем строку состояния StatusBar
+        self.CreateStatusBar()
+        
+        # Выводим в нем приветствие
+        self.PushStatusText("Добро пожаловать! выбирете меню Файл чтобы открыть файл")
+        
+#---------------------------------------------------------------------------------------------------        
+    def OnOpenFile(self, event):
+
+        # This is how you pre-establish a file filter so that the dialog
+        # only shows the extension(s) you want it to.
+        
+#         wildcard = 'Python source (*.py)|*.py'
+        wildcard = 'Text source (*.txt)|*.txt'
+        
+        dlg = wx.FileDialog(None, message="Выбор файла", defaultDir=os.getcwd(), 
+                            defaultFile="", wildcard=wildcard, style=wx.FD_OPEN)
+
+        # Show the dialog and retrieve the user response. If it is the OK response, 
+        # process the data.
+        if dlg.ShowModal() == wx.ID_OK:
+            # This returns the file that was selected
+            path = dlg.GetPath()
+
+            # Open the file as read-only and slurp its content
+            fid = open(path, 'rt')
+            text = fid.read()
+            fid.close()
+
+            text_ctrl = wx.TextCtrl(self.notebook, style=wx.TE_MULTILINE)
+            text_ctrl.SetFont(wx.Font(FONTSIZE, wx.TELETYPE, wx.NORMAL, wx.NORMAL))
+            text_ctrl.SetValue(text)
+
+            filename = os.path.split(os.path.splitext(path)[0])[1]
+            self.notebook.AddPage(text_ctrl, filename, select=True)
+
+        # Destroy the dialog. Don't do this until you are done with it!
+        # BAD things can happen otherwtwise!
+        dlg.Destroy()
+        
+#------------------------------------------------------------------------------------------------        
+    def OnQuitViewer(self, event):
+        self.Close()
+        
 ##################################################################################################  
 #--------------------------------------- 'Построить график' -------------------------------------#
 ##################################################################################################
@@ -1683,8 +2783,7 @@ class PlotFrame(wx.Frame):
   
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self.canvas, 1, wx.LEFT|wx.TOP|wx.GROW)
-        sizer.Add(wx.StaticText(self,-1, self.start_msg), 0,
-                  wx.ALIGN_LEFT|wx.TOP)
+        sizer.Add(wx.StaticText(self,-1, self.start_msg), 0, wx.ALIGN_LEFT|wx.TOP)
   
         self.canvas.Bind(wx.EVT_KEY_DOWN, self.onKeyEvent)
   
@@ -1722,13 +2821,13 @@ class PlotFrame(wx.Frame):
   
         self.SetMenuBar(menuBar)
   
-        self.Bind(wx.EVT_MENU, self.onPrint,        id=MENU_PRINT)
-        self.Bind(wx.EVT_MENU, self.onPrinterSetup, id=MENU_PSETUP)
+        self.Bind(wx.EVT_MENU, self.onPrint,          id=MENU_PRINT)
+        self.Bind(wx.EVT_MENU, self.onPrinterSetup,   id=MENU_PSETUP)
         self.Bind(wx.EVT_MENU, self.onPrinterPreview, id=MENU_PREVIEW)
-        self.Bind(wx.EVT_MENU, self.onClipboard,    id=MENU_CLIPB)
-        self.Bind(wx.EVT_MENU, self.onExport,       id=MENU_SAVE)
-        self.Bind(wx.EVT_MENU, self.onExit ,        id=MENU_EXIT)
-        self.Bind(wx.EVT_MENU, self.onHelp,         id=MENU_HELP)
+        self.Bind(wx.EVT_MENU, self.onClipboard,      id=MENU_CLIPB)
+        self.Bind(wx.EVT_MENU, self.onExport,         id=MENU_SAVE)
+        self.Bind(wx.EVT_MENU, self.onExit ,          id=MENU_EXIT)
+        self.Bind(wx.EVT_MENU, self.onHelp,           id=MENU_HELP)
         
         # initialize the print data and set some default values
         self.pdata = wx.PrintData()
@@ -1739,7 +2838,7 @@ class PlotFrame(wx.Frame):
     # 
     def onPrinterSetup(self,event=None):
         self.canvas.Printer_Setup(event=event)
-#         sdf
+
 #------------------------------------------------------------------------------------------  
     def onPrinterPreview(self, bmp):
 #     def onPrinterPreview(self,event=None):
@@ -1840,271 +2939,6 @@ class PlotFrame(wx.Frame):
        
         self.axes.plot(t,s)
         self.axes.plot(t,c)
-
-##################################################################################################  
-#---------------------------------- 'Создать отчет' ---------------------------------------------#
-##################################################################################################
-
-class ReportWindow(wx.Dialog):
-
-#------------------------------------------------------------------------------------------
-    def __init__(self, *args, **kwargs):
-        super(ReportWindow, self).__init__(*args, **kwargs)
-
-        self.InitUI()
-        
-#------------------------------------------------------------------------------------------
-    def InitUI(self):
-
-        self.SetSize((400, 380))
-        self.SetTitle(u'Данные по месторождению')
-        self.Centre()
-        
-        panel = wx.Panel(self, -1)
-        self.currentDirectory = os.getcwd()
-        
-        wx.StaticText(panel, -1, u"Оператор:", pos=(10, 20)) 
-        wx.StaticText(panel, -1, u"Название месторождения:", pos=(10, 50))       
-        wx.StaticText(panel, -1, u"Номер скважины:", pos=(10, 80)) 
-        
-        self.posCtrl1 = wx.TextCtrl(panel, -1, "", pos=(80, 20))
-        self.posCtrl2 = wx.TextCtrl(panel, -1, "", pos=(170, 50))
-        self.posCtrl3 = wx.TextCtrl(panel, -1, "", pos=(120, 80))
-        
-        
-        wx.StaticBox(panel, label = u'Способ эксплуатации', pos=(25, 125), size=(350, 150))
-        
-        self.button1 = wx.Button(panel,label = u"Сохранить данные", pos=(10,310))
-        self.button2 = wx.Button(panel,label = u"Создать отчет", pos=(180,310))
-        self.button3 = wx.Button(panel,label = u"Закрыть", pos=(290,310))
-        
-        # Выключаем кнопку 'Создать отчет'
-        self.button2.Disable()
-        
-#----------------------------------------------------------------------------------------------        
-        method1 = self.radio1 = wx.RadioButton(panel, label = u"Механизированный станок-качалка", pos=(40, 150), 
-                                               style = wx.RB_GROUP)
-        method2 = self.radio2 = wx.RadioButton(panel, label = u"Газлифт", pos=(40, 180))
-        method3 = self.radio3 = wx.RadioButton(panel, label = u"Погружной ЭЦН", pos=(40, 210))
-        method3 = self.radio4 = wx.RadioButton(panel, label = u"Винтовой насос", pos=(40, 240))
-
-        self.Bind(wx.EVT_RADIOBUTTON, self.onChoice)
-
-#---------------------------------------------------------------------------------------------
-        self.Bind(wx.EVT_BUTTON, self.onSaveAsFile, self.button1)
-        self.Bind(wx.EVT_BUTTON, self.CreateReport, self.button2)
-        self.Bind(wx.EVT_BUTTON, self.onClose, self.button3)
-
-#----------------------------------------------------------------------------------------------
-    def onChoice(self, event):
-        
-        """ Выбираем способ добычи """
-        
-        btn = event.GetEventObject()
-        self.label = btn.GetLabel()
-        
-#---------------------------------------------------------------------------------------------
-    def onSaveAsFile(self, event):
-        """
-        Создаем и показываем диалог Save FileDialog
-        """
-        wildcard = "Text source (*.txt)|*.txt|" \
-            "All files (*.*)|*.*"
-        self.currentDirectory = os.getcwd()
-        dlg = wx.FileDialog(self, message="Сохранение документа", defaultDir=self.currentDirectory, 
-                            defaultFile="", wildcard=wildcard, style=wx.FD_SAVE)
-        if dlg.ShowModal() == wx.ID_OK:
-            path = dlg.GetPath()
-            report = open(path, "w") 
-
-# Создаем заголовочный файл
-
-        # Устанавливаем дату и время
-        date = strftime("%a %d-%m-%y %H:%M:%S")
-
-        # Добавляем линию конеца заголовочного файла
-        div = '********************** Конец заголовка ***************************'
-
-        # Write header data to the file 
-        report.write('\n Программа: Python ver. 2.7')
-        
-        # Добавляем пустую строку
-        report.write('\n')
-        
-        report.write('\n Наименование: Отчет')
-        
-        report.write('\n')
-       
-        self.multiline = """\n Программа позволяет проводится теплотехнический расчет работы нефтяной скважины по данным технологической анкеты.
-\n Вводятся начальные данные по скважине. Строится геотерма скважины. Определяются теплопотери в грунт.
-\n Строится термограмма скважины с учетом характера движения жидкости. Определяется глубина отложения
-\n парафинов и проводится расчет параметров электрического кабеля.
-
-\n Выходными параметрами программы являются:
-- длины обогрева (горячая и холодная зона)
-- электротехнические параметры кабеля (мощность обогрева, ток, напряжение)
-- температура жилы и оболочки """
-        
-        report.write('\n Описание: Программа расчета электрического обогрева нефтяных скважин.\n %s' % self.multiline)  
-        
-        report.write('\n')
-        
-        report.write('\n Разработчик: ООО ОКБ "Гамма"')
-        
-        report.write('\n')
-        
-        report.write('\n Дата расчета: ' + date)
-        
-        report.write('\n')
-        
-        report.write('\n Оператор: %s' % str(self.posCtrl1.GetValue()))
-        
-        report.write('\n')
-        
-        report.write('\n Наименование месторождения: %s' % str(self.posCtrl2.GetValue()))
-        
-        report.write('\n')
-        
-        report.write('\n Номер скважины: %s' % float(self.posCtrl3.GetValue()))
-        
-        report.write('\n')
-        
-        report.write('\n Способ эксплуатации скважины: %s' % self.label)
-
-        report.write('\n')
-    
-        report.write('\n' + div * 1 + '\n')
-        
-        report.write('\n')        
-#--------------------------------------------------------------------------
-
-        # Закрываем файл после записи
-        report.close()
-    
-        self.button1.Disable()
-        
-        wx.MessageBox(u'Данные успешно сохранены!', u'Сохранение данных', wx.OK | wx.ICON_INFORMATION)
-        
-        self.button2.Enable()
-                    
-        dlg.Destroy()
-#--------------------------------------------------------------------------------------------
-
-    def onClose(self, event):
-        """ закрываем окно с данными по месторождению """
-        self.Close()
-
-#--------------------------------------------------------------------------------------------        
-
-    def CreateReport(self, event):
-#---------------------------------------------------------------------
-    # Сюда вставить код для отчета после расчета параметров
-
-#----------------------------------------------------------------------
-        # Закрываем окно с данными
-#         self.Close()
-        self.button2.Disable()
-    
-        # Show message box that's all ok 
-        wx.MessageBox(u'Отчет успешно создан!', u'Создание отчета', wx.OK | wx.ICON_INFORMATION)
-
-##################################################################################################  
-#---------------------------------------- 'Просмотра отчета' ------------------------------------#
-##################################################################################################
-
-class Viewer(wx.Frame):
-    
-#----------------------------------------------------------------------------------------------    
-    def __init__(self, parent, title):
-
-        wx.Frame.__init__(self, parent, title=title, size = (900, 800))
-        
-        style = aui.AUI_NB_DEFAULT_STYLE ^ wx.aui.AUI_NB_BOTTOM
-
-        # Create the notebook 
-             
-        mgr = aui.AuiManager()
-
-        # tell AuiManager to manage this frame
-        mgr.SetManagedWindow(self)
-
-        self.notebook = aui.AuiNotebook(self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, agwStyle=style) 
-    
-        # Добавляем иконку в верхний левый угол главного окна        
-        # Размещаем картинку
-        icon = wx.Icon('viewer.png', wx.BITMAP_TYPE_PNG)
-        # Показываем в окне
-        self.SetIcon(icon)
-
-        # Creating the menubar
-        menu_bar = wx.MenuBar()
-
-        # Setting up the menu
-        file_menu = wx.Menu()
-        # wx.ID_OPEN
-        menu_item = file_menu.Append(wx.ID_OPEN, '&Открыть...\tCtrl+N', 'Выбираем необходимый файл ')
-        
-        # Bind the "select menu item" event to the OnOpen event handler
-        self.Bind(wx.EVT_MENU, self.OnOpenFile, menu_item)
-    
-
-        # Adding the 'file_menu' to the menu bar
-        menu_bar.Append(file_menu, '&Файл')
-        file_menu.AppendSeparator()
-      
-        qmi = wx.MenuItem(file_menu, wx.ID_EXIT, '&Выход\tCtrl+Q', 'Выйти из программы')
-        file_menu.Append(qmi)
-        self.Bind(wx.EVT_MENU, self.OnQuitViewer, qmi)
-        
-        # Adding the menu bar to the frame content
-        self.SetMenuBar(menu_bar)
-        self.Center()
-        self.Show()
-        
-        # Создаем строку состояния StatusBar
-        self.CreateStatusBar()
-        
-        # Выводим в нем приветствие
-        self.PushStatusText("Добро пожаловать! Войдите в меню Файл для выбора файла")
-        
-#---------------------------------------------------------------------------------------------------        
-    def OnOpenFile(self, event):
-
-        # This is how you pre-establish a file filter so that the dialog
-        # only shows the extension(s) you want it to.
-        
-#         wildcard = 'Python source (*.py)|*.py'
-        wildcard = 'Text source (*.txt)|*.txt'
-        
-        dlg = wx.FileDialog(None, message="Выбор файла", defaultDir=os.getcwd(), 
-                            defaultFile="", wildcard=wildcard, style=wx.FD_OPEN)
-
-        # Show the dialog and retrieve the user response. If it is the OK response, 
-        # process the data.
-        if dlg.ShowModal() == wx.ID_OK:
-            # This returns the file that was selected
-            path = dlg.GetPath()
-
-            # Open the file as read-only and slurp its content
-            fid = open(path, 'rt')
-            text = fid.read()
-            fid.close()
-
-            text_ctrl = wx.TextCtrl(self.notebook, style=wx.TE_MULTILINE)
-            text_ctrl.SetFont(wx.Font(FONTSIZE, wx.TELETYPE, wx.NORMAL, wx.NORMAL))
-            text_ctrl.SetValue(text)
-
-            filename = os.path.split(os.path.splitext(path)[0])[1]
-            self.notebook.AddPage(text_ctrl, filename, select=True)
-
-        # Destroy the dialog. Don't do this until you are done with it!
-        # BAD things can happen otherwtwise!
-        dlg.Destroy()
-        
-#------------------------------------------------------------------------------------------------        
-    def OnQuitViewer(self, event):
-        self.Close()
-
 
 ##################################################################################################  
 #--------------------------------------- 'Печать отчета' ----------------------------------------#
@@ -2358,7 +3192,7 @@ class PrintFrameworkSample(wx.Frame):
         dlg.Destroy()
 
 #-------------------------------------------------------------------------------------------------
-# Открываем предварительный просмотр
+# Предварительный просмотр документа
 
     def OnPrintPreview(self, evt):
         data = wx.PrintDialogData(self.pdata)
@@ -2509,4 +3343,4 @@ class HelpWindow(wx.Frame):
 ####################################################################################################
 # Главный цикл
 if __name__ == '__main__':
-    main()
+    main()     
