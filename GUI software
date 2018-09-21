@@ -11,7 +11,7 @@ sys.setdefaultencoding('utf-8')
 """
 Программа расчета электрического обогрева нефтяных скважин.
 
-"""
+"""  
 #------------------------------------------------------------------------------
 
 # Импортируемые библиотеки
@@ -251,7 +251,7 @@ class MainFrame(wx.Frame):
         """ Вызываем функциональное окно по нажатию на значок    """
         
         # Создаем диалоговое окно
-        dlg = RibbonBar(None, title="Новый расчет", size=(530,180))
+        dlg = RibbonBar(None, title="Скважина с ЭЦН - Новый расчет", size=(530,180))
         
         # Показываем его
         dlg.ShowModal()
@@ -336,7 +336,7 @@ class RibbonBar(wx.Dialog):
         ribbonBar.SetActivePage(ToolsTab)
         
         # Создаем панель 'Данные'
-        DataPanel = RB.RibbonPanel(ToolsTab, wx.ID_ANY, u"Данные")
+        DataPanel = RB.RibbonPanel(ToolsTab, wx.ID_ANY, "Данные")
         
         # Размещаем панель на вкладке
         setDataPanel = RB.RibbonButtonBar(DataPanel)
@@ -345,7 +345,7 @@ class RibbonBar(wx.Dialog):
         ToolsIconSetData = wx.Bitmap("menu icons/data1.jpg", wx.BITMAP_TYPE_ANY)
         
         # Задаем название значка и всплывающей подсказки
-        setDataPanel.AddSimpleButton(ID_SetData, u"Ввод данных", ToolsIconSetData, 'ввести данные для расчета')
+        setDataPanel.AddSimpleButton(ID_SetData, "Ввод данных", ToolsIconSetData, 'ввести данные для расчета')
         
         # Вызываем окно 'Ввод данных'
         setDataPanel.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.OnOpenNewWindow, id=ID_SetData)
@@ -353,7 +353,7 @@ class RibbonBar(wx.Dialog):
 #------------------------ Создаем панель Импорт данных --------------------------------------------------------------
 
         # Создаем панель 'Импорт данных'
-        DataImportPanel = RB.RibbonPanel(ToolsTab, wx.ID_ANY, u"Подготовка данных")
+        DataImportPanel = RB.RibbonPanel(ToolsTab, wx.ID_ANY, "Подготовка данных")
         
         # Размещаем панель на вкладке
         ImportDataPanel = RB.RibbonButtonBar(DataImportPanel)
@@ -370,7 +370,7 @@ class RibbonBar(wx.Dialog):
             
 #----------------------- Создаем панель Расчет ------------------------------------------------------------------------
 
-        CalcPanel = RB.RibbonPanel(ToolsTab, wx.ID_ANY, u"Расчет")
+        CalcPanel = RB.RibbonPanel(ToolsTab, wx.ID_ANY, "Расчет")
      
         # Размещаем панель на вкладке
         setCalcPanel = RB.RibbonButtonBar(CalcPanel)
@@ -381,14 +381,14 @@ class RibbonBar(wx.Dialog):
 #-------------------------- Создаем панель Пуск ---------------------------------------------------------------------
         
         # Задаем название кнопки и значок
-        setCalcPanel.AddSimpleButton(ID_Run, u"Пуск", ToolsIconRunButton, 'запустить расчет')
+        setCalcPanel.AddSimpleButton(ID_Run, "Пуск", ToolsIconRunButton, 'запустить расчет')
         
         # Вызываем окно 'Пуск'
         setCalcPanel.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.OnRunCalculation, id=ID_Run)
         
 #------------------------ Создаем панель Результаты расчета -------------------------------------------------------
 
-        PlotPanel = RB.RibbonPanel(ToolsTab, wx.ID_ANY, u"Результаты расчета")
+        PlotPanel = RB.RibbonPanel(ToolsTab, wx.ID_ANY, "Результаты расчета")
         
         # Размещаем панель на вкладке
         setResult = RB.RibbonButtonBar(PlotPanel)
@@ -402,7 +402,7 @@ class RibbonBar(wx.Dialog):
         ToolsIconReport = wx.Bitmap( "menu icons/report.jpg", wx.BITMAP_TYPE_ANY )
     
         # Создаем кнопку Создать отчет
-        setResult.AddSimpleButton(ID_CreateReport, u"Создать отчет", ToolsIconReport, 'создать отчет')
+        setResult.AddSimpleButton(ID_CreateReport, "Создать отчет", ToolsIconReport, 'создать отчет')
       
          # Вызываем окно 'Создать отчет'
         setResult.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.OnCreateReport, id=ID_CreateReport)
@@ -412,7 +412,7 @@ class RibbonBar(wx.Dialog):
         ToolsIconReview = wx.Bitmap( "menu icons/open.jpg", wx.BITMAP_TYPE_ANY )
        
         # Создаем кнопку Просмотр отчета
-        setResult.AddSimpleButton(ID_ViewReport, u"Просмотр отчета", ToolsIconReview, 'открыть отчет для просмотра')
+        setResult.AddSimpleButton(ID_ViewReport, "Просмотр отчета", ToolsIconReview, 'открыть отчет для просмотра')
       
         # Вызываем окно 'Просмотр отчета'
         setResult.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.OnOpenViewer, id=ID_ViewReport)  
@@ -420,7 +420,7 @@ class RibbonBar(wx.Dialog):
 #----------------------------- Создаем кнопку Построить график -------------------------------------------------------------        
         
     # Создаем кнопку Построить график
-        setResult.AddSimpleButton(ID_Plot, u"График", TooslIconPlot, 'построить график')
+        setResult.AddSimpleButton(ID_Plot, "График", TooslIconPlot, 'построить график')
         
         # Вызываем окно 'Построить график'        
         setResult.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.OnPlotGraph, id=ID_Plot)
@@ -430,7 +430,7 @@ class RibbonBar(wx.Dialog):
         ToolsIconPrint = wx.Bitmap( "menu icons/print2.jpg", wx.BITMAP_TYPE_ANY )
         
         # Создаем кнопку Печать отчета
-        setResult.AddSimpleButton(ID_PrintReport, u"Печать отчета", ToolsIconPrint, 'напечатать отчет')       
+        setResult.AddSimpleButton(ID_PrintReport, "Печать отчета", ToolsIconPrint, 'напечатать отчет')       
         
         # Вызываем окно 'Просмотр отчета'
         setResult.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.onPrintDocument, id=ID_PrintReport)
@@ -441,16 +441,16 @@ class RibbonBar(wx.Dialog):
         infoTab = RB.RibbonPage(ribbonBar, wx.ID_ANY, "Справка")
     
         # Создаем панель Информация
-        HelpPanel = RB.RibbonPanel(infoTab, wx.ID_ANY, u"Информация")
+        HelpPanel = RB.RibbonPanel(infoTab, wx.ID_ANY, "Информация")
         
         # Размещаем панель на вкладке
         helpinfo = RB.RibbonButtonBar(HelpPanel)
 
         # Задаем рисунок значка
-        HelpIcon = wx.Bitmap( u"menu icons/help.jpg", wx.BITMAP_TYPE_ANY)
+        HelpIcon = wx.Bitmap( "menu icons/help.jpg", wx.BITMAP_TYPE_ANY)
         
         # Создаем кнопку и ее название
-        helpinfo.AddSimpleButton(ID_Help, u"Помощь", HelpIcon, 'справочные метериалы по программе')
+        helpinfo.AddSimpleButton(ID_Help, "Помощь", HelpIcon, 'справочные метериалы по программе')
     
         # Вызываем меню 'Помощь'
         helpinfo.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.onOpenHelpWindow, id=ID_Help)
@@ -510,11 +510,6 @@ class RibbonBar(wx.Dialog):
   
         # Создаем окно
         frame = wx.Frame(None, title="Открываем файл", size=(800, 700))
-#---------------------------------------------------------------------------------------------
-
-  # добавить сюда меню (пункты сохранить, сохранить как и выход)
-
-#----------------------------------------------------------------------------------------------
         
         # Создаем окно многострочного текста и открываем его во фрейме
         self.my_text = wx.TextCtrl(frame, style=wx.TE_MULTILINE)
@@ -541,6 +536,12 @@ class RibbonBar(wx.Dialog):
     
         # Показываем окно
         frame.Show()
+        
+#---------------------------------------------------------------------------------------------
+
+  # сюда можно добавить, при необходимости, дополнительные пункты меню (пункты сохранить, сохранить как и выход)
+    
+
 #-------------------------------------------------------------------------------------------------------------
 # Сохраняем файл как 
 
@@ -592,6 +593,8 @@ class RibbonBar(wx.Dialog):
         
         """готовим анкетные данные для расчета """
         
+        global thispath
+        
         # Считываем данные из файла
         wildcard = "Text source (*.txt)|*.txt|" \
             "All files (*.*)|*.*"
@@ -603,9 +606,9 @@ class RibbonBar(wx.Dialog):
         
         if dlg.ShowModal() == wx.ID_OK:
             
-            path = dlg.GetPath()
+            thispath = dlg.GetPath()
             
-            report = open(path, "r") 
+            report = open(thispath, "r") 
             
         data_import = report.readlines()
             
@@ -614,7 +617,7 @@ class RibbonBar(wx.Dialog):
         # удаляем строки заголовка с 1 по 18 строку 
         del data_import[0:16]
         
-        # преобразуем list в string (объединяем все значения в один список)
+        # объединяем все значения в один список
         value = "".join(data_import)
     
         # разделяем список на части
@@ -623,15 +626,13 @@ class RibbonBar(wx.Dialog):
         # удаляем весь лишний текст до первого значения
         del devOne[:3]
 
-        # присваиваем значение переменной
+        # присваиваем значение переменным
         valueOne = devOne[0]
         valueTwo = devOne[5]
-
 
         # преобразуем полученное значение в число
         num1 = float(valueOne)
         num2 = float(valueTwo)
-
 
         # создаем папку для временных файлов
 
@@ -639,7 +640,6 @@ class RibbonBar(wx.Dialog):
 
         if not os.path.exists(derictory):  
             os.makedirs(derictory)
-    
 
         # записываем результат в промежуточный файл
 
@@ -647,7 +647,7 @@ class RibbonBar(wx.Dialog):
         f.write(str(num1)+ "\n")
         f.write(str(num2))
         
-   #------ сюда вставляем оставшиеся строчки -----#
+   #------ сюда добавляем оставшиеся строчки -----#
 
         f.close()
 
@@ -755,7 +755,7 @@ class RibbonBar(wx.Dialog):
             path = dlg.GetPath()
             report = open(path, "w") 
 
-# Создаем заголовочный файл
+    # Создаем заголовочный файл
 
         # Устанавливаем дату и время
         date = strftime("%a %d-%m-%y %H:%M:%S")
@@ -765,7 +765,7 @@ class RibbonBar(wx.Dialog):
 
         # Записываем заголовочные данные в файл 
         
-        report.write('\n Наименование: Отчет')
+        report.write('Наименование: Отчет')
         
         report.write('\n')
     
@@ -780,7 +780,7 @@ class RibbonBar(wx.Dialog):
 # - температура жилы и оболочки \n """
         
 #         report.write('\n Описание: Программа расчета электрического обогрева нефтяных скважин с ЭЦН.\n %s' % self.multiline)
-        report.write('\n Описание: Расчет электрического обогрева нефтяной скважин с ЭЦН.\n ')
+        report.write('\n Описание: Расчет электрического обогрева нефтяной скважин с ЭЦН.')
         
         report.write('\n')
         
@@ -788,72 +788,228 @@ class RibbonBar(wx.Dialog):
         
         report.write('\n')
         
-        report.write('\n Дата расчета: ' + date)
+        report.write('\n Дата расчета:' + date)
         
         report.write('\n')
         
+        # считываем данные из файла
+        with open (thispath, "r") as myfile:
+            data=myfile.readlines()
+            
+        # удаляем лишние строчки
+        del data[0:8]
+
+        # преобразуем list в string
+        newvalue = "".join(data)
+
+        # разделяем строку
+        splitedData = newvalue.split()
+
+        # удаляем весь текст, оставляем только значение
+        del splitedData[:5]
+
+        # присваиваем значение переменной
+        DownholeNumber = splitedData[0]
         
-        report.write('\n Cкважина №:' )
+        # Записываем полученное значение в файл отчета
+        report.write('\n Cкважина №: %s' % DownholeNumber)
         
         report.write('\n')
-    
+        
+        # добавляем разделитель
         report.write('\n' + div * 1 + '\n')
-        
-        report.write('\n')     
         
 #-------------------------------------------------------------------------------------------------------
 
-        report.write('\n В этом месте будут находиться систематизированные результаты расчета')
+        report.write('\n Температура парафинизации в устье скважины: ')
+        
+        report.write('\n')
+        
+        report.write('\n Интервал регулирования температуры системой управления:' )
+        
+        report.write('\n')
+        
+        report.write('\n' + div * 1 + '\n')
+        
+#-------------------------------------------------------------------------------------------------------
+        report.write('\n Номинальный дебит скважины по жидкости:')
     
-#         report.write('\n Температура парафинизации в устье скважины %s' % value)
-        
-#         report.write('\n')
-        
-#         report.write('\n Интервал регулирования температуры системой управления % s' % value)
-        
-#         report.write('\n')
-        
-#         report.write('\n' + div * 1 + '\n')
+        report.write('\n')
     
-
+        report.write('\n Минимальная глубина обогрева для номинального дебита:')
     
+        report.write('\n')
+        
+        report.write('\n Длина нагревателя Stream Tracer 1.0/50 с запасом:')
     
+        report.write('\n')
+        
+        report.write('\n В том числе: надземная часть')
     
+        report.write('\n')
+        
+        report.write('\n Зона повышенной мощности (верхняя часть):')
     
+        report.write('\n')
+        
+        report.write('\n Зона пониженной мощности (нижняя часть):')
     
+        report.write('\n')
+        
+        report.write('\n' + div * 1 + '\n')
+        
+#-------------------------------------------------------------------------------------------------------
+        report.write('\n Напряжение питания для нагревателя длиной :')
     
+        report.write('\n')
+        
+        report.write('\n Рабочий ток:')
     
-#         report.write('\n' + div * 1 + '\n')
+        report.write('\n')
         
-#         report.write('\n При номинальном дебите')
+        report.write('\n Мощность нагревателя при номинальном дебите:')
+    
+        report.write('\n')
         
-#         report.write('\n')
+        report.write('\n Линейная мощность верхней зоны обогрева скважины:')
+    
+        report.write('\n')
         
-#         report.write('\n ожидаемое значение рабочего тока %s' % value)
+        report.write('\n Линейная мощность нижней зоны обогрева скважины:')
+    
+        report.write('\n')
         
-#         report.write('\n')
+        report.write('\n Максимальная температура жилы при номинальном дебите:')
+    
+        report.write('\n')
         
-#         report.write('\n Мощность нагревателя составит %s' % value)
+        report.write ('\n Максимальная температура жилы (по алгоритму):')
         
-#         report.write('\n')
+        report.write('\n')
         
-#         report.write('\n Линейная мощность верхней зоны обогрева скважины %s' % value)
+        report.write('\n' + div * 1 + '\n')
+    
+#----------------------------------------------------------------------------------------------------------
+        report.write('\n Минимальный дебит скважины по жидкости:')
+    
+        report.write('\n')
         
-#         report.write('\n')
+        report.write('\n Минимальная глубина обогрева для минимального дебита:')
+    
+        report.write('\n')
         
-#         report.write('\n Линейная мощность нижней зоны обогрева скважины %s' % value)
+        report.write('\n Длина нагревателя Stream Tracer 1.0/50 с запасом:')
+    
+        report.write('\n')
         
-#         report.write('\n')
+        report.write('\n В том числе: надземная часть')
+    
+        report.write('\n')
         
-#         report.write('\n Расчетная температура флюида в устье скважины %s' % value)
+        report.write('\n Зона повышенной мощнсти (верхняя часть):')
+    
+        report.write('\n')
         
-#         report.write('\n')
+        report.write('\n Зона пониженной мощности (нижняя часть):')
+              
+        report.write('\n')
         
-#         report.write('\n Максимальная температура жилы при номинальном дебете % s' % value)
+        report.write('\n' + div * 1 + '\n')
+#---------------------------------------------------------------------------------------------------------------
+        report.write('\n Напряжение питания для нагреывателя длиной :')
+    
+        report.write('\n')
         
-#         report.write('\n')
+        report.write('\n Рабочий ток:')
+    
+        report.write('\n')
         
-#         report.write('\n Максимальная температура жилы (по алгоритму) %s' % value)
+        report.write('\n Мощность нагревателя при минимальном дебите:')
+    
+        report.write('\n')
+        
+        report.write('\n Линейная мощность верхней зоны обогрева скважины:')
+    
+        report.write('\n')
+        
+        report.write('\n Линейная мощность нижней зоны обогрева скважины:')
+    
+        report.write('\n')
+        
+        report.write('\n Максимальная температура жилы при минимальном дебите:')
+    
+        report.write('\n')
+        
+        report.write('\n Максимальная температура жилы (по алгоритму):')
+    
+        report.write('\n')
+        
+        report.write('\n' + div * 1 + '\n')
+#---------------------------------------------------------------------------------------------------------------
+        report.write('\n Расчет для заданных: глубины обогрева')
+    
+        report.write('\n')
+        
+        report.write('\n и напряжения питания:')
+    
+        report.write('\n')
+        
+        report.write('\n Требуется нагреватель Stream Tracer 1.0/35 длиной:')
+    
+        report.write('\n')
+        
+        report.write('\n В том числе: надземная часть')
+    
+        report.write('\n')
+        
+        report.write('\n зона повышенной мощности (верхняя часть):')
+    
+        report.write('\n')
+        
+        report.write('\n зона пониженной мощности (нижняя часть):')
+    
+        report.write('\n')
+        
+        report.write('\n' + div * 1 + '\n')
+#-----------------------------------------------------------------------------------------------------------------
+        
+        report.write('\n При номинальном дебите:')
+        
+        report.write('\n')
+        
+        report.write('\n ожидаемое значение рабочего тока:')
+        
+        report.write('\n')
+        
+        report.write('\n Мощность нагревателя составит:')
+        
+        report.write('\n')
+        
+        report.write('\n Линейная мощность верхней зоны обогрева скважины:')
+        
+        report.write('\n')
+        
+        report.write('\n Линейная мощность нижней зоны обогрева скважины:')
+        
+        report.write('\n')
+        
+        report.write('\n Расчетная температура флюида в устье скважины:')
+        
+        report.write('\n')
+        
+        report.write('\n Максимальная температура жилы при номинальном дебете:')
+        
+        report.write('\n')
+        
+        report.write('\n Максимальная температура жилы (по алгоритму):')
+        
+        report.write('\n')
+        
+        report.write('\n' + div * 1 + '\n')
+        
+        report.write('\n')
+            
+        report.write(' конец ')
 #----------------------------------------------------------------------
         # Закрываем окно с данными
 
@@ -861,7 +1017,7 @@ class RibbonBar(wx.Dialog):
         
         dlg.Destroy()
     
-        # Show message box that's all ok 
+        # Показываем сообщение что все Ок 
         wx.MessageBox(u'Отчет успешно создан!', u'Сообщение', wx.OK | wx.ICON_INFORMATION)
         
          # Активность кнопки 'Создать отчет' 
@@ -934,7 +1090,7 @@ class TabPanelOne(wx.Panel):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         
         # Объявляем глобальные переменные
-        global txt14, txt15, txt16, txt17, txt18, txt19, add, txt6_3, txt6_4, txt6_5, impButton
+        global txt14, txt15, txt16, txt17, txt18, txt19, add, txt663, txt664, txt665, impButton
                
 #---- Первое поле ------- 
 
@@ -973,6 +1129,7 @@ class TabPanelOne(wx.Panel):
         # Рисуем поля ввода значений
         txt14 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
         txt14.Bind(wx.EVT_TEXT, self.onCheckFirstTabFirstField)
+        
         # Устанавливаем фон поля
 #         self.txt14.SetBackgroundColour("#FFFFE8")
 
@@ -1156,17 +1313,17 @@ class TabPanelOne(wx.Panel):
         # Задаем отступ слева
         FirstSizer_hor8.AddSpacer(220)
 
-        font6_3 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text6_3 = wx.StaticText(self, wx.ID_ANY, "Напряжение питания ПЭД, В")
-        text6_3.SetFont(font6_3)
-        text6_3.SetForegroundColour('black')
+        font663 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text663 = wx.StaticText(self, wx.ID_ANY, "Напряжение питания ПЭД, В")
+        text663.SetFont(font663)
+        text663.SetForegroundColour('black')
         self.Show(True)
        
-        txt6_3 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
-        txt6_3.Bind(wx.EVT_TEXT, self.onCheckFirstTabEighthField)
+        txt663 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+        txt663.Bind(wx.EVT_TEXT, self.onCheckFirstTabEighthField)
         
-        FirstSizer_hor8.Add(text6_3, flag = wx.ALL, border = 10)
-        FirstSizer_hor8.Add(txt6_3, flag = wx.ALL, border = 10)
+        FirstSizer_hor8.Add(text663, flag = wx.ALL, border = 10)
+        FirstSizer_hor8.Add(txt663, flag = wx.ALL, border = 10)
 
 #---------- Девятое поле ---------
 
@@ -1181,17 +1338,17 @@ class TabPanelOne(wx.Panel):
         # Задаем отступ слева
         FirstSizer_hor9.AddSpacer(220)
 
-        font6_4 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text6_4 = wx.StaticText(self, wx.ID_ANY, "Частота питающего напряжения, Гц")
-        text6_4.SetFont(font6_4)
-        text6_4.SetForegroundColour('black')
+        font664 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text664 = wx.StaticText(self, wx.ID_ANY, "Частота питающего напряжения, Гц")
+        text664.SetFont(font664)
+        text664.SetForegroundColour('black')
         self.Show(True)
        
-        txt6_4 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
-        txt6_4.Bind(wx.EVT_TEXT, self.onCheckFirstTabNinthField)
+        txt664 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+        txt664.Bind(wx.EVT_TEXT, self.onCheckFirstTabNinthField)
         
-        FirstSizer_hor9.Add(text6_4, flag = wx.ALL, border = 10)
-        FirstSizer_hor9.Add(txt6_4, flag = wx.ALL, border = 10)
+        FirstSizer_hor9.Add(text664, flag = wx.ALL, border = 10)
+        FirstSizer_hor9.Add(txt664, flag = wx.ALL, border = 10)
 
 #------ Десятое поле -----------
 
@@ -1206,21 +1363,18 @@ class TabPanelOne(wx.Panel):
         # Задаем отступ слева
         FirstSizer_hor10.AddSpacer(220)
 
-        font6_5 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text6_5 = wx.StaticText(self, wx.ID_ANY, "Ток потребления ПЭД, А")
-        text6_5.SetFont(font6_5)
-        text6_5.SetForegroundColour('black')
+        font665 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
+        text665 = wx.StaticText(self, wx.ID_ANY, "Ток потребления ПЭД, А")
+        text665.SetFont(font665)
+        text665.SetForegroundColour('black')
         self.Show(True)
         
-        txt6_5 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
-        txt6_5.Bind(wx.EVT_TEXT, self.onCheckFirstTabTenthField)
+        txt665 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+        txt665.Bind(wx.EVT_TEXT, self.onCheckFirstTabTenthField)
         
-        FirstSizer_hor10.Add(text6_5, flag = wx.ALL, border = 10)
-        FirstSizer_hor10.Add(txt6_5, flag = wx.ALL, border = 10)
+        FirstSizer_hor10.Add(text665, flag = wx.ALL, border = 10)
+        FirstSizer_hor10.Add(txt665, flag = wx.ALL, border = 10)
 
-#---------------------------------------------------------------------------------------------------------------
-        # Обрабатываем событие (меняем подсветку полей ввода)
-#         txt14.Bind(wx.EVT_SET_FOCUS, self.FirstFieldOn)
 #--------------------------------------------------------------------------------------------------------------------                
         
         # Рисуем резделительную линию
@@ -1255,6 +1409,8 @@ class TabPanelOne(wx.Panel):
 
 #-----------------------------------------------------------------------------------------------------------------
     def onLoadData(self, event):
+        
+        """ загружаем в редактор ранее сохраненные данные """
         
          # Считываем данные из файла
         wildcard = "Text source (*.txt)|*.txt|" \
@@ -1308,15 +1464,12 @@ class TabPanelOne(wx.Panel):
         # Считываем данные из промежуточного файла и присваиваем значения переменным,
         #                которые будут участвовать в расчете 
 
-#         data_1 = loadtxt("C:\Users\i.geraskin\Documents\Python script\Program\Temporary\Treated_Data.txt", delimiter=" ", unpack=False)
         # задаем расположение файла
         filename="C:\Users\i.geraskin\Documents\Python script\Program\Temporary\Treated_Data.txt"
 
         # считываем данные из файла
         with open (filename, "r") as myfile:
             data_1=myfile.readlines()
-            # выводим на печать
-#             print data
 
         # Присваиваем значения переменным, которые будут участвовать в расчете
         
@@ -1389,69 +1542,12 @@ class TabPanelOne(wx.Panel):
 #         long_ = data [n]
 #         u_u = data [n]
         
-        
+        # вставляем данные в соответствующие поля
         number1 = str(txt14.SetValue(h_bhole))
         number2 = str(txt62.SetValue(d_vnut_nkt))
             
         # Выводим сообщение
         wx.MessageBox('Данные успешно считаны!', 'Сообщение', wx.OK | wx.ICON_INFORMATION)
-
-#*******************************************************************************************************
-          # Доп функция - пока отключена
-#-------------------------------------------------------------------------------------------------
-# Управляем подсветкой полей ввода на первой вкладке
-
-#     def FirstFieldOn(self, event):
-#         """  """
-#         # Устанавливаем белый фон для остальных полей
-#         self.txt15.SetBackgroundColour("white")
-#         self.txt15.Refresh()
-        
-#         self.txt16.SetBackgroundColour("white")
-#         self.txt16.Refresh()
-        
-#         # Устанавливаем желтый фон для текущего поля
-#         self.txt14.SetBackgroundColour("#FFFFE8")
-#         self.txt14.SetFocus()
-#         self.txt14.Refresh()
-         
-#     def SecondFieldOn(self, event):
-#         """  """
-#         # Устанавливаем белый фон для остальных полей
-#         self.txt14.SetBackgroundColour("white")
-#         self.txt14.Refresh()
-        
-#         self.txt16.SetBackgroundColour("white")
-#         self.txt16.Refresh()
-        
-#         # Устанавливаем желтый фон для текущего поля
-#         self.txt15.SetBackgroundColour("#FFFFE8")
-#         self.txt15.Refresh()
-    
-    
-#     def ThirdFieldOn(self, event):
-#         """  """
-#         # Устанавливаем белый фон для остальных полей
-#         self.txt15.SetBackgroundColour("white")
-#         self.txt15.Refresh()
-        
-#         self.txt14.SetBackgroundColour("white")
-#         self.txt14.Refresh()
-        
-#         #  Устанавливаем желтый фон для текущего поля
-#         self.txt16.SetBackgroundColour("#FFFFE8")
-#         self.txt16.Refresh()
-         
-#     def FourthFieldOn(self, event):
-#         """  """
-#         #
-#         self.txt14.SetBackgroundColour("white")
-#         self.txt14.Refresh()
-        
-#         #
-#         self.txt15.SetBackgroundColour("#FFFFE8")
-#         self.txt15.Refresh()   
-
 #----------------------------------------------------------------------------------------------------------------        
 # Закрываем окно 
 
@@ -1477,9 +1573,9 @@ class TabPanelOne(wx.Panel):
         Five_Field = txt18.GetValue()
         Six_Field = txt19.GetValue()
         Seven_Field = add.GetValue()
-        Eight_Field = txt6_3.GetValue()
-        Nine_Field = txt6_4.GetValue()
-        Ten_Field = txt6_5.GetValue()
+        Eight_Field = txt663.GetValue()
+        Nine_Field = txt664.GetValue()
+        Ten_Field = txt665.GetValue()
         
         if One_Field and Two_Field and Three_Field and Four_Field and Five_Field and Six_Field and Seven_Field and Eight_Field and Nine_Field and Ten_Field != '':
             
@@ -1504,7 +1600,7 @@ class TabPanelOne(wx.Panel):
         One_Field = txt14.GetValue()
         
         # Делаем проверку
-        if One_Field >= '0':
+        if One_Field >= 0:
             
             # Если значение в диапазоне, задаем черный цвет значения
             txt14.SetForegroundColour(wx.BLACK)
@@ -1528,14 +1624,31 @@ class TabPanelOne(wx.Panel):
         
         # Значение поля равно
         Two_Field = txt15.GetValue()
+        One_Field = txt14.GetValue()
+       
         
         # Делаем проверку
-        if Two_Field >= '0':
-            
+        if Two_Field >= 0:
             # Если значение в диапазоне, задаем черный цвет значения
             txt15.SetForegroundColour(wx.BLACK)
             txt15.Refresh()
             txt15.SetToolTip(wx.ToolTip(""))
+            
+            if  (One_Field/Two_Field) >= 0.866:
+                txt14.SetForegroundColour(wx.RED)
+                txt15.SetForegroundColour(wx.RED)
+                txt14.Refresh()
+                txt15.Refresh()
+                txt14.SetToolTip(wx.ToolTip("Внимание ошибка! Необходимы данные инклинометрии"))
+                txt15.SetToolTip(wx.ToolTip("Внимание ошибка! Необходимы данные инклинометрии"))
+                
+            else:
+                txt14.SetForegroundColour(wx.BLACK)
+                txt15.SetForegroundColour(wx.BLACK)
+                txt14.Refresh()
+                txt15.Refresh()
+                txt14.SetToolTip(wx.ToolTip(""))
+                txt15.SetToolTip(wx.ToolTip(""))
         
         elif Two_Field == '':
             txt15.SetToolTip(wx.ToolTip(""))
@@ -1557,12 +1670,8 @@ class TabPanelOne(wx.Panel):
         Three_Field = txt16.GetValue()
         Five_Field = txt18.GetValue()
         
-#         compare = txt18.GetValue()
-#         d_vnesh_nkt = compare * 1000
-        
         # Делаем проверку
-        if Three_Field >= '140' and Three_Field <= '180':
-#         if d_vnesh_obs >= '140' and d_vnesh_obs <= '180' and d_vnesh_obs >= d_vnesh_nkt:
+        if Three_Field >= 140 and Three_Field <= 180:
             
             # Если значение в диапазоне, задаем черный цвет значения
             txt16.SetForegroundColour(wx.BLACK)
@@ -1591,6 +1700,7 @@ class TabPanelOne(wx.Panel):
         Two_Field = txt15.GetValue()
         Four_Field = txt17.GetValue()
         
+        
         # Делаем проверку
         if Four_Field < Two_Field:
             
@@ -1618,9 +1728,16 @@ class TabPanelOne(wx.Panel):
         
         # Значение поля равно
         Five_Field = txt18.GetValue()
+        Three_Field = txt16.GetValue()
         
         # Делаем проверку
-        if Five_Field > '70' and Five_Field < '80':
+        if Five_Field < Three_Field:
+             # Если значение в диапазоне, задаем черный цвет значения
+            txt18.SetForegroundColour(wx.BLACK)
+            txt18.Refresh()
+            txt18.SetToolTip(wx.ToolTip(""))
+        
+        elif Five_Field > 70 and Five_Field < 80:
             
             # Если значение в диапазоне, задаем черный цвет значения
             txt18.SetForegroundColour(wx.BLACK)
@@ -1630,7 +1747,7 @@ class TabPanelOne(wx.Panel):
         elif Five_Field == '':
             txt18.SetToolTip(wx.ToolTip(""))
             
-        elif Five_Field > '80':
+        elif Five_Field > 80:
             # Если значение не в диапазоне, задаем красный цвет значения
             txt18.SetForegroundColour(wx.RED)
             txt18.Refresh()
@@ -1646,11 +1763,7 @@ class TabPanelOne(wx.Panel):
 # Шестое поле
  
         """ статический уровень флюида в скважине """
-
-
-
-
-            
+           
 #----------------------------------------------------------------------------------------------------------            
 # Седьмое поле 
     
@@ -1662,20 +1775,31 @@ class TabPanelOne(wx.Panel):
         Seven_Field = add.GetValue()
         
         # Делаем проверку
-        if Seven_Field >= '5' and Seven_Field <= '6' :
+        if Seven_Field == '':
+            add.SetToolTip(wx.ToolTip("введите значение"))
             
-            # Если значение в диапазоне, задаем черный цвет значения
-            add.SetForegroundColour(wx.BLACK)
-            add.Refresh()
-            add.SetToolTip(wx.ToolTip(""))
+        elif Seven_Field > 0:
+                add.SetForegroundColour(wx.BLACK)
+                add.Refresh()
+                # Выводим предупреждающую надпись    
+                add.SetToolTip(wx.ToolTip(""))        
         
         else:
+            value = float(Seven_Field)
             
-            # Если значение не в диапазоне, задаем красный цвет значения
-            add.SetForegroundColour(wx.RED)
-            add.Refresh()
-            # Выводим предупреждающую надпись    
-            add.SetToolTip(wx.ToolTip("Внимание ошибка! Значение толщины находится вне допустимого диапазона"))
+            if value >= 5 and value <= 6:
+                # Если значение в диапазоне, задаем черный цвет значения
+                add.SetForegroundColour(wx.BLACK)
+                add.Refresh()
+                add.SetToolTip(wx.ToolTip(""))
+        
+            else:
+            
+                # Если значение не в диапазоне, задаем красный цвет значения
+                add.SetForegroundColour(wx.RED)
+                add.Refresh()
+                # Выводим предупреждающую надпись    
+                add.SetToolTip(wx.ToolTip("Внимание ошибка! Значение толщины находится вне допустимого диапазона"))
             
 #-----------------------------------------------------------------------------------------------------------
 # Восьмое поле 
@@ -1685,36 +1809,41 @@ class TabPanelOne(wx.Panel):
         """ Проверяем восьмое поле. Напряжение питания ПЭД. """
         
         # Значение поля равно
-        Eight_Field  = txt6_3.GetValue()
+        Eight_Field = txt663.GetValue()
         
         # Делаем проверку
-        if Eight_Field > '0' and Eight_Field < '600':
+        if Eight_Field == '':
+            txt663.SetToolTip(wx.ToolTip("введите значение"))
             
-           # Если значение в диапазоне, задаем черный цвет значения
-            txt6_3.SetForegroundColour(wx.RED)
-            txt6_3.Refresh()
-            txt6_3.SetToolTip(wx.ToolTip("Внимание ошибка! Значение напряжения находится вне допустимого диапазона"))
-            
-        elif Eight_Field > '600' and Eight_Field < '3500':
-            txt6_3.SetForegroundColour(wx.BLACK)
-            txt6_3.Refresh()
-            txt6_3.SetToolTip(wx.ToolTip(""))
-            
-    
-        elif Eight_Field > '3500':
-            txt6_3.SetForegroundColour(wx.RED)
-            txt6_3.Refresh()
-            txt6_3.SetToolTip(wx.ToolTip("Внимание ошибка! Значение напряжения находится вне допустимого диапазона"))
-        
-        elif Eight_Field == '':
-            txt6_3.SetToolTip(wx.ToolTip(""))
-
         else:
-            # Если значение не в диапазоне, задаем красный цвет значения
-            txt6_3.SetForegroundColour(wx.RED)
-            txt6_3.Refresh()
-            # Выводим предупреждающую надпись    
-            txt6_3.SetToolTip(wx.ToolTip("Внимание ошибка! Значение напряжения находится вне допустимого диапазона"))
+            u_ESP = str(Eight_Field)
+            if u_ESP < '0':
+                txt663.SetForegroundColour(wx.RED)
+                txt663.Refresh()
+                # Выводим предупреждающую надпись    
+                txt663.SetToolTip(wx.ToolTip("Внимание ошибка! Значение напряжения находится вне допустимого диапазона"))                
+            
+            else:
+                u_ESP = float(Eight_Field)
+        
+                if u_ESP > 0 and u_ESP < 3500 and u_ESP > 600:
+                    txt663.SetForegroundColour(wx.BLACK)
+                    txt663.Refresh()
+                    txt663.SetToolTip(wx.ToolTip(""))
+                
+                elif u_ESP < 600: 
+                    txt663.SetForegroundColour(wx.RED)
+                    txt663.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt663.SetToolTip(wx.ToolTip("Внимание ошибка! Значение напряжения находится вне допустимого диапазона"))
+      
+                else:
+                    # Если значение не в диапазоне, задаем красный цвет значения
+                    txt663.SetForegroundColour(wx.RED)
+                    txt663.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt663.SetToolTip(wx.ToolTip("Внимание ошибка! Значение напряжения находится вне допустимого диапазона"))
+            
 #------------------------------------------------------------------------------------------------------------
 # Девятое поле 
 
@@ -1723,33 +1852,41 @@ class TabPanelOne(wx.Panel):
         """ Проверяем восьмое поле. Частота питающего напряжения. """
         
         # Значение поля равно
-        Nine_Field = txt6_4.GetValue()
+        Nine_Field = txt664.GetValue()
         
         # Делаем проверку
-        if Nine_Field > '40' and Nine_Field < '60':
+        if Nine_Field == '':
+            txt664.SetToolTip(wx.ToolTip("введите значение"))
             
-             # Если значение в диапазоне, задаем черный цвет значения
-            txt6_4.SetForegroundColour(wx.BLACK)
-            txt6_4.Refresh()
-            txt6_4.SetToolTip(wx.ToolTip(""))
-
-        elif Nine_Field == '':
-            txt6_4.SetToolTip(wx.ToolTip(""))
-            
-        elif Nine_Field > '60':
-            txt6_4.SetForegroundColour(wx.RED)
-            txt6_4.Refresh() 
-            
-#         elif f_ESP > '4000':
-#             txt6_4.SetForegroundColour(wx.RED)
-#             txt6_4.Refresh()    
-        
         else:
-            # Если значение не в диапазоне, задаем красный цвет значения
-            txt6_4.SetForegroundColour(wx.RED)
-            txt6_4.Refresh()
-            # Выводим предупреждающую надпись    
-            txt6_4.SetToolTip(wx.ToolTip("Внимание ошибка! Значение частоты находится вне допустимого диапазона"))
+            f_ESP = str(Nine_Field)
+            # Проверка на отрицательность значения
+            if f_ESP < '0':
+                txt664.SetForegroundColour(wx.RED)
+                txt664.Refresh()
+                # Выводим предупреждающую надпись    
+                txt664.SetToolTip(wx.ToolTip("Внимание ошибка! Значение находится вне допустимого диапазона")) 
+           
+            else:
+                f_ESP = float(Nine_Field)
+    
+                if f_ESP > 0 and f_ESP > 40 and f_ESP < 60:
+            
+                    # Если значение в диапазоне, задаем черный цвет значения
+                    txt664.SetForegroundColour(wx.BLACK)
+                    txt664.Refresh()
+                    txt664.SetToolTip(wx.ToolTip(""))
+            
+                elif f_ESP > 60:
+                    txt664.SetForegroundColour(wx.RED)
+                    txt664.Refresh() 
+                    txt664.SetToolTip(wx.ToolTip("Внимание ошибка! Значение напряжения находится вне допустимого диапазона"))
+                else:
+                    # Если значение не в диапазоне, задаем красный цвет значения
+                    txt664.SetForegroundColour(wx.RED)
+                    txt664.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt664.SetToolTip(wx.ToolTip("Внимание ошибка! Значение частоты находится вне допустимого диапазона"))
 
 #----------------------------------------------------------------------------------------------------------
 # Десятое поле 
@@ -1759,26 +1896,44 @@ class TabPanelOne(wx.Panel):
         """ Проверяем десятое поле. Ток потребления ПЭД. """
         
         # Значение поля равно
-        Ten_Field = txt6_5.GetValue()
+        Ten_Field = txt665.GetValue()        
         
         # Делаем проверку
-        if Ten_Field > '10' and Ten_Field < '100':
-            
-            # Если значение в диапазоне, задаем черный цвет значения
-            txt6_5.SetForegroundColour(wx.BLACK)
-            txt6_5.Refresh()
-            txt6_5.SetToolTip(wx.ToolTip(""))
-          
-        elif Ten_Field == '':
-            txt6_5.SetToolTip(wx.ToolTip(""))
-        
+        if Ten_Field == '':            
+            txt665.SetToolTip(wx.ToolTip("введите значение"))
         else:
+            i_ESP = str(Ten_Field) # меняем тип с float на string (работа с отрицательными значениями)
             
-            # Если значение не в диапазоне, задаем красный цвет значения
-            txt6_5.SetForegroundColour(wx.RED)
-            txt6_5.Refresh()
-            # Выводим предупреждающую надпись    
-            txt6_5.SetToolTip(wx.ToolTip("Внимание ошибка! Значение тока находится вне допустимого диапазона"))
+            # Проверка на отрицательность значения
+            if i_ESP < '0':
+                txt665.SetForegroundColour(wx.RED)
+                txt665.Refresh()
+                # Выводим предупреждающую надпись    
+                txt665.SetToolTip(wx.ToolTip("Внимание ошибка! Значение находится вне допустимого диапазона")) 
+    
+            else:
+                # Делаем тип данных float
+                i_ESP = float(Ten_Field)
+                
+                # Проверяем на условия
+                if i_ESP > 0 and i_ESP < 100 and i_ESP > 10:
+                    txt665.SetForegroundColour(wx.BLACK)
+                    txt665.Refresh()
+                    txt665.SetToolTip(wx.ToolTip(""))
+            
+                elif i_ESP < 100:    
+                    # Если значение не в диапазоне, задаем красный цвет значения
+                    txt665.SetForegroundColour(wx.RED)
+                    txt665.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt665.SetToolTip(wx.ToolTip("Внимание ошибка! Значение тока находится вне допустимого диапазона"))
+       
+                else:
+                    # Если значение не в диапазоне, задаем красный цвет значения
+                    txt665.SetForegroundColour(wx.RED)
+                    txt665.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt665.SetToolTip(wx.ToolTip("Внимание ошибка! Значение тока находится вне допустимого диапазона"))
 
 ########################################################################
 class TabPanelTwo(wx.Panel):
@@ -3115,7 +3270,7 @@ class TabPanelSix(wx.Panel):
        
         else:
             # Если нет - выводим предупреждающее сообщение
-            wx.MessageBox(u'Чтобы сохранить данные, пожалуйста, заполните все пустые поля', 'Ошибка ввода данных', wx.OK | wx.ICON_ERROR)
+            wx.MessageBox('Чтобы сохранить данные, пожалуйста, заполните все пустые поля', 'Ошибка ввода данных', wx.OK | wx.ICON_ERROR)
 #------------------------------------------------------------------------------------------------------------------------------
 #
     def CallofSaveData(self, event):
@@ -3834,7 +3989,7 @@ class MyProgressDialog(wx.ProgressDialog):
     
   # Симулируем ход расчета 
 
-    progressMax = 10
+    progressMax = 5
 #------------------------------------------------------------------------------------    
     def __init__(self):
         wx.ProgressDialog.__init__(self, "Расчет выполняется", "Осталось времени", self.progressMax,
