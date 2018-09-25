@@ -549,6 +549,7 @@ class RibbonBar(wx.Dialog):
 
         """
         Создаем и показываем диалоговое окно Сохранения файла
+        
         """
         wildcard = "Text source (*.txt)|*.txt|" \
             "All files (*.*)|*.*"
@@ -570,6 +571,7 @@ class RibbonBar(wx.Dialog):
 # Открываем окно Ввода данных
 
     def OnOpenNewWindow(self, event):
+        
         """ открываем окно ввода данных """
         
         NewWindow = NotebookFrame(None)
@@ -780,6 +782,7 @@ class RibbonBar(wx.Dialog):
 # - температура жилы и оболочки \n """
         
 #         report.write('\n Описание: Программа расчета электрического обогрева нефтяных скважин с ЭЦН.\n %s' % self.multiline)
+
         report.write('\n Описание: Расчет электрического обогрева нефтяной скважин с ЭЦН.')
         
         report.write('\n')
@@ -821,7 +824,7 @@ class RibbonBar(wx.Dialog):
         
 #-------------------------------------------------------------------------------------------------------
 
-        report.write('\n Температура парафинизации в устье скважины: ')
+        report.write('\n Температура парафинизации в устье скважины:')
         
         report.write('\n')
         
@@ -1263,7 +1266,7 @@ class TabPanelOne(wx.Panel):
         self.Show(True)
         
         txt19 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
-#         txt19.Bind(wx.EVT_TEXT, self.onCheckSixthField)
+        txt19.Bind(wx.EVT_TEXT, self.onCheckFirstTabSixthField)
         
         FirstSizer_hor6.Add(text19, flag = wx.ALL, border = 10)
         FirstSizer_hor6.Add(txt19, flag = wx.ALL, border = 10)
@@ -1566,18 +1569,18 @@ class TabPanelOne(wx.Panel):
         """ проверяем полноту заполнение полей первой вкладки """
              
         # Контрольные значения
-        One_Field = txt14.GetValue()
-        Two_Field = txt15.GetValue()
-        Three_Field = txt16.GetValue()
-        Four_Field = txt17.GetValue()
-        Five_Field = txt18.GetValue()
-        Six_Field = txt19.GetValue()
-        Seven_Field = add.GetValue()
-        Eight_Field = txt663.GetValue()
-        Nine_Field = txt664.GetValue()
-        Ten_Field = txt665.GetValue()
+        OnePointFour = txt14.GetValue()
+        OnePointFive = txt15.GetValue()
+        OnePoinSix = txt16.GetValue()
+        OnePoinSeven = txt17.GetValue()
+        OnePoinEight = txt18.GetValue()
+        OnePoinNine = txt19.GetValue()
+        AdditionalField = add.GetValue()
+        SixSixThree = txt663.GetValue()
+        SixSixFour = txt664.GetValue()
+        SixSixFive = txt665.GetValue()
         
-        if One_Field and Two_Field and Three_Field and Four_Field and Five_Field and Six_Field and Seven_Field and Eight_Field and Nine_Field and Ten_Field != '':
+        if OnePointFour and OnePointFive and OnePoinSix and OnePoinSeven and OnePoinEight and OnePoinNine and AdditionalField and SixSixThree and SixSixFour and SixSixFive != '':
             
             # Переходим на следующую вкладку
             self.notebook = self.GetParent()
@@ -1594,239 +1597,289 @@ class TabPanelOne(wx.Panel):
 
     def onCheckFirstTabFirstField(self, event):
         
-        """ Проверяем первое поле. Глубина забоя. """
+        """ Проверяем первое поле. 1.4 Глубина забоя. """
         
         # Значение поля равно
-        One_Field = txt14.GetValue()
+        OnePointFour = txt14.GetValue()
         
         # Делаем проверку
-        if One_Field >= 0:
+        if OnePointFour == '':
+            txt14.SetToolTip(wx.ToolTip("введите значение"))
+        else: 
+            # делаем тип string
+            h_bhole = str(OnePointFour) # глубина забоя
             
-            # Если значение в диапазоне, задаем черный цвет значения
-            txt14.SetForegroundColour(wx.BLACK)
-            txt14.Refresh()
-            txt14.SetToolTip(wx.ToolTip(""))
-        
-        elif One_Field == '':
-            txt14.SetToolTip(wx.ToolTip(""))
-        
-        else:
-            # Если значение не в диапазоне, задаем красный цвет значения
-            txt14.SetForegroundColour(wx.RED)
-            txt14.Refresh()
-            # Выводим предупреждающую надпись    
-            txt14.SetToolTip(wx.ToolTip("Внимание ошибка! Значение глубины находится вне допустимого диапазона"))
+            # проверка на отрицательность значения поля
+            if h_bhole < '0':
+                # раскрашиваем значение красным если отрицательное
+                txt14.SetForegroundColour(wx.RED)
+                txt14.Refresh()
+                # Выводим предупреждающую надпись    
+                txt14.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение глубины забоя")) 
+            else:
+                # делаем тип float
+                h_bhole = float(OnePointFour)
+                
+                # усли больше нуля
+                if h_bhole >= 0:
+                    # Делаем шрифт черным
+                    txt14.SetForegroundColour(wx.BLACK)
+                    txt14.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt14.SetToolTip(wx.ToolTip(""))
+                else:
+                    # Меняем шрифт на красный
+                    txt14.SetForegroundColour(wx.RED)
+                    txt14.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt14.SetToolTip(wx.ToolTip("Внимание ошибка! Значение глубины забоя находится вне допустимого диапазона"))
 #------------------------------------------------------------------------------------------------
 
     def onCheckFirstTabSecondField(self, event):
         
-        """ Проверяем второе поле. Длина эксплуатационной колонны. """
+        """ Проверяем второе поле. 1.5 Длина эксплуатационной колонны. """
         
         # Значение поля равно
-        Two_Field = txt15.GetValue()
-        One_Field = txt14.GetValue()
+        OnePointFive = txt15.GetValue()
+        OnePointFour = txt14.GetValue()
        
-        
         # Делаем проверку
-        if Two_Field >= 0:
-            # Если значение в диапазоне, задаем черный цвет значения
-            txt15.SetForegroundColour(wx.BLACK)
-            txt15.Refresh()
-            txt15.SetToolTip(wx.ToolTip(""))
-            
-            if  (One_Field/Two_Field) >= 0.866:
-                txt14.SetForegroundColour(wx.RED)
-                txt15.SetForegroundColour(wx.RED)
-                txt14.Refresh()
-                txt15.Refresh()
-                txt14.SetToolTip(wx.ToolTip("Внимание ошибка! Необходимы данные инклинометрии"))
-                txt15.SetToolTip(wx.ToolTip("Внимание ошибка! Необходимы данные инклинометрии"))
-                
-            else:
-                txt14.SetForegroundColour(wx.BLACK)
-                txt15.SetForegroundColour(wx.BLACK)
-                txt14.Refresh()
-                txt15.Refresh()
-                txt14.SetToolTip(wx.ToolTip(""))
-                txt15.SetToolTip(wx.ToolTip(""))
-        
-        elif Two_Field == '':
-            txt15.SetToolTip(wx.ToolTip(""))
-        
+        if OnePointFive == '':
+            txt15.SetToolTip(wx.ToolTip("введите значение"))
         else:
+            h_obs = str(OnePointFive)   # длина эксплуатационной колонны 
+            h_bhole = str(OnePointFour) # глубина забоя
             
-            # Если значение не в диапазоне, задаем красный цвет значения
-            txt15.SetForegroundColour(wx.RED)
-            txt15.Refresh()
-            # Выводим предупреждающую надпись    
-            txt15.SetToolTip(wx.ToolTip("Внимание ошибка! Значение длины находится вне допустимого диапазона"))
+            if h_obs < '0' :
+                txt15.SetForegroundColour(wx.RED)
+                txt15.Refresh()
+                # Выводим предупреждающую надпись    
+                txt15.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение длины")) 
+            else:
+                h_obs = float(OnePointFive)
+                h_bhole = float(OnePointFour)
+                
+                # Глубина эксплуатационной колонны должна быть больше глубины забоя
+                if h_obs > 0 and h_obs >= h_bhole:
+                    txt15.SetForegroundColour(wx.BLACK) 
+                    txt15.Refresh()
+                    txt15.SetToolTip(wx.ToolTip(""))                                                                    
+                else:
+                    txt15.SetForegroundColour(wx.RED)
+                    txt15.Refresh()
+                    txt15.SetToolTip(wx.ToolTip("Внимание ошибка! Необходимы данные инклинометрии"))                       
+
 #------------------------------------------------------------------------------------------------
   
     def onCheckFirstTabThirdField(self, event):
         
-        """ Проверяем третье поле. Диаметр эксплуатационной колонны. """
+        """ Проверяем третье поле. 1.6 Диаметр эксплуатационной колонны. """
         
         # Значение поля равно
-        Three_Field = txt16.GetValue()
-        Five_Field = txt18.GetValue()
-        
+        OnePoinSix = txt16.GetValue() # диаметр эксплуатационной колонны
+               
         # Делаем проверку
-        if Three_Field >= 140 and Three_Field <= 180:
-            
-            # Если значение в диапазоне, задаем черный цвет значения
-            txt16.SetForegroundColour(wx.BLACK)
-            txt16.Refresh()
+        if OnePoinSix == '':
             txt16.SetToolTip(wx.ToolTip(""))
-            
-        elif Three_Field == '':
-            txt16.SetToolTip(wx.ToolTip(""))
-        
         else:
-            
-            # Если значение не в диапазоне, задаем красный цвет значения
-            txt16.SetForegroundColour(wx.RED)
-            txt16.Refresh()
-            # Выводим предупреждающую надпись    
-            txt16.SetToolTip(wx.ToolTip("Внимание ошибка! Значение диаметра находится вне допустимого диапазона"))
-            
+            h_obs = str(OnePoinSix)
+        
+            if h_obs < '0':
+                txt16.SetForegroundColour(wx.RED)
+                txt16.Refresh()
+                # Выводим предупреждающую надпись    
+                txt16.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение диаметра")) 
+            else:
+                h_obs = float(OnePoinSix)
+                
+                if h_obs >= 140 and h_obs <= 180:
+                    txt16.SetForegroundColour(wx.BLACK)
+                    txt16.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt16.SetToolTip(wx.ToolTip(""))
+                else:
+                    txt16.SetForegroundColour(wx.RED)
+                    txt16.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt16.SetToolTip(wx.ToolTip("Внимание ошибка! Значение диаметра находится вне допустимого диапазона"))
+                    
 #---------------------------------------------------------------------------------------------------------
 # Четвертое поле
 
     def onCheckFirstTabFourthField(self, event):
         
-        """ Проверяем четвертое поле. Длина колонны НКТ. """
+        """ Проверяем четвертое поле. 1.7 Длина колонны НКТ. """
         
         # Значение поля равно
-        Two_Field = txt15.GetValue()
-        Four_Field = txt17.GetValue()
+        OnePoinFive = txt15.GetValue() # длина эксплуатационной колонны
+        OnePoinSeven = txt17.GetValue() # длина колонны НКТ
         
         
         # Делаем проверку
-        if Four_Field < Two_Field:
-            
-            # Если значение в диапазоне, задаем черный цвет значения
-            txt17.SetForegroundColour(wx.BLACK)
-            txt17.Refresh()
+        if OnePoinSeven == '':
             txt17.SetToolTip(wx.ToolTip(""))
-            
-        elif Four_Field == '':
-            txt17.SetToolTip(wx.ToolTip(""))
-        
         else:
-            # Если значение не в диапазоне, задаем красный цвет значения
-            txt17.SetForegroundColour(wx.RED)
-            txt17.Refresh()
-            # Выводим предупреждающую надпись    
-            txt17.SetToolTip(wx.ToolTip("Внимание ошибка! Значение длины колонны находится вне допустимого диапазона"))
+            h_nkt = str(OnePoinSeven) # длина колонны НКТ
+            h_obs = str(OnePoinFive)  # длина эксплуатационной колонны (обсадная колонна)
+       
+            if h_nkt < '0':
+                txt17.SetForegroundColour(wx.RED)
+                txt17.Refresh()
+                # Выводим предупреждающую надпись    
+                txt17.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение диаметра")) 
+            else:
+                h_nkt = float(OnePoinSeven)
+                h_obs = float(OnePoinFive)
+                
+                if OnePoinFive > 0 and OnePoinSeven < OnePoinFive:
+            
+                    # Если значение в диапазоне, задаем черный цвет значения
+                    txt17.SetForegroundColour(wx.BLACK)
+                    txt17.Refresh()
+                    txt17.SetToolTip(wx.ToolTip(""))
+            
+                else:
+                    # Если значение не в диапазоне, задаем красный цвет значения
+                    txt17.SetForegroundColour(wx.RED)
+                    txt17.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt17.SetToolTip(wx.ToolTip("Внимание ошибка! Длина НКТ больше длины обсадной колонны"))
             
 #------------------------------------------------------------------------------------------------------------------------
 # Пятое поле
 
     def onCheckFirstTabFifthField(self, event):
         
-        """ Проверяем пятое поле. Диаметр колонны НКТ """
+        """ Проверяем пятое поле. 1.8 Диаметр колонны НКТ """
         
         # Значение поля равно
-        Five_Field = txt18.GetValue()
-        Three_Field = txt16.GetValue()
+        OnePoinEight = txt18.GetValue()  # диаметр колонны НКТ
+        OnePointSix = txt16.GetValue() # диаметр обсадной уолонны
         
         # Делаем проверку
-        if Five_Field < Three_Field:
-             # Если значение в диапазоне, задаем черный цвет значения
-            txt18.SetForegroundColour(wx.BLACK)
-            txt18.Refresh()
+        if OnePoinEight == '':
             txt18.SetToolTip(wx.ToolTip(""))
-        
-        elif Five_Field > 70 and Five_Field < 80:
-            
-            # Если значение в диапазоне, задаем черный цвет значения
-            txt18.SetForegroundColour(wx.BLACK)
-            txt18.Refresh()
-            txt18.SetToolTip(wx.ToolTip(""))
-            
-        elif Five_Field == '':
-            txt18.SetToolTip(wx.ToolTip(""))
-            
-        elif Five_Field > 80:
-            # Если значение не в диапазоне, задаем красный цвет значения
-            txt18.SetForegroundColour(wx.RED)
-            txt18.Refresh()
-        
         else:
+            d_vnesh_nkt = str(OnePoinEight) # диаметр колонны НКТ
             
-            # Если значение не в диапазоне, задаем красный цвет значения
-            txt18.SetForegroundColour(wx.RED)
-            txt18.Refresh()
-            # Выводим предупреждающую надпись    
-            txt18.SetToolTip(wx.ToolTip("Внимание ошибка! Значение длины находится вне допустимого диапазона"))
+            if d_vnesh_nkt < '0':
+                # Если значение не в диапазоне, задаем красный цвет значения
+                txt18.SetForegroundColour(wx.RED)
+                txt18.Refresh()
+                # Выводим предупреждающую надпись    
+                txt18.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение диаметра НКТ"))
+            else:
+                d_vnesh_nkt = float(OnePoinEight)
+                d_vnesh_obs = float(OnePointSix)
+        
+                if d_vnesh_nkt > 0 and d_vnesh_nkt < d_vnesh_obs:
+                    # Если значение в диапазоне, задаем черный цвет значения
+                    txt18.SetForegroundColour(wx.BLACK)
+                    txt18.Refresh()
+                    txt18.SetToolTip(wx.ToolTip(""))
+                else:
+                    # Если значение не в диапазоне, задаем красный цвет значения
+                    txt18.SetForegroundColour(wx.RED)
+                    txt18.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt18.SetToolTip(wx.ToolTip("Внимание ошибка! Значение диаметра НКТ находится вне допустимого диапазона"))
 #---------------------------------------------------------------------------------------------------------
 # Шестое поле
+    
+    def onCheckFirstTabSixthField(self, event):
  
-        """ статический уровень флюида в скважине """
-           
-#----------------------------------------------------------------------------------------------------------            
+        """ Проверяем шестое поле. 1.9 Статический уровень флюида в скважине """
+        
+        # 
+        OnePoinNine  = txt19.GetValue()
+        
+        # Делаем проверку
+        if OnePoinNine == '':
+            txt19.SetToolTip(wx.ToolTip("введите значение"))
+        else: 
+            h_stat = str(OnePoinNine)
+            
+            if h_stat < '0':
+                txt19.SetForegroundColour(wx.RED)
+                txt19.Refresh()
+                # Выводим предупреждающую надпись    
+                txt19.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение статического уровня")) 
+            else:
+                h_stat = float(OnePoinNine)
+                
+                if h_stat >= 0:
+                    txt19.SetForegroundColour(wx.BLACK)
+                    txt19.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt19.SetToolTip(wx.ToolTip(""))
+                else:
+                    txt19.SetForegroundColour(wx.RED)
+                    txt19.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt19.SetToolTip(wx.ToolTip("Внимание ошибка! Значение статического уровня находится вне допустимого диапазона")) 
+#---------------------------------------------------------------------------------------------------------------------------------            
 # Седьмое поле 
     
     def onCheckFirstTabSeventhField(self, event):
         
-        """ Проверяем седьмое поле. Толщина стенки НКТ. """
+        """ Проверяем седьмое поле. add Толщина стенки НКТ. """
         
         # Значение поля равно
-        Seven_Field = add.GetValue()
+        AdditionalField = add.GetValue()
         
         # Делаем проверку
-        if Seven_Field == '':
+        if AdditionalField == '':
             add.SetToolTip(wx.ToolTip("введите значение"))
             
-        elif Seven_Field > 0:
-                add.SetForegroundColour(wx.BLACK)
-                add.Refresh()
-                # Выводим предупреждающую надпись    
-                add.SetToolTip(wx.ToolTip(""))        
-        
-        else:
-            value = float(Seven_Field)
+        else: 
+            value = str(AdditionalField)
             
-            if value >= 5 and value <= 6:
-                # Если значение в диапазоне, задаем черный цвет значения
-                add.SetForegroundColour(wx.BLACK)
-                add.Refresh()
-                add.SetToolTip(wx.ToolTip(""))
-        
-            else:
-            
-                # Если значение не в диапазоне, задаем красный цвет значения
+            if value < '0':
                 add.SetForegroundColour(wx.RED)
                 add.Refresh()
                 # Выводим предупреждающую надпись    
-                add.SetToolTip(wx.ToolTip("Внимание ошибка! Значение толщины находится вне допустимого диапазона"))
+                add.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение толщины"))       
+        
+            else:
+                value = float(AdditionalField)
             
+                if value >= 0 and value >= 5 and value <= 6:
+                    # Если значение в диапазоне, задаем черный цвет значения
+                    add.SetForegroundColour(wx.BLACK)
+                    add.Refresh()
+                    add.SetToolTip(wx.ToolTip(""))
+                else:
+                    # Если значение не в диапазоне, задаем красный цвет значения
+                    add.SetForegroundColour(wx.RED)
+                    add.Refresh()
+                    # Выводим предупреждающую надпись    
+                    add.SetToolTip(wx.ToolTip("Внимание ошибка! Значение толщины находится вне допустимого диапазона"))
 #-----------------------------------------------------------------------------------------------------------
 # Восьмое поле 
 
     def onCheckFirstTabEighthField(self, event):
         
-        """ Проверяем восьмое поле. Напряжение питания ПЭД. """
+        """ Проверяем восьмое поле. 6.3 Напряжение питания ПЭД. """
         
         # Значение поля равно
-        Eight_Field = txt663.GetValue()
+        SixSixThree = txt663.GetValue()
         
         # Делаем проверку
-        if Eight_Field == '':
+        if SixSixThree == '':
             txt663.SetToolTip(wx.ToolTip("введите значение"))
             
         else:
-            u_ESP = str(Eight_Field)
+            u_ESP = str(SixSixThree)
             if u_ESP < '0':
                 txt663.SetForegroundColour(wx.RED)
                 txt663.Refresh()
                 # Выводим предупреждающую надпись    
-                txt663.SetToolTip(wx.ToolTip("Внимание ошибка! Значение напряжения находится вне допустимого диапазона"))                
+                txt663.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение напряжения"))                
             
             else:
-                u_ESP = float(Eight_Field)
+                u_ESP = float(SixSixThree)
         
-                if u_ESP > 0 and u_ESP < 3500 and u_ESP > 600:
+                if u_ESP >= 0 and u_ESP < 3500 and u_ESP > 600:
                     txt663.SetForegroundColour(wx.BLACK)
                     txt663.Refresh()
                     txt663.SetToolTip(wx.ToolTip(""))
@@ -1843,34 +1896,33 @@ class TabPanelOne(wx.Panel):
                     txt663.Refresh()
                     # Выводим предупреждающую надпись    
                     txt663.SetToolTip(wx.ToolTip("Внимание ошибка! Значение напряжения находится вне допустимого диапазона"))
-            
 #------------------------------------------------------------------------------------------------------------
 # Девятое поле 
 
     def onCheckFirstTabNinthField(self, event):
         
-        """ Проверяем восьмое поле. Частота питающего напряжения. """
+        """ Проверяем восьмое поле. 6.4 Частота питающего напряжения. """
         
         # Значение поля равно
-        Nine_Field = txt664.GetValue()
+        SixSixFour = txt664.GetValue()
         
         # Делаем проверку
-        if Nine_Field == '':
+        if SixSixFour == '':
             txt664.SetToolTip(wx.ToolTip("введите значение"))
             
         else:
-            f_ESP = str(Nine_Field)
+            f_ESP = str(SixSixFour)
             # Проверка на отрицательность значения
             if f_ESP < '0':
                 txt664.SetForegroundColour(wx.RED)
                 txt664.Refresh()
                 # Выводим предупреждающую надпись    
-                txt664.SetToolTip(wx.ToolTip("Внимание ошибка! Значение находится вне допустимого диапазона")) 
+                txt664.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение частоты")) 
            
             else:
-                f_ESP = float(Nine_Field)
+                f_ESP = float(SixSixFour)
     
-                if f_ESP > 0 and f_ESP > 40 and f_ESP < 60:
+                if f_ESP >= 0 and f_ESP > 40 and f_ESP < 60:
             
                     # Если значение в диапазоне, задаем черный цвет значения
                     txt664.SetForegroundColour(wx.BLACK)
@@ -1880,40 +1932,39 @@ class TabPanelOne(wx.Panel):
                 elif f_ESP > 60:
                     txt664.SetForegroundColour(wx.RED)
                     txt664.Refresh() 
-                    txt664.SetToolTip(wx.ToolTip("Внимание ошибка! Значение напряжения находится вне допустимого диапазона"))
+                    txt664.SetToolTip(wx.ToolTip("Внимание ошибка! Значение частоты находится вне допустимого диапазона"))
                 else:
                     # Если значение не в диапазоне, задаем красный цвет значения
                     txt664.SetForegroundColour(wx.RED)
                     txt664.Refresh()
                     # Выводим предупреждающую надпись    
                     txt664.SetToolTip(wx.ToolTip("Внимание ошибка! Значение частоты находится вне допустимого диапазона"))
-
 #----------------------------------------------------------------------------------------------------------
 # Десятое поле 
 
     def onCheckFirstTabTenthField(self, event):
         
-        """ Проверяем десятое поле. Ток потребления ПЭД. """
+        """ Проверяем десятое поле. 6.5 Ток потребления ПЭД. """
         
         # Значение поля равно
-        Ten_Field = txt665.GetValue()        
+        SixSixFive = txt665.GetValue()        
         
         # Делаем проверку
-        if Ten_Field == '':            
+        if SixSixFive == '':            
             txt665.SetToolTip(wx.ToolTip("введите значение"))
         else:
-            i_ESP = str(Ten_Field) # меняем тип с float на string (работа с отрицательными значениями)
+            i_ESP = str(SixSixFive) # меняем тип с float на string (работа с отрицательными значениями)
             
             # Проверка на отрицательность значения
             if i_ESP < '0':
                 txt665.SetForegroundColour(wx.RED)
                 txt665.Refresh()
                 # Выводим предупреждающую надпись    
-                txt665.SetToolTip(wx.ToolTip("Внимание ошибка! Значение находится вне допустимого диапазона")) 
+                txt665.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение тока")) 
     
             else:
                 # Делаем тип данных float
-                i_ESP = float(Ten_Field)
+                i_ESP = float(SixSixFive)
                 
                 # Проверяем на условия
                 if i_ESP > 0 and i_ESP < 100 and i_ESP > 10:
@@ -1972,6 +2023,8 @@ class TabPanelTwo(wx.Panel):
        
         # Рисуем поле со значением
         txt21 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+        # Обрабатываем событие
+        txt21.Bind(wx.EVT_TEXT, self.onCheckSecondTabFirstField)
         
         # Задаем дистанцию между текстом и полем 
         SecondSizer_horiz1.Add(text21, flag = wx.ALL, border = 10)
@@ -2003,6 +2056,8 @@ class TabPanelTwo(wx.Panel):
         
         # Выводим поле значения
         txt22 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+        # Обрабатываем событие
+        txt22.Bind(wx.EVT_TEXT, self.onCheckSecondTabSecondField)
    
         # Задаем дистанцию между текстом и полем 
         SecondSizer_horiz2.Add(text22, flag = wx.ALL, border = 10)
@@ -2033,6 +2088,8 @@ class TabPanelTwo(wx.Panel):
     
         # Рисуем поле для ввода
         txt23 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+        # Обрабатываем событие
+        txt23.Bind(wx.EVT_TEXT, self.onCheckSecondTabThirdField)
         
         # Расстояние между текстом и полем
         SecondSizer_horiz3.Add(text23, flag = wx.ALL, border = 10)
@@ -2057,6 +2114,7 @@ class TabPanelTwo(wx.Panel):
         self.Show(True)
        
         txt24 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+        txt24.Bind(wx.EVT_TEXT, self.onCheckSecondTabFourthField)
       
         # Расстояние между названием и полем
         SecondSizer_horiz4.Add(text24, flag = wx.ALL, border = 10)
@@ -2068,10 +2126,6 @@ class TabPanelTwo(wx.Panel):
           
         self.btn_next2 = wx.Button(self, wx.ID_OK, label="следующая>", pos=(500, 700))
         
-#         sizer_nextButton.Add(self.btn_next2, flag = wx.ALL, border = 500)
-
-#         self.btn_next2.Enable()
-
         self.Bind(wx.EVT_BUTTON, self.OnCheckSecondTab, self.btn_next2)
     
     
@@ -2124,13 +2178,12 @@ class TabPanelTwo(wx.Panel):
     def OnCheckSecondTab(self, event):
         
         # Контрольные значения
-        Eleven_Field = txt21.GetValue()
-        Twelve_Field = txt22.GetValue()
-        Thirteen_Field = txt23.GetValue()
-        Fourteen_Field = txt24.GetValue()
-
+        TwoPointOne = txt21.GetValue()
+        TwoPointTwo = txt22.GetValue()
+        TwoPointThree = txt23.GetValue()
+        TwoPointFour = txt24.GetValue()
         
-        if Eleven_Field and Twelve_Field and Thirteen_Field and Fourteen_Field != '':
+        if TwoPointOne and TwoPointTwo and TwoPointThree and TwoPointFour != '':
             
             # Переходим на следующую вкладку
             self.notebook = self.GetParent()
@@ -2141,7 +2194,6 @@ class TabPanelTwo(wx.Panel):
             
              # Делаем вкладку неактивной
 #             self.notebook.EnableTab(1, False)
-           
         else:
             # Выводим сообщение
             wx.MessageBox(u'Чтобы перейти к следующей вкладке, пожалуйста, заполните все пустые поля', 'Ошибка ввода данных', wx.OK | wx.ICON_ERROR)
@@ -2151,39 +2203,130 @@ class TabPanelTwo(wx.Panel):
 
     def onCheckSecondTabFirstField(self, event):
         
-        """ Температура нефтяного пласта """      
+        """ Проверяем первое поле. 2.1 Температура нефтяного пласта. """      
         
-        Eleven_Field = txt21.GetValue()
-        One_Field = txt14.GetValue()
+        # Задаем значения
+        TwoPointOne = txt21.GetValue() # температура нефтяного пласта
+        OnePointFour = txt14.GetValue()    # злубина забоя
         
-        devide = Eleven_Field/One_Field
-        
-        if devide > '0.01' and devide < '0.03':
-            # Если значение в диапазоне, задаем черный цвет значения
-            txt21.SetForegroundColour(wx.BLACK)
-            txt21.Refresh()
-            txt21.SetToolTip(wx.ToolTip(""))
-          
-        elif devide == '':
-            txt21.SetToolTip(wx.ToolTip(""))
-        
+        # Делаем проверку на отрицательность
+        if TwoPointOne == '':
+            txt21.SetToolTip(wx.ToolTip("введите значение"))
         else:
+            t_bhole = str(TwoPointOne)
+            # Проверка на отрицательность значения
+            if t_bhole < '0':
+                txt21.SetForegroundColour(wx.RED)
+                txt21.Refresh()
+                # Выводим предупреждающую надпись    
+                txt21.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение температуры"))     
+            else:
+                # Делаем тип данных float
+                t_bhole = float(TwoPointOne)
+                h_bhole = float(OnePointFour)
+     
+                if t_bhole >= 0 and t_bhole > (0.01 * h_bhole) and t_bhole < (0.03 * h_bhole):
             
-            # Если значение не в диапазоне, задаем красный цвет значения
-            txt21.SetForegroundColour(wx.RED)
-            txt21.Refresh()
-            # Выводим предупреждающую надпись    
-            txt21.SetToolTip(wx.ToolTip("Внимание ошибка! Значение находится вне допустимого диапазона"))
+                    # Если значение в диапазоне, задаем черный цвет значения
+                    txt21.SetForegroundColour(wx.BLACK)
+                    txt21.Refresh()
+                    txt21.SetToolTip(wx.ToolTip(""))
+                else:            
+                    # Если значение не в диапазоне, задаем красный цвет значения
+                    txt21.SetForegroundColour(wx.RED)
+                    txt21.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt21.SetToolTip(wx.ToolTip("Внимание ошибка! Значение находится вне допустимого диапазона"))
             
 #-----------------------------------------------------------------------------------------------------------------
 # Проверка второго поля            
 
+    def onCheckSecondTabSecondField(self, event):
+        
+        """ Проверяем второе поле. 2.2 Глубина вечномерзлых грунтов. """  
+        
+        # Задаем значения
+        TwoPointTwo = txt22.GetValue() # температура нефтяного пласта
+        
+        # Делаем проверку на отрицательность
+        if TwoPointTwo == '':
+            txt22.SetToolTip(wx.ToolTip("введите значение"))
+        else:
+            h_ice = str(TwoPointTwo)
+            # Проверка на отрицательность значения
+            if h_ice < '0':
+                txt22.SetForegroundColour(wx.RED)
+                txt22.Refresh()
+                # Выводим предупреждающую надпись    
+                txt22.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение глубины"))  
+            else:
+                h_ice = float(TwoPointTwo)
+                
+                if h_ice >= 0:
+                    # Если значение в диапазоне, задаем черный цвет значения
+                    txt22.SetForegroundColour(wx.BLACK)
+                    txt22.Refresh()
+                    txt22.SetToolTip(wx.ToolTip(""))
+#-----------------------------------------------------------------------------------------------------------------
+# Проверка третьего поля    
 
+    def onCheckSecondTabThirdField(self, event):
+        
+        """ Проверяем третье поле. 2.3 Средняя температура наиболее холодного месяца. """ 
+        
+        # Задаем значения
+        TwoPointThree = txt23.GetValue() # cредняя температура наиболее холодного месяца
+        
+        # Делаем проверку на отрицательность
+        if TwoPointThree == '':
+            txt23.SetToolTip(wx.ToolTip("введите значение"))
+        else:
+            t_month = str(TwoPointThree)
+            
+            # Проверка на отрицательность значения
+            if t_month < '0':
+                # Если значение в диапазоне, задаем черный цвет значения
+                    txt23.SetForegroundColour(wx.BLACK)
+                    txt23.Refresh()
+                    txt23.SetToolTip(wx.ToolTip(""))               
+            else:
+                t_month = float(TwoPointThree)
+                
+                txt23.SetForegroundColour(wx.RED)
+                txt23.Refresh()
+                # Выводим предупреждающую надпись    
+                txt23.SetToolTip(wx.ToolTip("Внимание ошибка! Введено положительное значение температуры"))  
+        
+#-----------------------------------------------------------------------------------------------------------------
+# Проверка четвертого поля    
 
+    def onCheckSecondTabFourthField(self, event):
+        
+        """ Проверяем четвертое поле. 2.4 Максимальная температура наиболее теплого месяца. """   
+        
+        # Задаем значения
+        TwoPointFour = txt24.GetValue()
 
-
-
-
+        # Делаем проверку на отрицательность
+        if TwoPointFour == '':
+            txt24.SetToolTip(wx.ToolTip("введите значение"))
+        else:
+            t_maxh = str(TwoPointFour)
+            
+            # Проверка на отрицательность значения
+            if t_maxh < '0':
+                # Если значение вне диапазона
+                txt24.SetForegroundColour(wx.RED)
+                txt24.Refresh()
+                # Выводим предупреждающую надпись    
+                txt24.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение температуры"))     
+            else:
+                t_maxh = float(TwoPointFour)
+                
+                txt24.SetForegroundColour(wx.BLACK)
+                txt24.Refresh()
+                txt24.SetToolTip(wx.ToolTip(""))   
+                
 ########################################################################
 class TabPanelThree(wx.Panel):
     """
@@ -2215,7 +2358,10 @@ class TabPanelThree(wx.Panel):
         text31.SetForegroundColour('black')
         self.Show(True)
         
+        # Рисуем поле
         txt31 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+        # Обрабатываем событие
+        txt31.Bind(wx.EVT_TEXT, self.onCheckThirdTabFirstField)
        
         # Задаем дистанцию между текстом и полем 
         ThirdSizer_horiz1.Add(text31, flag = wx.ALL, border = 10)
@@ -2237,6 +2383,7 @@ class TabPanelThree(wx.Panel):
         self.Show(True)
         
         txt32 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+        txt32.Bind(wx.EVT_TEXT, self.onCheckThirdTabSecondField)
         
         # Задаем дистанцию между текстом и полем 
         ThirdSizer_horiz2.Add(text32, flag = wx.ALL, border = 10)
@@ -2258,6 +2405,7 @@ class TabPanelThree(wx.Panel):
         self.Show(True)
         
         txt33 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+        txt33.Bind(wx.EVT_TEXT, self.onCheckThirdTabThirdField)
         
         # Задаем дистанцию между текстом и полем 
         ThirdSizer_horiz3.Add(text33, flag = wx.ALL, border = 15)
@@ -2279,6 +2427,7 @@ class TabPanelThree(wx.Panel):
         self.Show(True)
         
         txt34 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+        txt34.Bind(wx.EVT_TEXT, self.onCheckThirdTabFourthField)
         
         # Задаем дистанцию между текстом и полем 
         ThirdSizer_horiz4.Add(text34, flag = wx.ALL, border = 15)
@@ -2300,6 +2449,7 @@ class TabPanelThree(wx.Panel):
         self.Show(True)
         
         txt35 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+        txt35.Bind(wx.EVT_TEXT, self.onCheckThirdTabFifthField)
         
         # Задаем дистанцию между текстом и полем 
         ThirdSizer_horiz5.Add(text35, flag = wx.ALL, border = 15)
@@ -2332,14 +2482,14 @@ class TabPanelThree(wx.Panel):
     def OnCheckThirdTab(self, event):
         
         # Контрольные значения
-        ro = txt31.GetValue()
-        visc_plast = txt32.GetValue()
-        pn_plast = txt33.GetValue()
-        tkpn = txt34.GetValue()
-        g_plast = txt35.GetValue()
+        ThreePointOne = txt31.GetValue()
+        ThreePointTwo = txt32.GetValue()
+        ThreePointThree = txt33.GetValue()
+        ThreePointFour = txt34.GetValue()
+        ThreePointFive = txt35.GetValue()
 
         
-        if ro and visc_plast and pn_plast and tkpn and g_plast != '':
+        if ThreePointOne and ThreePointTwo and ThreePointThree and ThreePointFour and ThreePointFive != '':
             
             # Переходим на следующую вкладку
             self.notebook = self.GetParent()
@@ -2356,13 +2506,193 @@ class TabPanelThree(wx.Panel):
             wx.MessageBox(u'Чтобы перейти к следующей вкладке, пожалуйста, заполните все пустые поля', 'Ошибка ввода данных', wx.OK | wx.ICON_ERROR)
             
 #-----------------------------------------------------------------------------------------------------------------
+# Проверка первого поля    
 
+    def onCheckThirdTabFirstField(self, event):
+        
+        """ Проверяем первое поле. 3.1 Плотность нефтяного флюида в условиях пласта. """   
+        
+        # Задаем значения
+        ThreePointOne = txt31.GetValue()
+        
+        # Делаем проверку на отрицательность
+        if ThreePointOne == '':
+            txt31.SetToolTip(wx.ToolTip("введите значение"))
+        else:
+            ro = str(ThreePointOne)
+            
+            # Проверка на отрицательность значения
+            if ro < '0':
+                # Если значение вне диапазона
+                txt31.SetForegroundColour(wx.RED)
+                txt31.Refresh()
+                # Выводим предупреждающую надпись    
+                txt31.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение плотности"))     
+            else:
+                ro = float(ThreePointOne)
+                
+                if ro >= 600 and ro <= 950:
+                    txt31.SetForegroundColour(wx.BLACK)
+                    txt31.Refresh()
+                    txt31.SetToolTip(wx.ToolTip(""))   
+                else:
+                    # Если значение вне диапазона
+                    txt31.SetForegroundColour(wx.RED)
+                    txt31.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt31.SetToolTip(wx.ToolTip("Внимание ошибка! Значение плотности вне допустимого диапазона")) 
+                
+#----------------------------------------------------------------------------------------------------------------
 
+# Проверка второго поля    
 
+    def onCheckThirdTabSecondField(self, event):
+        
+        """ Проверяем второе поле. 3.2 Вязкость нефтяного флюида в условиях пласта. """   
+        
+        # Задаем значения
+        ThreePointTwo = txt32.GetValue()
 
+        # Делаем проверку на отрицательность
+        if ThreePointTwo == '':
+            txt32.SetToolTip(wx.ToolTip("введите значение"))
+        else:
+            visc_plast = str(ThreePointTwo)
+            
+            # Проверка на отрицательность значения
+            if visc_plast < '0':
+                # Если значение вне диапазона
+                txt32.SetForegroundColour(wx.RED)
+                txt32.Refresh()
+                # Выводим предупреждающую надпись    
+                txt32.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение вязкости"))     
+            else:
+                visc_plast = float(ThreePointTwo)
+                
+                if visc_plast >= 1 and visc_plast <= 200:
+                    txt32.SetForegroundColour(wx.BLACK)
+                    txt32.Refresh()
+                    txt32.SetToolTip(wx.ToolTip(""))   
+                else:
+                    # Если значение вне диапазона
+                    txt32.SetForegroundColour(wx.RED)
+                    txt32.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt32.SetToolTip(wx.ToolTip("Внимание ошибка! Значение вязкости вне допустимого диапазона")) 
+
+#-------------------------------------------------------------------------------------------------------------------
+
+# Проверка третьего поля    
+
+    def onCheckThirdTabThirdField(self, event):
+        
+        """ Проверяем второе поле. 3.3 Давление насыщения в условиях пласта. """   
+        
+        # Задаем значения
+        ThreePointThree = txt33.GetValue()
+
+        # Делаем проверку на отрицательность
+        if ThreePointThree == '':
+            txt33.SetToolTip(wx.ToolTip("введите значение"))
+        else:
+            pn_plast = str(ThreePointThree)
+            
+            # Проверка на отрицательность значения
+            if pn_plast < '0':
+                # Если значение вне диапазона
+                txt33.SetForegroundColour(wx.RED)
+                txt33.Refresh()
+                # Выводим предупреждающую надпись    
+                txt33.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение давления насыщения"))     
+            else:
+                pn_plast = float(ThreePointThree)
+                
+                if pn_plast > 0 and pn_plast < 30:
+                    txt33.SetForegroundColour(wx.BLACK)
+                    txt33.Refresh()
+                    txt33.SetToolTip(wx.ToolTip(""))   
+                else:
+                    # Если значение вне диапазона
+                    txt33.SetForegroundColour(wx.RED)
+                    txt33.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt33.SetToolTip(wx.ToolTip("Внимание ошибка! Значение вязкости вне допустимого диапазона")) 
+#-------------------------------------------------------------------------------------------------------------------
+# Проверка четвертого поля    
+
+    def onCheckThirdTabFourthField(self, event):
+        
+        """ Проверяем четвертое поле. 3.4 Температурный коэффициент давления насыщения. """   
+        
+        # Задаем значения
+        ThreePointFour = txt34.GetValue()
+
+        # Делаем проверку на отрицательность
+        if ThreePointFour == '':
+            txt34.SetToolTip(wx.ToolTip("введите значение"))
+        else:
+            tkpn = str(ThreePointFour)
+            
+            # Проверка на отрицательность значения
+            if tkpn < '0':
+                # Если значение вне диапазона
+                txt34.SetForegroundColour(wx.RED)
+                txt34.Refresh()
+                # Выводим предупреждающую надпись    
+                txt34.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение давления насыщения"))     
+            else:
+                tkpn = float(ThreePointFour)
+                
+                if tkpn > 0 and tkpn <= 0.005:
+                    txt34.SetForegroundColour(wx.BLACK)
+                    txt34.Refresh()
+                    txt34.SetToolTip(wx.ToolTip(""))   
+                else:
+                    # Если значение вне диапазона
+                    txt34.SetForegroundColour(wx.RED)
+                    txt34.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt34.SetToolTip(wx.ToolTip("Внимание ошибка! Значение давления насыщения вне допустимого диапазона")) 
+#--------------------------------------------------------------------------------------------------------------------
+# Проверка четвертого поля    
+
+    def onCheckThirdTabFifthField(self, event):
+        
+        """ Проверяем пятое поле. 3.5 Газосодержание пластовой жидкости. """   
+        
+        # Задаем значения
+        ThreePointFive = txt35.GetValue()
+
+        # Делаем проверку на отрицательность
+        if ThreePointFive == '':
+            txt35.SetToolTip(wx.ToolTip("введите значение"))
+        else:
+            g_plast = str(ThreePointFive)
+            
+            # Проверка на отрицательность значения
+            if g_plast < '0':
+                # Если значение вне диапазона
+                txt35.SetForegroundColour(wx.RED)
+                txt35.Refresh()
+                # Выводим предупреждающую надпись    
+                txt35.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение газосодержания"))     
+            else:
+                g_plast = float(ThreePointFive)
+                
+                if g_plast > 0 and g_plast < 200:
+                    txt35.SetForegroundColour(wx.BLACK)
+                    txt35.Refresh()
+                    txt35.SetToolTip(wx.ToolTip(""))   
+                else:
+                    # Если значение вне диапазона
+                    txt35.SetForegroundColour(wx.RED)
+                    txt35.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt35.SetToolTip(wx.ToolTip("Внимание ошибка! Значение газосодержания вне допустимого диапазона")) 
         
 ########################################################################
 class TabPanelFour(wx.Panel):
+    
     """
     Четвертая вкладка
     """
@@ -2392,6 +2722,7 @@ class TabPanelFour(wx.Panel):
         self.Show(True)
              
         txt41 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+        txt41.Bind(wx.EVT_TEXT, self.onCheckFourthTabFirstField)
         
         # Задаем дистанцию между текстом и полем 
         FourthSizer_horiz1.Add(text41, flag = wx.ALL, border = 15)
@@ -2413,6 +2744,7 @@ class TabPanelFour(wx.Panel):
         self.Show(True)
         
         txt42 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+        txt42.Bind(wx.EVT_TEXT, self.onCheckFourthTabSecondField)
         
         # Задаем дистанцию между текстом и полем 
         FourthSizer_horiz2.Add(text42, flag = wx.ALL, border = 15)
@@ -2434,6 +2766,7 @@ class TabPanelFour(wx.Panel):
         self.Show(True)
         
         txt43 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+        txt43.Bind(wx.EVT_TEXT, self.onCheckFourthTabThirdField)
         
         # Задаем дистанцию между текстом и полем 
         FourthSizer_horiz3.Add(text43, flag = wx.ALL, border = 15)
@@ -2455,6 +2788,7 @@ class TabPanelFour(wx.Panel):
         self.Show(True)
 
         txt44 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+        txt44.Bind(wx.EVT_TEXT, self.onCheckFourthTabFourthField)
         
         # Задаем дистанцию между текстом и полем 
         FourthSizer_horiz4.Add(text44, flag = wx.ALL, border = 15)
@@ -2476,6 +2810,7 @@ class TabPanelFour(wx.Panel):
         self.Show(True)
         
         txt45 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+        txt45.Bind(wx.EVT_TEXT, self.onCheckFourthTabFifthField)
         
          # Задаем дистанцию между текстом и полем 
         FourthSizer_horiz5.Add(text45, flag = wx.ALL, border = 15)
@@ -2498,6 +2833,7 @@ class TabPanelFour(wx.Panel):
         self.Show(True)
         
         txt46 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+        txt46.Bind(wx.EVT_TEXT, self.onCheckFourthTabSixthField)
         
         # Задаем дистанцию между текстом и полем 
         FourthSizer_horiz6.Add(text46, flag = wx.ALL, border = 15)
@@ -2519,6 +2855,7 @@ class TabPanelFour(wx.Panel):
         self.Show(True)
         
         txt47 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+        txt47.Bind(wx.EVT_TEXT, self.onCheckFourthTabSeventhField)
         
         # Задаем дистанцию между текстом и полем 
         FourthSizer_horiz7.Add(text47, flag = wx.ALL, border = 15)
@@ -2540,6 +2877,7 @@ class TabPanelFour(wx.Panel):
         self.Show(True)
         
         txt48 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+        txt48.Bind(wx.EVT_TEXT, self.onCheckFourthTabEighthField)
         
         # Задаем дистанцию между текстом и полем 
         FourthSizer_horiz8.Add(text48, flag = wx.ALL, border = 15)
@@ -2561,6 +2899,7 @@ class TabPanelFour(wx.Panel):
         self.Show(True)
         
         txt49 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+        txt49.Bind(wx.EVT_TEXT, self.onCheckFourthTabNinethField)
         
         # Задаем дистанцию между текстом и полем 
         FourthSizer_horiz9.Add(text49, flag = wx.ALL, border = 15)
@@ -2582,6 +2921,7 @@ class TabPanelFour(wx.Panel):
         self.Show(True)
        
         txt410 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+        txt410.Bind(wx.EVT_TEXT, self.onCheckFourthTabTenthField)
         
         # Задаем дистанцию между текстом и полем 
         FourthSizer_horiz10.Add(text410, flag = wx.ALL, border = 15)
@@ -2590,7 +2930,6 @@ class TabPanelFour(wx.Panel):
 
         wx.StaticLine(self, pos=(30, 650), size=(950,2))
         
-#         self.btn_previous3 = wx.Button(self, wx.ID_OK, label="<<предыдущая", pos=(350, 710))
         self.btn_next4 = wx.Button(self, wx.ID_OK, label="следующая>", pos=(500, 700))
         self.btn_next4.Enable()
         
@@ -2615,18 +2954,18 @@ class TabPanelFour(wx.Panel):
     def OnCheckFourthTab(self, event):
         
         # Контрольные значения
-        nomdebit = txt41.GetValue()
-        debit_oil  = txt42.GetValue()
-        g = txt43.GetValue()
-        water = txt44.GetValue()
-        h_din = txt45.GetValue()
-        p_wellhead = txt46.GetValue()
-        t_wellhead = txt47.GetValue()
-        debit = txt48.GetValue()
-        scraper = txt49.GetValue()
-        h_aspo = txt410.GetValue()
+        FourPointOne = txt41.GetValue()
+        FourPointTwo  = txt42.GetValue()
+        FourPointThree = txt43.GetValue()
+        FourPointFour = txt44.GetValue()
+        FourPointFive = txt45.GetValue()
+        FourPointSix = txt46.GetValue()
+        FourPointSeven = txt47.GetValue()
+        FourPointEight = txt48.GetValue()
+        FourPointNine = txt49.GetValue()
+        FourPointTen = txt410.GetValue()
         
-        if nomdebit and debit_oil and g != '':
+        if FourPointOne and FourPointTwo and FourPointThree and FourPointFour and FourPointFive and FourPointSix and FourPointSeven and FourPointEight and FourPointNine and FourPointTen != '':
             
             # Переходим на следующую вкладку
             self.notebook = self.GetParent()
@@ -2637,19 +2976,399 @@ class TabPanelFour(wx.Panel):
             
              # Делаем вкладку неактивной
 #             self.notebook.EnableTab(3, False)
-           
         else:
             # Выводим сообщение
             wx.MessageBox(u'Чтобы перейти к следующей вкладке, пожалуйста, заполните все пустые поля', 'Ошибка ввода данных', wx.OK | wx.ICON_ERROR)
             
 #-----------------------------------------------------------------------------------------------------------------
 
+# Проверка первого поля
 
+    def onCheckFourthTabFirstField(self, event):
+        
+        """ Проверяем первое поле. 4.1 Дебит по жидкости (с чистой НКТ). """   
+        
+        # Задаем значения
+        FourPointOne = txt41.GetValue()
 
+        # Делаем проверку на отрицательность
+        if FourPointOne == '':
+            txt41.SetToolTip(wx.ToolTip("введите значение"))
+        else:
+            nomdebit = str(FourPointOne)
+            
+            # Проверка на отрицательность значения
+            if nomdebit < '0':
+                # Если значение вне диапазона
+                txt41.SetForegroundColour(wx.RED)
+                txt41.Refresh()
+                # Выводим предупреждающую надпись    
+                txt41.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение дебита"))     
+            else:
+                nomdebit = float(FourPointOne)
+                
+                if nomdebit > 0:
+                    txt41.SetForegroundColour(wx.BLACK)
+                    txt41.Refresh()
+                    txt41.SetToolTip(wx.ToolTip(""))   
+                else:
+                    # Если значение вне диапазона
+                    txt41.SetForegroundColour(wx.RED)
+                    txt41.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt41.SetToolTip(wx.ToolTip("Внимание ошибка! Значение дебита вне допустимого диапазона")) 
 
+#-----------------------------------------------------------------------------------------------------------------
 
+# Проверка второго поля
 
+    def onCheckFourthTabSecondField(self, event):
+        
+        """ Проверяем второе поле. 4.2 Дебит по нефти. """   
+        
+        # Задаем значения
+        FourPointTwo = txt42.GetValue() # дебит по нефти
+        FourPointOne = txt41.GetValue() # дебит по жидкости
 
+        # Делаем проверку на отрицательность
+        if FourPointTwo == '':
+            txt42.SetToolTip(wx.ToolTip("введите значение"))
+        else:
+            debit_oil = str(FourPointTwo)
+            
+            # Проверка на отрицательность значения
+            if debit_oil < '0':
+                # Если значение вне диапазона
+                txt42.SetForegroundColour(wx.RED)
+                txt42.Refresh()
+                # Выводим предупреждающую надпись    
+                txt42.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение дебита"))     
+            else:
+                debit_oil = float(FourPointTwo)
+                nomdebit = float(FourPointOne)
+                
+                if debit_oil > 0 and debit_oil <= nomdebit:
+                    txt42.SetForegroundColour(wx.BLACK)
+                    txt42.Refresh()
+                    txt42.SetToolTip(wx.ToolTip(""))   
+                else:
+                    # Если значение вне диапазона
+                    txt42.SetForegroundColour(wx.RED)
+                    txt42.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt42.SetToolTip(wx.ToolTip("Внимание ошибка! Значение дебита вне допустимого диапазона")) 
+#-----------------------------------------------------------------------------------------------------------------
+
+# Проверка третьего поля
+
+    def onCheckFourthTabThirdField(self, event):
+        
+        """ Проверяем третье поле. 4.3 Газовый фактор. """
+            
+        
+        # Задаем значения
+        FourPointThree = txt43.GetValue() # газовый фактор
+        ThreePointFive = txt35.GetValue() # газосодержание пластовой нефти
+
+        # Делаем проверку на отрицательность
+        if FourPointThree == '':
+            txt43.SetToolTip(wx.ToolTip("введите значение"))
+        else:
+            g = str(FourPointThree)
+            
+            # Проверка на отрицательность значения
+            if g < '0':
+                # Если значение вне диапазона
+                txt43.SetForegroundColour(wx.RED)
+                txt43.Refresh()
+                # Выводим предупреждающую надпись    
+                txt43.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение газового фактора"))     
+            else:
+                g = float(FourPointThree)
+                g_plast = float(ThreePointFive)
+                
+                if g > 0 and g < g_plast:
+                    txt43.SetForegroundColour(wx.BLACK)
+                    txt43.Refresh()
+                    txt43.SetToolTip(wx.ToolTip(""))   
+                else:
+                    # Если значение вне диапазона
+                    txt43.SetForegroundColour(wx.RED)
+                    txt43.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt43.SetToolTip(wx.ToolTip("Внимание ошибка! Значение газового фактора вне допустимого диапазона")) 
+                    
+#-----------------------------------------------------------------------------------------------------------------
+
+# Проверка четвертого поля
+
+    def onCheckFourthTabFourthField(self, event):
+        
+        """ Проверяем четвертое поле. 4.4 Содержание воды, массовая доля. """
+       
+        # Задаем значения
+        FourPointFour = txt44.GetValue() 
+
+        # Делаем проверку на отрицательность
+        if FourPointFour == '':
+            txt44.SetToolTip(wx.ToolTip("введите значение"))
+        else:
+            water = str(FourPointFour)
+            
+            # Проверка на отрицательность значения
+            if water < '0':
+                # Если значение вне диапазона
+                txt44.SetForegroundColour(wx.RED)
+                txt44.Refresh()
+                # Выводим предупреждающую надпись    
+                txt44.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение обводненности"))     
+            else:
+                water = float(FourPointFour)
+                              
+                if water > 0 and water < 80:
+                    txt44.SetForegroundColour(wx.BLACK)
+                    txt44.Refresh()
+                    txt44.SetToolTip(wx.ToolTip(""))   
+                else:
+                    # Если значение вне диапазона
+                    txt44.SetForegroundColour(wx.RED)
+                    txt44.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt44.SetToolTip(wx.ToolTip("Внимание ошибка! Значение обводненности вне допустимого диапазона")) 
+                    
+#--------------------------------------------------------------------------------------------------------------------------
+
+# Проверка пятого поля
+
+    def onCheckFourthTabFifthField(self, event):
+        
+        """ Проверяем пятое поле. 4.5 Динамический уровень. """
+       
+        # Задаем значения
+        FourPointFive = txt45.GetValue() # динамический уровень
+        OnePoinSeven = txt17.GetValue()  # длина колонны НКТ 
+        OnePoinNine  = txt19.GetValue()  # статический уровень флюида в скважине 
+
+        # Делаем проверку на отрицательность
+        if FourPointFive == '':
+            txt45.SetToolTip(wx.ToolTip("введите значение"))
+        else:
+            h_din = str(FourPointFive)
+            
+            # Проверка на отрицательность значения
+            if h_din < '0':
+                # Если значение вне диапазона
+                txt45.SetForegroundColour(wx.RED)
+                txt45.Refresh()
+                # Выводим предупреждающую надпись    
+                txt45.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение обводненности"))     
+            else:
+                h_din = float(FourPointFive)
+                h_nkt = float(OnePoinSeven)
+                h_stat = float(OnePoinNine)
+                              
+                if h_din > h_stat and h_din < h_nkt:
+                    txt45.SetForegroundColour(wx.BLACK)
+                    txt45.Refresh()
+                    txt45.SetToolTip(wx.ToolTip(""))   
+                else:
+                    # Если значение вне диапазона
+                    txt45.SetForegroundColour(wx.RED)
+                    txt45.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt45.SetToolTip(wx.ToolTip("Внимание ошибка! Значение обводненности вне допустимого диапазона")) 
+#-----------------------------------------------------------------------------------------------------------------
+
+# Проверка шестого поля
+
+    def onCheckFourthTabSixthField(self, event):
+        
+        """" Проверяем шестое поле. 4.6 Давление на устье. """
+        
+        # Задаем значения
+        FourPointSix = txt46.GetValue() 
+
+        # Делаем проверку на отрицательность
+        if FourPointSix == '':
+            txt46.SetToolTip(wx.ToolTip("введите значение"))
+        else:
+            p_wellhead = str(FourPointSix)
+            
+            # Проверка на отрицательность значения
+            if p_wellhead < '0':
+                # Если значение вне диапазона
+                txt46.SetForegroundColour(wx.RED)
+                txt46.Refresh()
+                # Выводим предупреждающую надпись    
+                txt46.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение давления"))     
+            else:
+                p_wellhead = float(FourPointSix)
+                              
+                if p_wellhead > 1:
+                    txt46.SetForegroundColour(wx.BLACK)
+                    txt46.Refresh()
+                    txt46.SetToolTip(wx.ToolTip(""))   
+                else:
+                    # Если значение вне диапазона
+                    txt46.SetForegroundColour(wx.RED)
+                    txt46.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt46.SetToolTip(wx.ToolTip("Внимание ошибка! Значение давления вне допустимого диапазона"))
+#-----------------------------------------------------------------------------------------------------------------
+
+# Проверка седьмого поля
+
+    def onCheckFourthTabSeventhField(self, event):
+        
+        """" Проверяем седьмое поле. 4.7 Температура жидкости на выходе из скважины. """
+           
+        # Задаем значения
+        FourPointSeven = txt47.GetValue() # температура жидкости на выходе из скважины
+        TwoPointOne = txt21.GetValue()    # температура нефтяного пласта
+
+        # Делаем проверку на отрицательность
+        if FourPointSeven == '':
+            txt47.SetToolTip(wx.ToolTip("введите значение"))
+        else:
+            t_wellhead = str(FourPointSeven)
+            # Проверка на отрицательность значения
+            if t_wellhead < '0':
+                # Если значение вне диапазона
+                txt47.SetForegroundColour(wx.RED)
+                txt47.Refresh()
+                # Выводим предупреждающую надпись    
+                txt47.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение давления"))     
+            else:
+                t_wellhead = float(FourPointSeven)
+                t_bhole = float(TwoPointOne)
+                              
+                if t_wellhead < t_bhole:
+                    txt47.SetForegroundColour(wx.BLACK)
+                    txt47.Refresh()
+                    txt47.SetToolTip(wx.ToolTip(""))   
+                else:
+                    # Если значение вне диапазона
+                    txt47.SetForegroundColour(wx.RED)
+                    txt47.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt47.SetToolTip(wx.ToolTip("Внимание ошибка! Значение давления вне допустимого диапазона"))
+#-----------------------------------------------------------------------------------------------------------------
+
+# Проверка восьмого поля
+
+#          = txt48.GetValue()
+
+    def onCheckFourthTabEighthField(self, event):
+        
+        """" Проверяем восьмое поле. 4.8 Минимальный дебит по жидкости. """
+        
+        # Задаем значения
+        FourPointEight = txt48.GetValue() # минимальный дебит по жидкости
+        FourPointOne = txt41.GetValue()   # дебит по жидкости (с чистой НКТ)
+
+        # Делаем проверку на отрицательность
+        if FourPointEight == '':
+            txt48.SetToolTip(wx.ToolTip("введите значение"))
+        else:
+            debit = str(FourPointEight)
+            # Проверка на отрицательность значения
+            if debit < '0':
+                # Если значение вне диапазона
+                txt48.SetForegroundColour(wx.RED)
+                txt48.Refresh()
+                # Выводим предупреждающую надпись    
+                txt48.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение дебита"))     
+            else:
+                debit = float(FourPointEight)
+                nomdebit = float(FourPointOne)
+                              
+                if debit <= nomdebit:
+                    txt48.SetForegroundColour(wx.BLACK)
+                    txt48.Refresh()
+                    txt48.SetToolTip(wx.ToolTip(""))   
+                else:
+                    # Если значение вне диапазона
+                    txt48.SetForegroundColour(wx.RED)
+                    txt48.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt48.SetToolTip(wx.ToolTip("Внимание ошибка! Значение дебита вне допустимого диапазона"))
+#-----------------------------------------------------------------------------------------------------------------
+
+# Проверка девятого поля
+
+    def onCheckFourthTabNinethField(self, event):
+        
+        """" Проверяем девятое поле. 4.9 Глубина спуска скребка при механической очистке. """
+ 
+        # Задаем значения
+        FourPointNine = txt49.GetValue() # глубина спуска скребка при механической очистке
+        OnePoinSeven = txt17.GetValue()  # длина колонны НКТ 
+
+        # Делаем проверку на отрицательность
+        if FourPointNine == '':
+            txt49.SetToolTip(wx.ToolTip("введите значение"))
+        else:
+            scraper = str(FourPointNine)
+            # Проверка на отрицательность значения
+            if scraper < '0':
+                # Если значение вне диапазона
+                txt49.SetForegroundColour(wx.RED)
+                txt49.Refresh()
+                # Выводим предупреждающую надпись    
+                txt49.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение глубины"))     
+            else:
+                scraper = float(FourPointNine)
+                h_nkt = float(OnePoinSeven)
+                              
+                if scraper < h_nkt:
+                    txt49.SetForegroundColour(wx.BLACK)
+                    txt49.Refresh()
+                    txt49.SetToolTip(wx.ToolTip(""))   
+                else:
+                    # Если значение вне диапазона
+                    txt49.SetForegroundColour(wx.RED)
+                    txt49.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt49.SetToolTip(wx.ToolTip("Внимание ошибка! Значение глубины вне допустимого диапазона"))
+
+#-----------------------------------------------------------------------------------------------------------------
+
+# Проверка десятого поля
+
+    def onCheckFourthTabTenthField(self, event):
+    
+        """" Проверяем десятое поле. 4.10 Максимальная глубина отложения АСПО. """
+ 
+        # Задаем значения
+        FourPointTen = txt410.GetValue() # максимальная глубина отложения АСПО
+        OnePoinSeven = txt17.GetValue()  # длина колонны НКТ 
+
+        # Делаем проверку на отрицательность
+        if FourPointTen == '':
+            txt410.SetToolTip(wx.ToolTip("введите значение"))
+        else:
+            h_aspo = str(FourPointTen)
+            # Проверка на отрицательность значения
+            if h_aspo < '0':
+                # Если значение вне диапазона
+                txt410.SetForegroundColour(wx.RED)
+                txt410.Refresh()
+                # Выводим предупреждающую надпись    
+                txt410.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение глубины"))     
+            else:
+                h_aspo = float(FourPointTen)
+                h_nkt = float(OnePoinSeven)
+                              
+                if h_aspo < h_nkt:
+                    txt410.SetForegroundColour(wx.BLACK)
+                    txt410.Refresh()
+                    txt410.SetToolTip(wx.ToolTip(""))   
+                else:
+                    # Если значение вне диапазона
+                    txt410.SetForegroundColour(wx.RED)
+                    txt410.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt410.SetToolTip(wx.ToolTip("Внимание ошибка! Значение глубины вне допустимого диапазона"))
 ########################################################################
 class TabPanelFive(wx.Panel):
     """
@@ -2681,6 +3400,7 @@ class TabPanelFive(wx.Panel):
         self.Show(True)
         
         txt51 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+        txt51.Bind(wx.EVT_TEXT, self.onCheckFiveTabFirstField)
         
         # Задаем дистанцию между текстом и полем 
         FifthSizer_horiz1.Add(text51, flag = wx.ALL, border = 15)
@@ -2701,6 +3421,7 @@ class TabPanelFive(wx.Panel):
         self.Show(True)
         
         txt52 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+#         txt52.Bind(wx.EVT_TEXT, self.onCheckFiveTabSecondField)
         
          # Задаем дистанцию между текстом и полем 
         FifthSizer_horiz2.Add(text52, flag = wx.ALL, border = 15)
@@ -2721,6 +3442,7 @@ class TabPanelFive(wx.Panel):
         self.Show(True)
         
         txt53 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+#         txt53.Bind(wx.EVT_TEXT, self.onCheckFiveTabThirdField)
         
         # Задаем дистанцию между текстом и полем 
         FifthSizer_horiz3.Add(text53, flag = wx.ALL, border = 15)
@@ -2741,6 +3463,7 @@ class TabPanelFive(wx.Panel):
         self.Show(True)
         
         txt54 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+#         txt54.Bind(wx.EVT_TEXT, self.onCheckFiveTabFourthField)
         
         # Задаем дистанцию между текстом и полем 
         FifthSizer_horiz4.Add(text54, flag = wx.ALL, border = 15)
@@ -2761,6 +3484,7 @@ class TabPanelFive(wx.Panel):
         self.Show(True)
         
         txt55 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+#         txt55.Bind(wx.EVT_TEXT, self.onCheckFiveTabFifthField)
         
          # Задаем дистанцию между текстом и полем 
         FifthSizer_horiz5.Add(text55, flag = wx.ALL, border = 15)
@@ -2781,6 +3505,7 @@ class TabPanelFive(wx.Panel):
         self.Show(True)
         
         txt56 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+#         txt56.Bind(wx.EVT_TEXT, self.onCheckFiveTabSixthField)
         
         # Задаем дистанцию между текстом и полем 
         FifthSizer_horiz6.Add(text56, flag = wx.ALL, border = 15)
@@ -2801,6 +3526,7 @@ class TabPanelFive(wx.Panel):
         self.Show(True)
         
         txt57 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+#         txt57.Bind(wx.EVT_TEXT, self.onCheckFiveTabSeventhField)
         
         # Задаем дистанцию между текстом и полем 
         FifthSizer_horiz7.Add(text57, flag = wx.ALL, border = 15)
@@ -2821,6 +3547,7 @@ class TabPanelFive(wx.Panel):
         self.Show(True)
         
         txt58 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+#         txt58.Bind(wx.EVT_TEXT, self.onCheckFiveTabEighthField)
         
         # Задаем дистанцию между текстом и полем 
         FifthSizer_horiz8.Add(text58, flag = wx.ALL, border = 15)
@@ -2841,6 +3568,7 @@ class TabPanelFive(wx.Panel):
         self.Show(True)
         
         txt59 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+#         txt59.Bind(wx.EVT_TEXT, self.onCheckFiveTabNinthField)
         
         # Задаем дистанцию между текстом и полем 
         FifthSizer_horiz9.Add(text59, flag = wx.ALL, border = 15)
@@ -2861,6 +3589,7 @@ class TabPanelFive(wx.Panel):
         self.Show(True)
         
         txt510 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+#         txt510.Bind(wx.EVT_TEXT, self.onCheckFiveTabTenthField)
         
         # Задаем дистанцию между текстом и полем 
         FifthSizer_horiz10.Add(text510, flag = wx.ALL, border = 15)
@@ -2893,19 +3622,18 @@ class TabPanelFive(wx.Panel):
     def OnCheckFifthTab(self, event):
         
         # Контрольные значения
-        ro_oil = txt51.GetValue()
-        visc_oil = txt52.GetValue()
-        cp = txt53.GetValue()
-        asf = txt54.GetValue()
-        silica_gel = txt55.GetValue()
-        freezing_oil = txt56.GetValue()
-        t_0 = txt57.GetValue()
-        melting = txt58.GetValue()
-        ro_gas = txt59.GetValue()
-        ro_water = txt510.GetValue()
+        FivePointOne = txt51.GetValue()
+        FivePointTwo = txt52.GetValue()
+        FivePointThree = txt53.GetValue()
+        FivePointFour = txt54.GetValue()
+        FivePointFive = txt55.GetValue()
+        FivePointSix = txt56.GetValue()
+        FivePointSeven = txt57.GetValue()
+        FivePointEight = txt58.GetValue()
+        FivePointNine = txt59.GetValue()
+        FivePointTen = txt510.GetValue()
 
-        
-        if ro_oil and visc_oil and cp != '':
+        if FivePointOne and FivePointTwo and FivePointThree and FivePointFour and FivePointFive and FivePointSix and FivePointSeven and FivePointEight and FivePointNine and FivePointTen != '':
             
             # Переходим на следующую вкладку
             self.notebook = self.GetParent()
@@ -2920,9 +3648,127 @@ class TabPanelFive(wx.Panel):
         else:
             # Выводим сообщение
             wx.MessageBox(u'Чтобы перейти к следующей вкладке, пожалуйста, заполните все пустые поля', 'Ошибка ввода данных', wx.OK | wx.ICON_ERROR)
-#--------------------------------------------------------------------------------------------------------------------------------            
-            
+#-----------------------------------------------------------------------------------------------------------------
 
+# Проверка первого поля
+
+    def onCheckFiveTabFirstField(self, event):
+        
+        """ Проверяем первое поле. 5.1 Плотность дегазированной нефти в нормальных условиях. """ 
+        
+        # Задаем значения
+        FivePointOne = txt51.GetValue() # плотность дегазированной нефти в нормальных условиях
+        ThreePoinOne = txt31.GetValue() #
+
+        # Делаем проверку на отрицательность
+        if FivePointOne == '':
+            txt51.SetToolTip(wx.ToolTip("введите значение"))
+        else:
+            ro_oil = str(FivePointOne)
+            # Проверка на отрицательность значения
+            if ro_oil < '0':
+                # Если значение вне диапазона
+                txt51.SetForegroundColour(wx.RED)
+                txt51.Refresh()
+                # Выводим предупреждающую надпись    
+                txt51.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение плотности"))     
+            else:
+                ro_oil = float(FivePointOne)
+                ro = float(ThreePoinOne)
+                              
+                if ro_oil >= 700 and ro_oil <= 900 and ro_oil > ro:
+                    txt51.SetForegroundColour(wx.BLACK)
+                    txt51.Refresh()
+                    txt51.SetToolTip(wx.ToolTip(""))
+#                 elif 
+                
+                else:
+                    # Если значение вне диапазона
+                    txt51.SetForegroundColour(wx.RED)
+                    txt51.Refresh()
+                    # Выводим предупреждающую надпись    
+                    txt51.SetToolTip(wx.ToolTip("Внимание ошибка! Значение плотности вне допустимого диапазона"))
+#-----------------------------------------------------------------------------------------------------------------
+
+# Проверка второго поля
+
+# visc_oil = txt52.GetValue()
+
+
+
+
+
+#-----------------------------------------------------------------------------------------------------------------
+
+# Проверка третьего поля
+
+# cp = txt53.GetValue()
+
+
+
+
+#-----------------------------------------------------------------------------------------------------------------
+
+# Проверка четвертого поля
+
+# asf = txt54.GetValue()
+
+
+
+
+
+#-----------------------------------------------------------------------------------------------------------------
+
+# Проверка пятого поля
+
+# silica_gel = txt55.GetValue()
+
+
+
+
+
+#-----------------------------------------------------------------------------------------------------------------
+
+# Проверка шестого поля
+
+# freezing_oil = txt56.GetValue()
+
+
+
+
+#-----------------------------------------------------------------------------------------------------------------
+
+# Проверка седьмого поля
+
+# t_0 = txt57.GetValue()
+
+
+
+#-----------------------------------------------------------------------------------------------------------------
+
+# Проверка восьмого поля
+
+# melting = txt58.GetValue()
+
+
+
+
+
+#-----------------------------------------------------------------------------------------------------------------
+
+# Проверка девятого поля
+
+# ro_gas = txt59.GetValue()
+
+
+
+#-----------------------------------------------------------------------------------------------------------------
+
+# Проверка десятого поля
+
+# ro_water = txt510.GetValue()
+
+   
             
 #######################################################################
 class TabPanelSix(wx.Panel):
@@ -2954,6 +3800,7 @@ class TabPanelSix(wx.Panel):
         self.Show(True)
         
         txt61 = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER)
+#         txt61.Bind(wx.EVT_TEXT, self.onCheckSixTabFirstField)
         
         # Задаем дистанцию между текстом и полем 
         SixthSizer_horiz1.Add(text61, flag = wx.ALL, border = 10)
@@ -3277,6 +4124,93 @@ class TabPanelSix(wx.Panel):
         frame = onSaveAdditionalData(None)
         frame.Show()
     
+#-----------------------------------------------------------------------------------------------------------------
+
+# Проверка первого поля
+
+
+
+
+
+#-----------------------------------------------------------------------------------------------------------------
+
+# Проверка второго поля
+
+
+
+
+
+
+#-----------------------------------------------------------------------------------------------------------------
+
+# Проверка третьего поля
+
+
+
+
+
+#-----------------------------------------------------------------------------------------------------------------
+
+# Проверка четвертого поля
+
+
+
+
+
+
+#-----------------------------------------------------------------------------------------------------------------
+
+# Проверка пятого поля
+
+
+
+
+
+
+#-----------------------------------------------------------------------------------------------------------------
+
+# Проверка шестого поля
+
+
+
+
+
+#-----------------------------------------------------------------------------------------------------------------
+
+# Проверка седьмого поля
+
+
+
+
+
+#-----------------------------------------------------------------------------------------------------------------
+
+# Проверка восьмого поля
+
+
+
+
+
+#-----------------------------------------------------------------------------------------------------------------
+
+# Проверка девятого поля
+
+
+
+
+#-----------------------------------------------------------------------------------------------------------------
+
+# Проверка десятого поля
+
+
+
+
+
+
+
+
+
+
 ####################################################################################################################
 class NotebookFrame(wx.Frame):
     
