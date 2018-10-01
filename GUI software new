@@ -659,7 +659,6 @@ class RibbonBar(wx.Dialog):
         valueTwentySix = devOne[167]
         valueTwentySeven = devOne[172]
         valueTwentyEight = devOne[178]
-        valueTwentyEight = devOne[178]
         valueTwentyNine = devOne[184]
         valueThirty = devOne[191]
 
@@ -711,14 +710,14 @@ class RibbonBar(wx.Dialog):
         num20 = float(valueTwenty)
         
         num21 = float(valueTwentyOne)
-        num22 = float(valueTwentyOne)
-        num23 = float(valueTwentyOne)
-        num24 = float(valueTwentyOne)
-        num25 = float(valueTwentyOne)
-        num26 = float(valueTwentyOne)
-        num27 = float(valueTwentyOne)
-        num28 = float(valueTwentyOne)
-        num29 = float(valueTwentyOne)
+        num22 = float(valueTwentyTwo)
+        num23 = float(valueTwentyThree)
+        num24 = float(valueTwentyFour)
+        num25 = float(valueTwentyFive)
+        num26 = float(valueTwentySix)
+        num27 = float(valueTwentySeven)
+        num28 = float(valueTwentyEight)
+        num29 = float(valueTwentyNine)
         num30 = float(valueThirty)
         
         num31 = float(valueOne)
@@ -1608,7 +1607,6 @@ class TabPanelOne(wx.Panel):
         valueTwentySix = devOne[167]
         valueTwentySeven = devOne[172]
         valueTwentyEight = devOne[178]
-        valueTwentyEight = devOne[178]
         valueTwentyNine = devOne[184]
         valueThirty = devOne[191]
 
@@ -1660,17 +1658,17 @@ class TabPanelOne(wx.Panel):
         num20 = float(valueTwenty)
         
         num21 = float(valueTwentyOne)
-        num22 = float(valueTwentyOne)
-        num23 = float(valueTwentyOne)
-        num24 = float(valueTwentyOne)
-        num25 = float(valueTwentyOne)
-        num26 = float(valueTwentyOne)
-        num27 = float(valueTwentyOne)
-        num28 = float(valueTwentyOne)
-        num29 = float(valueTwentyOne)
+        num22 = float(valueTwentyTwo)
+        num23 = float(valueTwentyThree)
+        num24 = float(valueTwentyFour)
+        num25 = float(valueTwentyFive)
+        num26 = float(valueTwentySix)
+        num27 = float(valueTwentySeven)
+        num28 = float(valueTwentyEight)
+        num29 = float(valueTwentyNine)
         num30 = float(valueThirty)
         
-        num31 = float(valueOne)
+        num31 = float(valueThirtyOne)
         num32 = float(valueThirtyTwo)
         num33 = float(valueThirtyThree)
         num34 = float(valueThirtyFour)
@@ -1774,54 +1772,54 @@ class TabPanelOne(wx.Panel):
         h_nkt = data[3] 
         d_vnesh_nkt = data[4]
         h_stat = data[5]
-        u_ESP = data[6]
-        f_ESP = data[7]
-        i_ESP = data[8]
+        u_ESP = data[36]
+        f_ESP = data[37]
+        i_ESP = data[38]
 
 #  --------- Данные второй вкладки ----------#
 
-        t_bhole = data[9]
-        h_ice = data[10]
-        t_month = data[11] 
-        t_maxh = data[12] 
+        t_bhole = data[6]
+        h_ice = data[7]
+        t_month = data[8] 
+        t_maxh = data[9] 
 
 #  -------- Данные третьей вкладки -----------#
 
-        ro  = data[13]
-        visc_plast = data[14]
-        pn_plast = data[15]
-        tkpn = data[16]
-        g_plast = data[17]
+        ro  = data[10]
+        visc_plast = data[11]
+        pn_plast = data[12]
+        tkpn = data[13]
+        g_plast = data[14]
 
 #  -------- Данные четвертой вкладки ----------#
 
-        nomdebit = data[18]
-        debit_oil = data[19]  
-        g = data[20]
-        water = data[21]
-        h_din = data[22]
-        p_wellhead = data[23]
-        t_wellhead = data[24]
-        debit = data[25]
-        scraper = data[26]
-        h_aspo = data[27]
+        nomdebit = data[15]
+        debit_oil = data[16]  
+        g = data[17]
+        water = data[18]
+        h_din = data[19]
+        p_wellhead = data[20]
+        t_wellhead = data[21]
+        debit = data[22]
+        scraper = data[23]
+        h_aspo = data[24]
 
 #-------- Данные пятой вкладки -------#
 
-        ro_oil = data[28] 
-        visc_oil = data[29]
-        cp = data[30]
-        asf = data[31]
-        silica_gel = data[32]
-        freezing_oil = data[33]
-        t_0 = data[34]
-        melting = data[35]
-        ro_gas = data[36]
-        ro_water = data[37]
+        ro_oil = data[25] 
+        visc_oil = data[26]
+        cp = data[27]
+        asf = data[28]
+        silica_gel = data[29]
+        freezing_oil = data[30]
+        t_0 = data[31]
+        melting = data[32]
+        ro_gas = data[33]
+        ro_water = data[34]
         
  #-------- Данные шестой вкладки ---------#
 
-        ESP_gas = data[38]
+        ESP_gas = data[35]
         d_vnut_nkt = data[39]
         d_vnut_obs = data[40]
         c_neft = data[41]
@@ -3144,7 +3142,7 @@ class TabPanelFour(wx.Panel):
         
 
         font46 = wx.Font(11, wx.MODERN, wx.NORMAL, wx.NORMAL, False, u'Consolas')  
-        text46 = wx.StaticText(self, wx.ID_ANY, "Давление на устье, атм")
+        text46 = wx.StaticText(self, wx.ID_ANY, "Давление на устье, МПа")
         text46.SetFont(font46)
         text46.SetForegroundColour('black')
         self.Show(True)
@@ -6530,7 +6528,6 @@ class HelpWindow(wx.Frame):
         self.Close()
 
     def OnHelp(self, e):
-
         self.splitter.SplitVertically(self.panelLeft, self.panelRight, 0)
         self.panelLeft.SetFocus()
 
