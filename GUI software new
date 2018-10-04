@@ -10,7 +10,6 @@ sys.setdefaultencoding('utf-8')
 
 """
 Программа расчета электрического обогрева нефтяных скважин.
-
 """  
 #------------------------------------------------------------------------------
 
@@ -54,7 +53,7 @@ from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigCanvas
   
 from matplotlib.figure import Figure
 
-# Библиотека для работы с матрицами
+# Библиотека для работы с матрицами, загрузка данных из файла
 import numpy
 
 import numpy as np
@@ -62,6 +61,12 @@ import numpy as np
 from numpy import loadtxt
 
 import time
+
+import matplotlib.pyplot as plt
+
+from matplotlib.ticker import MultipleLocator
+
+# from PIL import Image
 
 # #start
 # start = time.clock()
@@ -739,13 +744,11 @@ class RibbonBar(wx.Dialog):
         num46 = float(valueFortySix)
         num47 = float(valueFortySeven)
         num48 = float(valueFortyEight)
-        num49 = float(valueFortyNine)
-        
+        num49 = float(valueFortyNine)        
         num50 = float(valueFifty)
         num51 = float(valueFiftyOne)
 
         # создаем папку для временных файлов
-
         derictory = 'C:\Users\i.geraskin\Documents\Python script\Program\Temporary' 
 
         if not os.path.exists(derictory):  
@@ -808,10 +811,7 @@ class RibbonBar(wx.Dialog):
         f.write(str(num48) + "\n")
         f.write(str(num49) + "\n")
         f.write(str(num50) + "\n") 
-        f.write(str(num51)) 
-        
-   #------ сюда добавляем оставшиеся строчки -----#
-
+        f.write(str(num51))        
         f.close()
 
         # Считываем данные из промежуточного файла и присваиваем значения переменным,
@@ -970,7 +970,7 @@ class RibbonBar(wx.Dialog):
         splitedData = newvalue.split()
 
         # удаляем весь текст, оставляем только значение
-        del splitedData[:5]
+        del splitedData[:6]
 
         # присваиваем значение переменной
         DownholeNumber = splitedData[0]
@@ -1928,7 +1928,7 @@ class TabPanelOne(wx.Panel):
             self.notebook.SetSelection(1)
             
             # Если все поля заполнены - делаем кнопку 'следующая' неактивной
-            self.NextFirstTabButton.Disable()
+            self.NextFirstTabButton.Enable()
            
         else:
             # если все иначе - выводим сообщение
@@ -1941,14 +1941,14 @@ class TabPanelOne(wx.Panel):
         """ Проверяем первое поле. 1.4 Глубина забоя. """
         
         # Значение поля равно
-        OnePointFour = txt14.GetValue()
+        OnePointFour = txt14.GetValue() # глубина забоя
         
         # Делаем проверку
         if OnePointFour == '':
             txt14.SetToolTip(wx.ToolTip("введите значение"))
         else: 
             # делаем тип string
-            h_bhole = str(OnePointFour) # глубина забоя
+            h_bhole = str(OnePointFour) 
             
             # проверка на отрицательность значения поля
             if h_bhole < '0':
@@ -1959,8 +1959,7 @@ class TabPanelOne(wx.Panel):
                 txt14.SetToolTip(wx.ToolTip("Внимание ошибка! Введено отрицательное значение глубины забоя")) 
             else:
                 # делаем тип float
-                h_bhole = float(OnePointFour)
-                
+                h_bhole = float(OnePointFour)                
                 # усли больше нуля
                 if h_bhole >= 0:
                     # Делаем шрифт черным
@@ -5834,17 +5833,15 @@ class MyProgressDialog(wx.ProgressDialog):
         while keepGoing and count < self.progressMax:
             count = count + 1
             wx.Sleep(1)
-            keepGoing = self.Update(count)
-            
-   
+            keepGoing = self.Update(count)            
+#--------------------------------------------------------------------------------------------------------   
                 
         
         
 
-           #---------------------- вставить сюда строчки расчета --------------------------#
+           #------ вставить сюда строчки расчета ------#
         
         
-#****************************************************************************************************
         
         
         # Показываем сообщение что расчет выполнен успешно 
@@ -5869,7 +5866,7 @@ class Viewer(wx.Frame):
     
     #---------------------------------------------------------------------------------------------------        
     def OnOpenFile(self, event):
-
+        
         # This is how you pre-establish a file filter so that the dialog
         # only shows the extension(s) you want it to.
         
@@ -5964,7 +5961,8 @@ class Viewer(wx.Frame):
 ##################################################################################################
 
 class PlotFrame(wx.Frame):
-    help_msg="""  Пункты меню:
+   
+    help_msg = """  Пункты меню:
      Сохранить                       экспорт рисунка графика (png, eps, bmp, jpg) в файл
      Копировать                      копировать изображение графика в системный буфер обмена
      Настройка печати                настройка размера страницы для печати
@@ -5978,23 +5976,35 @@ class PlotFrame(wx.Frame):
 """
   
     start_msg  = """        воспользуйтесь Меню для печати
-        или Ctrl-C чтобы скопировать изображение в буфер  """
+        или Ctrl-C чтобы сохранить изображение """
   
     about_msg =  """    распечатано из wx версия 0.1  03-Aug-2018
         Гераськин Игорь <i.geraskin@okb-gamma.ru>"""
 #---------------------------------------------------------------------------------------  
     def __init__(self):
-        wx.Frame.__init__(self, None, -1, "Результирующий график")
-        self.fig   = Figure((5.0, 3.0), 100)
-        self.canvas= FigCanvas(self, -1, self.fig)
-        self.axes  = self.fig.add_axes([0.15, 0.15, 0.75, 0.75])
-  
-  
+        wx.Frame.__init__(self, None, -1, "Результирующий график")              
+        self.fig  = Figure((5.0, 3.0), dpi = 100)
+        self.canvas = FigCanvas(self, -1, self.fig)
+        self.axes = self.fig.add_axes([0.15, 0.15, 0.75, 0.75])
+        
+        self.print_data = wx.PrintData()
+        self.clip = wx.Clipboard()
+        self.x = wx.BitmapDataObject()
+        
+        imageFile = 'export_plot.jpg'
+        self.bmp = wx.Bitmap(imageFile)
+        
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self.canvas, 1, wx.LEFT|wx.TOP|wx.GROW)
         sizer.Add(wx.StaticText(self,-1, self.start_msg), 0, wx.ALIGN_LEFT|wx.TOP)
   
         self.canvas.Bind(wx.EVT_KEY_DOWN, self.onKeyEvent)
+    
+        # Добавляем иконку в верхний левый угол главного окна        
+        # Размещаем картинку
+        icon = wx.Icon('graph.png', wx.BITMAP_TYPE_PNG)
+        # Показываем в окне
+        self.SetIcon(icon)
   
         self.SetSizer(sizer)
         self.Fit()
@@ -6002,7 +6012,9 @@ class PlotFrame(wx.Frame):
         self.Plot_Data()
 #------------------------------------------------------------------------------------------  
     def Build_Menus(self):
+        
         """ создаем меню """
+        
         MENU_EXIT  = wx.NewIdRef()
         MENU_SAVE  = wx.NewIdRef()
         MENU_PRINT = wx.NewIdRef()
@@ -6014,17 +6026,17 @@ class PlotFrame(wx.Frame):
         menuBar = wx.MenuBar()
   
         f0 = wx.Menu()
-        f0.Append(MENU_SAVE,   "&Экспорт изображения",   "Сохранить изображение графика")
+        f0.Append(MENU_SAVE, "&Экспорт изображения", "Сохранить изображение графика")
         f0.AppendSeparator()
-        f0.Append(MENU_PSETUP, "Настройка страницы...",    "Нстройка принтера")
+        f0.Append(MENU_PSETUP, "Настройка страницы...", "Нстройка принтера")
         f0.Append(MENU_PREVIEW,"Предварительный просмотр...", "Предварительный просмотр")
-        f0.Append(MENU_PRINT,  "&Печать",           "Печать графика")
+        f0.Append(MENU_PRINT,"&Печать","Печать графика")
         f0.AppendSeparator()
-        f0.Append(MENU_EXIT,   "В&ыход", "Выход")
-        menuBar.Append(f0,     "&Файл");
+        f0.Append(MENU_EXIT,"В&ыход", "Выход")
+        menuBar.Append(f0, "&Файл");
   
         f1 = wx.Menu()
-        f1.Append(MENU_HELP, "Краткий справочник",  "Краткий справочник")
+        f1.Append(MENU_HELP, "Краткий справочник", "Краткий справочник")
   
         menuBar.Append(f1, "&Помощь");
   
@@ -6038,35 +6050,42 @@ class PlotFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.onExit ,          id=MENU_EXIT)
         self.Bind(wx.EVT_MENU, self.onHelp,           id=MENU_HELP)
         
-        # initialize the print data and set some default values
+        # инициализация данных для печати и установка величин по умолчанию 
         self.pdata = wx.PrintData()
         self.pdata.SetPaperId(wx.PAPER_LEGAL)
         self.pdata.SetOrientation(wx.LANDSCAPE)
-        self.margins = (wx.Point(1,10), wx.Point(1,10))
+        self.margins = (wx.Point(1,15), wx.Point(1,15))
 #------------------------------------------------------------------------------------------
     # 
-    def onPrinterSetup(self,event=None):
-        self.canvas.Printer_Setup(event=event)
+    def onPrinterSetup(self, bmp):
+        
+        """ настройка печати """
+        
+        data = wx.PageSetupDialogData(self.print_data)
+
+        # Make a copy of our print data for the setup dialog
+        dlg_data = wx.PageSetupDialogData(self.print_data)
+        print_dlg = wx.PageSetupDialog(self, dlg_data)
+        if print_dlg.ShowModal() == wx.ID_OK:
+            # Update the printer data with the changes from
+            # the setup dialog.
+            newdata = dlg_data.GetPrintData()
+            self.print_data = wx.PrintData(newdata)
+            paperid = dlg_data.GetPaperId()
+            self.print_data.SetPaperId(paperid)
+        print_dlg.Destroy()
 
 #------------------------------------------------------------------------------------------  
     def onPrinterPreview(self, bmp):
-#     def onPrinterPreview(self,event=None):
-#         self.canvas.Printer_Preview(event=event)
-#         def Preview(self, bmp):
-
-        """Show the print preview """
-
-        data = wx.PrintDialogData(self.pdata)
-        picture = self.canvas.GetValue()
         
-        printout1 = TextDocPrintout(picture, "title", self.margins)
-        printout2 = None
-        preview = wx.PrintPreview(printout1, printout2, self.pdata)
+        """ предварительный просмотр графика """
+        
+        printout = self.CreatePrintout(bmp)
+        printout2 = self.CreatePrintout(bmp)
+        preview = wx.PrintPreview(printout, printout2, self.print_data)
         preview.SetZoom(100)
         if preview.IsOk():
-            pre_frame = wx.PreviewFrame(preview,
-                                        self.parent,
-                                        "Print Preview")
+            pre_frame = wx.PreviewFrame(preview, self.parent, "Print Preview")
             # The default size of the preview frame
             # sometimes needs some help.
             dsize = wx.GetDisplaySize()
@@ -6077,38 +6096,113 @@ class PlotFrame(wx.Frame):
             pre_frame.Show()
         else:
             # Error
-            wx.MessageBox("Failed to create print preview", "Ошибка печати", style=wx.ICON_ERROR|wx.OK)
+            wx.MessageBox("Невозможно создать предварительный просмотр", "Ошибка печати", style=wx.ICON_ERROR|wx.OK)        
+#------------------------------------------------------------------------------------------------------------  
+    def onPrint(self, event):
+       
+        """ печать графика """
         
-#------------------------------------------------------------------------------------------  
-    def onPrint(self,event=None):
-        self.canvas.Printer_Print(event=event)
+        pd = wx.PrintData()
+
+        pd.SetPrinterName("")
+        pd.SetOrientation(wx.PORTRAIT)
+        pd.SetPaperId(wx.PAPER_A4)
+        pd.SetQuality(wx.PRINT_QUALITY_DRAFT)
+        # Black and white printing if False.
+        pd.SetColour(True)
+        pd.SetNoCopies(1)
+        pd.SetCollate(True)
+
+        #------------
+
+        pdd = wx.PrintDialogData()
+
+        pdd.SetPrintData(pd)
+        pdd.SetMinPage(1)
+        pdd.SetMaxPage(1)
+        pdd.SetFromPage(1)
+        pdd.SetToPage(1)
+        pdd.SetPrintToFile(False)
         
-#------------------------------------------------------------------------------------------
-    def onClipboard(self,event=None):
-        self.canvas.Copy_to_Clipboard(event=event)
-        msg = "Это работает отлично!"
-        print (msg)
+        #------------
+
+        dlg = wx.PrintDialog(self, pdd)
+
+        if dlg.ShowModal() == wx.ID_OK:
+            dc = dlg.GetPrintDC()
+
+#             dc.StartDoc("My document title")
+            dc.StartPage()
+
+            # (wx.MM_METRIC) ---> Each logical unit is 1 mm.
+            # (wx.MM_POINTS) ---> Each logical unit is a "printer point" i.e.
+#             dc.SetMapMode(wx.MM_POINTS)
+
+#             dc.SetTextForeground("black")
+#             dc.SetFont(wx.Font(20, wx.SWISS, wx.NORMAL, wx.BOLD))
+            dc.DrawBitmap(self.bmp, 100, 100)
+
+            dc.EndPage()
+#             dc.EndDoc()
+            del dc
+
+        else :
+            dlg.Destroy()
+            
+#------------------------------------------------------------------------------------------------------------
+    def onClipboard(self, event):
         
-#------------------------------------------------------------------------------------------
-    def onKeyEvent(self,event=None):
-        """ копируем изображение в буфер обмена """
+        """ копирование в буфер обмена """
         
-        if event == None: return
-        key = event.KeyCode()
-        if (key < wx.WXK_SPACE or  key > 255):  return
+        # Сделать скриншот всей зоны DC (контекста устройства)
+        screen = wx.ScreenDC()
+        
+        size = screen.GetSize()
+        
+        # Создать битмап, в котором сохранится скриншот
+        bmp = wx.EmptyBitmap(size[0], size[1])
+        
+        # Создать в памяти DC, который будет использован непосредственно для скриншота
+        mem = wx.MemoryDC(bmp)
+        
+        #Blit в данном случае скопируйте сам экран в кэш памяти
+        # и, таким образом, он попадёт в битмап
+        mem.Blit(0, 0, size[0], size[1], screen, 0, 0)
+        
+        del mem  # Release bitmap
+        
+        # сохраняем скриншот в файл
+        bmp.SaveFile('screenshot.png', wx.BITMAP_TYPE_PNG)
+        
+        # выводим сообщение что все удачно
+        wx.MessageBox("График успешно сохранен!", "Сообщение", style=wx.OK | wx.ICON_INFORMATION)  
+    
+#-------------------------------------------------------------------------------------------------------------
+    def onKeyEvent(self, event=None):
+        
+        """ отслеживаем нажатие """
+        
+        if event == None: 
+            return
+        
+        key = event.GetKeyCode()
+        
+        if (key < wx.WXK_SPACE or  key > 255):
+            return
   
         if (event.ControlDown() and chr(key)=='C'): # Ctrl-C
-            self.onClipboard(event=event)
-            
+            self.onClipboard(self)            
 #------------------------------------------------------------------------------------------
     def onHelp(self, event=None):
-        """ вызываем спревку """
+        
+        """ вызываем справку """
+        
         dlg = wx.MessageDialog(self, self.help_msg, "Краткий справочник", wx.OK | wx.ICON_INFORMATION)
         dlg.ShowModal()
-        dlg.Destroy()
-        
+        dlg.Destroy() 
 #------------------------------------------------------------------------------------------  
     def onExport(self,event=None):
+        
         """ сохраняем изображение в файл """
         
         file_choices = "JPG (*.jpg)|*.jpg|" \
@@ -6120,7 +6214,7 @@ class PlotFrame(wx.Frame):
         thisdir  = os.getcwd()
   
         dlg = wx.FileDialog(self, message='Сохранение изображения',
-                            defaultDir = thisdir, defaultFile='plot.jpg',
+                            defaultDir = thisdir, defaultFile='export_plot.jpg',
                             wildcard=file_choices, style=wx.FD_SAVE)
   
         if dlg.ShowModal() == wx.ID_OK:
@@ -6129,24 +6223,88 @@ class PlotFrame(wx.Frame):
             
             if (path.find(thisdir) ==  0):
                 path = path[len(thisdir)+1:]
-            print('Сохраняем график в %s' % path)
-            
+                
+#             print('Сохраняем график в %s' % path)            
 #---------------------------------------------------------------------------------------  
     def onExit(self,event=None):
-        self.Destroy()
         
+        """ выход из окна с графиком """
+        
+        self.Destroy()        
 #---------------------------------------------------------------------------------------  
     def Plot_Data(self):
-        """ строим график """
         
-        t = numpy.arange(0.0,5.0,0.01)
-        s = numpy.sin(2.0*numpy.pi*t)
-        c = numpy.cos(0.4*numpy.pi*t)
-        
-       
-        self.axes.plot(t,s)
-        self.axes.plot(t,c)
+        """ строим график """ 
 
+ # Готовим данные 
+
+        # разбиваем глубину забоя по 1 м и записываем значения в файл
+
+        # задаем пустой список
+        b =[]
+
+        # задаем начальное значение шага
+        h = 0 # начальный уровень от устья скважины
+        
+        H=3136 # задаем глубину до забоя 
+
+        while h <= H:    
+            b.append(h)
+            x = np.asarray(b)
+            # задаем местоположение файла
+            path = 'C:\Users\i.geraskin\Documents\Python script\Program\Temporary\depth.txt'
+            # записываем результат в промежуточный файл
+            np.savetxt(path, x, fmt = '%4.1f', delimiter = ' ')
+            h += 1 # задаем шаг
+
+ # Рисуем график
+
+# считываем значения параметров из файла
+
+        # задаем путь 
+        filename = "C:\Users\i.geraskin\Documents\Python script\Program\Termogramma.txt"
+        filename1 = "C:\Users\i.geraskin\Documents\Python script\Program\T_par.txt"
+        filename2 = "C:\Users\i.geraskin\Documents\Python script\Program\T_neft_bez_ob_nom_d.txt"
+
+        # считываем значения
+        y = loadtxt(filename, delimiter = " ", unpack=False)
+        y1 = loadtxt(filename1, delimiter = " ", unpack=False)
+        y2 = loadtxt(filename2, delimiter = " ", unpack=False)
+
+        # Положение осей на графике
+        self.axes.xaxis.tick_top()
+        self.axes.invert_yaxis()
+
+        # Строим графики
+        self.axes.plot(y, x)  # геотерма
+        self.axes.plot(y1, x) # парафины
+        self.axes.plot(y2, x) # дебит
+
+        # вид разметки осей
+        ml_y = MultipleLocator(100) # ось ординат 
+        ml_x = MultipleLocator(1) # ось абсцисс
+
+        # рисуем разметку осей (абсцисс и ординат)
+        self.axes.xaxis.set_minor_locator(ml_x)
+        self.axes.xaxis.set_tick_params(which='minor', right = 'on')
+
+        self.axes.yaxis.set_minor_locator(ml_y)
+        self.axes.yaxis.set_tick_params(which='minor', right = 'off')
+
+
+        # задаем пределы значений по осям
+        self.axes.set_xlim(-20, 100) # ось X
+        self.axes.set_ylim(3200, 0) # ось Y
+
+        # выводим надписи под осями
+        self.axes.set_ylabel(u'Глубина скважины, м')
+        self.axes.set_xlabel(u'Температура, C')
+
+        # Рисуем легенду
+        self.axes.legend([u'геотерма', u'парафины', u'ном. дебит'], fontsize = 'medium')
+
+        # Рисуем сетку на графике
+        self.axes.grid(True)
 ##################################################################################################  
 #--------------------------------------- 'Печать отчета' ----------------------------------------#
 ##################################################################################################
@@ -6404,10 +6562,11 @@ class PrintFrameworkSample(wx.Frame):
     def OnPrintPreview(self, evt):
         data = wx.PrintDialogData(self.pdata)
         text = self.tc.GetValue() 
-        printout1 = TextDocPrintout(text, "название", self.margins)
-#         printout2 = None
+        
+        printout = TextDocPrintout(text, "название", self.margins)
+        printout2 = None
         printout2 = TextDocPrintout(text, "название", self.margins)
-        preview = wx.PrintPreview(printout1, printout2, data)
+        preview = wx.PrintPreview(printout, printout2, data)
 
         if not preview.Ok():
             wx.MessageBox("Невозможно открыть предварительный просмотр!", "Ошибка", style=wx.ICON_ERROR|wx.OK)
@@ -6422,6 +6581,8 @@ class PrintFrameworkSample(wx.Frame):
 #             height = dsize.GetHeight() - 100
 #             frame.SetInitialSize((width, height))
             frame.Initialize()
+            frame.SetPosition(self.GetPosition())
+            frame.SetSize(self.GetSize())
             frame.Show()
 
 #--------------------------------------------------------------------------------------------
@@ -6442,7 +6603,7 @@ class PrintFrameworkSample(wx.Frame):
                 "Ошибка печати", style=wx.ICON_ERROR|wx.OK)
         else:
             data = printer.GetPrintDialogData()        # сохраняем копию данных для печати в будущем
-            self.pdata = wx.PrintData(data.GetPrintData()) # force a copy
+            self.pdata = wx.PrintData(data.GetPrintData()) # принудительное копирование
         printout.Destroy()
 
 ##################################################################################################  
