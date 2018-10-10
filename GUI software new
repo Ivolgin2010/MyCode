@@ -66,6 +66,8 @@ import matplotlib.pyplot as plt
 
 from matplotlib.ticker import MultipleLocator
 
+import threading
+
 # from PIL import Image
 
 # #start
@@ -582,17 +584,136 @@ class RibbonBar(wx.Dialog):
         NewWindow = NotebookFrame(None)
         NewWindow.Show()
         
-#----------------------------------------------------------------------------------------------------------------
-# Запускаем расчет
+##################################################################################################  
+#------------------------------------- Запускаем расчет -----------------------------------------#
+##################################################################################################
 
-    def OnRunCalculation(self, event):
-        """ запускаем расчет """       
+#**********************************************************************************************************
+#     def OnRunCalculation(self, evt):
+        
+#         """ запускаем расчет """      
+        
+        
+# #         dialog = MyProgressDialog()
+# #         dialog.Show()
+# #         dialog.Destroy()
+
+#         self.maxPercent = 100
+#         self.percent = 0
+
+#         self.StartThread(self.DoWork)
+
+# #---------------------------------------------------------------------------------
+#     def StartThread(self, func, *args):
+        
+#         """ обработка многопоточности """
+        
+#         thread = threading.Thread(target=func, args=args)
+#         thread.setDaemon(True)
+#         thread.start()
+
+# #---------------------------------------------------------------------------------
+#     def showProgress(self):
+        
+#         """ показываем окно прогресса """
+        
+#         self.progress = wx.ProgressDialog("Расчет выполняется", "пожалуйста, ждите ...", maximum=self.maxPercent, parent=self, style=wx.PD_SMOOTH|wx.PD_AUTO_HIDE)
+        
+# #         style=wx.PD_ELAPSED_TIME | wx.PD_REMAINING_TIME | wx.PD_AUTO_HIDE
+# #         style=wx.PD_SMOOTH|wx.PD_AUTO_HIDE
+
+# #-----------------------------------------------------------------------------------------------------------------------------
+#     def destoryProgress(self):
+        
+#         """ удаляем окно прогресса """
+        
+#         self.progress.Destroy()
+
+# #-----------------------------------------------------------------------------------------------------------------------------
+#     def updateProgress(self, percent):
+        
+#         """ обновляем окно прогресса """
+        
+#         keepGoing = True
+#         time.sleep(1)
+#         while keepGoing and self.percent < percent:
+#             self.percent += 1
+#             (keepGoing, skip) = self.progress.Update(self.percent)
+#             time.sleep(0.1)
+
+# #-----------------------------------------------------------------------------------------------------------------------------
+#     def doSomething(self, take_time, taskPercent, say_something):
+        
+#         """  """
+        
+#         time.sleep(take_time)
+#         (keepGoing, skip) = self.progress.Update(taskPercent, say_something + " выполнено!")
+
+# #-----------------------------------------------------------------------------------------------------------------------------
+#     def DoWork(self):
+        
+#         """ выполняем зачачу """
+        
+#         self.StartThread(self.showProgress)
+
+#         taskPercent = 25
+#         self.StartThread(self.updateProgress, taskPercent)
+#         self.doSomething(5, taskPercent, "1st")
+
+#         taskPercent +=25
+#         self.StartThread(self.updateProgress, taskPercent)
+#         self.doSomething(5, taskPercent, "2nd")
+
+#         taskPercent +=25
+#         self.StartThread(self.updateProgress, taskPercent)
+#         self.doSomething(5, taskPercent, "3rd")
+
+#         taskPercent +=25
+#         self.StartThread(self.updateProgress, taskPercent)
+#         self.doSomething(5, taskPercent, "4th")
+        
+        
+
+#         self.destoryProgress()
+
+#         # Показываем сообщение что расчет выполнен успешно 
+#         wx.MessageBox('Расчет выполнен успешно!', 'Сообщение', wx.OK | wx.ICON_INFORMATION)
+
+        
+#     #  После расчета выключаем кнопки
+
+#           # Активность кнопки 'Пуск'  
+#         setCalcPanel.EnableButton(ID_Run, False)
+        
+#     # Включаем поля по окончанию расчета
+       
+#         # Активность кнопки 'Создать отчет' 
+#         setResult.EnableButton(ID_CreateReport, True)
+#************************************************************************************************************************
+    def OnRunCalculation(self, evt):
+        
+        """ запускаем расчет """  
         
         dialog = MyProgressDialog()
         dialog.Show()
-        dialog.Destroy()
         
-#----------------------------------------------------------------------------------------------------------------
+        # Показываем сообщение что расчет выполнен успешно 
+        wx.MessageBox('Запись прошла успешно!', 'Сообщение', wx.OK | wx.ICON_INFORMATION) 
+        
+        dialog.Destroy() 
+        #  После расчета выключаем кнопки
+
+        # Активность кнопки 'Пуск'  
+        setCalcPanel.EnableButton(ID_Run, False)
+        
+        # Включаем поля по окончанию расчета
+       
+        # Активность кнопки 'Создать отчет' 
+        setResult.EnableButton(ID_CreateReport, True)
+        
+        
+##########################################################################################################################
+
 # Готовим данные к расчету
 
 
@@ -5815,49 +5936,78 @@ class onSaveAdditionalData(wx.Dialog):
 #--------------------------------- ProgressBar и Расчет -----------------------------------------#
 ##################################################################################################
 
-class MyProgressDialog(wx.ProgressDialog):
+# class MyProgressDialog(wx.ProgressDialog):
     
     
   # Симулируем ход расчета 
 
-    progressMax = 5
+#     progressMax = 5
+# #------------------------------------------------------------------------------------    
+#     def MyProgressDialog(self, evt):
+        
+#         self.StartThread(self.DoWork)
+#         wx.ProgressDialog.__init__(self, "Расчет выполняется", "Осталось времени", self.progressMax,
+#                                    style=wx.PD_ELAPSED_TIME | wx.PD_REMAINING_TIME | wx.PD_AUTO_HIDE)
+
+# #-------------------------------------------------------------------------------------
+#     def Show(self):
+#         keepGoing = True
+#         count = 0
+#         while keepGoing and count < self.progressMax:
+#             count = count + 1
+#             wx.Sleep(1)
+#             keepGoing = self.Update(count)            
+#--------------------------------------------------------------------------------------------------------   
+#         # Показываем сообщение что расчет выполнен успешно 
+#         wx.MessageBox('Расчет выполнен успешно!', 'Сообщение', wx.OK | wx.ICON_INFORMATION)
+
+        
+#     #  После расчета выключаем кнопки
+
+#           # Активность кнопки 'Пуск'  
+#         setCalcPanel.EnableButton(ID_Run, False)
+        
+#     # Включаем поля по окончанию расчета
+       
+#         # Активность кнопки 'Создать отчет' 
+#         setResult.EnableButton(ID_CreateReport, True)
+
+
+class MyProgressDialog(wx.ProgressDialog):
+    
+    """  """
+    
+    
+    H = 3137 # задаем глубину до забоя
 #------------------------------------------------------------------------------------    
     def __init__(self):
-        wx.ProgressDialog.__init__(self, "Расчет выполняется", "Осталось времени", self.progressMax,
-                                   style=wx.PD_ELAPSED_TIME | wx.PD_REMAINING_TIME | wx.PD_AUTO_HIDE)
-
+        wx.ProgressDialog.__init__(self, "Writing data to file", "Please wait...", self.H, style=wx.PD_CAN_ABORT|wx.PD_SMOOTH|wx.PD_AUTO_HIDE)
 #-------------------------------------------------------------------------------------
     def Show(self):
+        global x
         keepGoing = True
-        count = 0
-        while keepGoing and count < self.progressMax:
-            count = count + 1
-            wx.Sleep(1)
-            keepGoing = self.Update(count)            
-#--------------------------------------------------------------------------------------------------------   
-                
         
+        # задаем пустой список
+        b =[]
         
-
-           #------ вставить сюда строчки расчета ------#
-        
-        
-        
-        
-        # Показываем сообщение что расчет выполнен успешно 
-        wx.MessageBox('Расчет выполнен успешно!', 'Сообщение', wx.OK | wx.ICON_INFORMATION)
-
-        
-    #  После расчета выключаем кнопки
-
-          # Активность кнопки 'Пуск'  
-        setCalcPanel.EnableButton(ID_Run, False)
-        
-    # Включаем поля по окончанию расчета
-       
-        # Активность кнопки 'Создать отчет' 
-        setResult.EnableButton(ID_CreateReport, True)
-        
+        # задаем начальное значение шага
+        h = 0 # начальный уровень от устья скважины           
+            
+        while keepGoing and h < self.H:
+            b.append(h)
+            x = np.asarray(b)
+            # задаем местоположение файла
+            path = 'C:\Users\i.geraskin\Documents\Python script\Program\Temporary\depth.txt'
+            
+            # записываем результат в промежуточный файл            
+            np.savetxt(path, x, fmt = '%4.1f', delimiter = ' ')
+            
+            h += 1 # задаем шаг 1 м
+            
+            wx.Sleep(0.01)
+            keepGoing = self.Update(h)           
+#------------------------------------------------------------------------------------
+      
 ##################################################################################################  
 #---------------------------------------- 'Просмотра отчета' ------------------------------------#
 ##################################################################################################
@@ -6238,24 +6388,24 @@ class PlotFrame(wx.Frame):
 
  # Готовим данные 
 
-        # разбиваем глубину забоя по 1 м и записываем значения в файл
+#         # разбиваем глубину забоя по 1 м и записываем значения в файл
 
-        # задаем пустой список
-        b =[]
+#         # задаем пустой список
+#         b =[]
 
-        # задаем начальное значение шага
-        h = 0 # начальный уровень от устья скважины
+#         # задаем начальное значение шага
+#         h = 0 # начальный уровень от устья скважины
         
-        H=3136 # задаем глубину до забоя 
+#         H=3136 # задаем глубину до забоя 
 
-        while h <= H:    
-            b.append(h)
-            x = np.asarray(b)
-            # задаем местоположение файла
-            path = 'C:\Users\i.geraskin\Documents\Python script\Program\Temporary\depth.txt'
-            # записываем результат в промежуточный файл
-            np.savetxt(path, x, fmt = '%4.1f', delimiter = ' ')
-            h += 1 # задаем шаг
+#         while h <= H:    
+#             b.append(h)
+#             x = np.asarray(b)
+#             # задаем местоположение файла
+#             path = 'C:\Users\i.geraskin\Documents\Python script\Program\Temporary\depth.txt'
+#             # записываем результат в промежуточный файл
+#             np.savetxt(path, x, fmt = '%4.1f', delimiter = ' ')
+#             h += 1 # задаем шаг
 
  # Рисуем график
 
