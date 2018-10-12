@@ -60,17 +60,20 @@ import numpy as np
 
 from numpy import loadtxt
 
+# библиотека для работы с датами и временем
 import time
 
+# библиотека для построения графиков
 import matplotlib.pyplot as plt
 
+# библиотека для разметки осей графика
 from matplotlib.ticker import MultipleLocator
 
-import threading
+# import threading
 
 # from PIL import Image
 
-# #start
+#start
 # start = time.clock()
 
 # start = time.time()
@@ -698,7 +701,7 @@ class RibbonBar(wx.Dialog):
         dialog.Show()
         
         # Показываем сообщение что расчет выполнен успешно 
-        wx.MessageBox('Запись прошла успешно!', 'Сообщение', wx.OK | wx.ICON_INFORMATION) 
+        wx.MessageBox('Расчет выполнен успешно!', 'Сообщение', wx.OK | wx.ICON_INFORMATION) 
         
         dialog.Destroy() 
         #  После расчета выключаем кнопки
@@ -5936,43 +5939,6 @@ class onSaveAdditionalData(wx.Dialog):
 #--------------------------------- ProgressBar и Расчет -----------------------------------------#
 ##################################################################################################
 
-# class MyProgressDialog(wx.ProgressDialog):
-    
-    
-  # Симулируем ход расчета 
-
-#     progressMax = 5
-# #------------------------------------------------------------------------------------    
-#     def MyProgressDialog(self, evt):
-        
-#         self.StartThread(self.DoWork)
-#         wx.ProgressDialog.__init__(self, "Расчет выполняется", "Осталось времени", self.progressMax,
-#                                    style=wx.PD_ELAPSED_TIME | wx.PD_REMAINING_TIME | wx.PD_AUTO_HIDE)
-
-# #-------------------------------------------------------------------------------------
-#     def Show(self):
-#         keepGoing = True
-#         count = 0
-#         while keepGoing and count < self.progressMax:
-#             count = count + 1
-#             wx.Sleep(1)
-#             keepGoing = self.Update(count)            
-#--------------------------------------------------------------------------------------------------------   
-#         # Показываем сообщение что расчет выполнен успешно 
-#         wx.MessageBox('Расчет выполнен успешно!', 'Сообщение', wx.OK | wx.ICON_INFORMATION)
-
-        
-#     #  После расчета выключаем кнопки
-
-#           # Активность кнопки 'Пуск'  
-#         setCalcPanel.EnableButton(ID_Run, False)
-        
-#     # Включаем поля по окончанию расчета
-       
-#         # Активность кнопки 'Создать отчет' 
-#         setResult.EnableButton(ID_CreateReport, True)
-
-
 class MyProgressDialog(wx.ProgressDialog):
     
     """  """
@@ -5981,7 +5947,7 @@ class MyProgressDialog(wx.ProgressDialog):
     H = 3137 # задаем глубину до забоя
 #------------------------------------------------------------------------------------    
     def __init__(self):
-        wx.ProgressDialog.__init__(self, "Writing data to file", "Please wait...", self.H, style=wx.PD_CAN_ABORT|wx.PD_SMOOTH|wx.PD_AUTO_HIDE)
+        wx.ProgressDialog.__init__(self, "Выполняется расчет", "Пожалуйста, подождите...", self.H, style=wx.PD_CAN_ABORT|wx.PD_SMOOTH|wx.PD_AUTO_HIDE)
 #-------------------------------------------------------------------------------------
     def Show(self):
         global x
@@ -6372,9 +6338,7 @@ class PlotFrame(wx.Frame):
             self.canvas.print_figure(path, dpi=300)
             
             if (path.find(thisdir) ==  0):
-                path = path[len(thisdir)+1:]
-                
-#             print('Сохраняем график в %s' % path)            
+                path = path[len(thisdir) + 1:]       
 #---------------------------------------------------------------------------------------  
     def onExit(self,event=None):
         
@@ -6386,40 +6350,22 @@ class PlotFrame(wx.Frame):
         
         """ строим график """ 
 
- # Готовим данные 
-
-#         # разбиваем глубину забоя по 1 м и записываем значения в файл
-
-#         # задаем пустой список
-#         b =[]
-
-#         # задаем начальное значение шага
-#         h = 0 # начальный уровень от устья скважины
-        
-#         H=3136 # задаем глубину до забоя 
-
-#         while h <= H:    
-#             b.append(h)
-#             x = np.asarray(b)
-#             # задаем местоположение файла
-#             path = 'C:\Users\i.geraskin\Documents\Python script\Program\Temporary\depth.txt'
-#             # записываем результат в промежуточный файл
-#             np.savetxt(path, x, fmt = '%4.1f', delimiter = ' ')
-#             h += 1 # задаем шаг
-
- # Рисуем график
-
 # считываем значения параметров из файла
 
         # задаем путь 
         filename = "C:\Users\i.geraskin\Documents\Python script\Program\Termogramma.txt"
         filename1 = "C:\Users\i.geraskin\Documents\Python script\Program\T_par.txt"
         filename2 = "C:\Users\i.geraskin\Documents\Python script\Program\T_neft_bez_ob_nom_d.txt"
+        filename3 = "C:\Users\i.geraskin\Documents\Python script\Program\T_neft_nom_d.txt"
+        filename4 = "C:\Users\i.geraskin\Documents\Python script\Program\T_jil_nom_d.txt"
+        
 
         # считываем значения
         y = loadtxt(filename, delimiter = " ", unpack=False)
         y1 = loadtxt(filename1, delimiter = " ", unpack=False)
         y2 = loadtxt(filename2, delimiter = " ", unpack=False)
+        y3 = loadtxt(filename3, delimiter = " ", unpack=False)
+        y4 = loadtxt(filename4, delimiter = " ", unpack=False)
 
         # Положение осей на графике
         self.axes.xaxis.tick_top()
@@ -6429,6 +6375,8 @@ class PlotFrame(wx.Frame):
         self.axes.plot(y, x)  # геотерма
         self.axes.plot(y1, x) # парафины
         self.axes.plot(y2, x) # дебит
+        self.axes.plot(y3, x) # температура жилы
+        self.axes.plot(y4, x) # температура нефти
 
         # вид разметки осей
         ml_y = MultipleLocator(100) # ось ординат 
@@ -6451,7 +6399,7 @@ class PlotFrame(wx.Frame):
         self.axes.set_xlabel(u'Температура, C')
 
         # Рисуем легенду
-        self.axes.legend([u'геотерма', u'парафины', u'ном. дебит'], fontsize = 'medium')
+        self.axes.legend([u'геотерма', u'парафины', u'ном. дебит', u'температура нефти', u'температура жилы'], fontsize = 'medium')
 
         # Рисуем сетку на графике
         self.axes.grid(True)
