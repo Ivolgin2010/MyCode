@@ -173,15 +173,15 @@ class MainFrame(wx.Frame):
         toolbar = self.CreateToolBar()
         
         # Добавляем картинку значка
-        ToolBarFirstIcon = toolbar.AddTool(wx.ID_ANY, 'Data', wx.Bitmap('C:\Users\i.geraskin\Documents\Python script\Program\data.jpg'), shortHelp="расчет обогрева скважины с ЭЦН")
+        ToolBarFirstIcon = toolbar.AddTool(wx.ID_ANY, 'Data', wx.Bitmap('C:\Users\i.geraskin\Documents\Python script\Program\ESP1.jpg'), shortHelp="расчет обогрева скважины с ЭЦН")
         
         # Добавляем дополнительные иконки
-        ToolBarSecondIcon = toolbar.AddTool(wx.ID_ANY, 'Data', wx.Bitmap('C:\Users\i.geraskin\Documents\Python script\Program\data1.jpg'), 
+        ToolBarSecondIcon = toolbar.AddTool(wx.ID_ANY, 'Data', wx.Bitmap('C:\Users\i.geraskin\Documents\Python script\Program\Oil pump.jpg'), 
                                       shortHelp="расчет обогрева скважины со станком-качалкой")
         
-        ToolBarThirdIcon = toolbar.AddTool(wx.ID_ANY, 'Data', wx.Bitmap('C:\Users\i.geraskin\Documents\Python script\Program\data.jpg'), shortHelp="расчет обогрева скважины газлифт")
+        ToolBarThirdIcon = toolbar.AddTool(wx.ID_ANY, 'Data', wx.Bitmap('C:\Users\i.geraskin\Documents\Python script\Program\Lift.jpg'), shortHelp="расчет обогрева скважины газлифт")
         
-        ToolBarFifthIcon = toolbar.AddTool(wx.ID_ANY, 'Data', wx.Bitmap('C:\Users\i.geraskin\Documents\Python script\Program\data.jpg'), 
+        ToolBarFifthIcon = toolbar.AddTool(wx.ID_ANY, 'Data', wx.Bitmap('C:\Users\i.geraskin\Documents\Python script\Program\Pump.jpg'), 
                                            shortHelp="расчет обогрева скважины с винтовым насосом")
         
         
@@ -2085,7 +2085,7 @@ class TabPanelOne(wx.Panel):
                 # делаем тип float
                 h_bhole = float(OnePointFour)                
                 # усли больше нуля
-                if h_bhole >= 0:
+                if h_bhole >= 0 and h_bhole <= 5000:
                     # Делаем шрифт черным
                     txt14.SetForegroundColour(wx.BLACK)
                     txt14.Refresh()
