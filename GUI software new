@@ -69,6 +69,9 @@ import matplotlib.pyplot as plt
 # библиотека для разметки осей графика
 from matplotlib.ticker import MultipleLocator
 
+# Библиотека для работы с таблицей
+import wx.grid as  gridlib
+
 # import threading
 
 # from PIL import Image
@@ -940,8 +943,10 @@ class RibbonBar(wx.Dialog):
 
         # Считываем данные из промежуточного файла и присваиваем значения переменным,
         #                которые будут участвовать в расчете 
+        
+        path = "C:\Users\i.geraskin\Documents\Python script\Program\Temporary\Treated_Data.txt" 
 
-        data = loadtxt("C:\Users\i.geraskin\Documents\Python script\Program\Temporary\Treated_Data.txt", delimiter=" ", unpack=False)
+        data = loadtxt(path, delimiter = " ", unpack=False)
 
         # Присваиваем значения переменным, которые будут участвовать в расчете
         
@@ -1817,8 +1822,9 @@ class TabPanelOne(wx.Panel):
         num51 = float(valueFiftyOne)
        
         # записываем результат в промежуточный файл
-
-        f = open("C:\Users\i.geraskin\Documents\Python script\Program\Temporary\Treated_Data.txt", "w") 
+        
+        path = "C:\Users\i.geraskin\Documents\Python script\Program\Temporary\Treated_Data.txt"
+        f = open(path, "w") 
         f.write(str(num1) + "\n")
         f.write(str(num2) + "\n")
         f.write(str(num3) + "\n")
@@ -2016,7 +2022,7 @@ class TabPanelOne(wx.Panel):
         number51 = str(txt616.SetValue(u_u))
             
         # Выводим сообщение
-        wx.MessageBox('Данные успешно считаны!', 'Сообщение', wx.OK | wx.ICON_INFORMATION)
+        wx.MessageBox('Данные успешно загружены!', 'Сообщение', wx.OK | wx.ICON_INFORMATION)
 #----------------------------------------------------------------------------------------------------------------        
 # Закрываем окно 
 
@@ -5941,8 +5947,7 @@ class onSaveAdditionalData(wx.Dialog):
 
 class MyProgressDialog(wx.ProgressDialog):
     
-    """  """
-    
+    """  """   
     
     H = 3137 # задаем глубину до забоя
 #------------------------------------------------------------------------------------    
@@ -6137,24 +6142,35 @@ class PlotFrame(wx.Frame):
         MENU_PSETUP = wx.NewIdRef()
         MENU_PREVIEW = wx.NewIdRef()
         MENU_CLIPB = wx.NewIdRef()
+        MENU_REPORT = wx.NewIdRef()
+        MENU_FILE_REPORT = wx.NewIdRef()
         MENU_HELP = wx.NewIdRef()
   
+        # Рисуем меню
         menuBar = wx.MenuBar()
-  
+        
+        # Меню 'Файл'
         f0 = wx.Menu()
-        f0.Append(MENU_SAVE, "&Экспорт изображения", "Сохранить изображение графика")
+        f0.Append(MENU_SAVE, "Экспорт изображения", "Сохранить изображение графика")
         f0.AppendSeparator()
-        f0.Append(MENU_PSETUP, "Настройка страницы...", "Нстройка принтера")
+        f0.Append(MENU_PSETUP, "Настройка страницы...", "Настройка принтера")
         f0.Append(MENU_PREVIEW,"Предварительный просмотр...", "Предварительный просмотр")
-        f0.Append(MENU_PRINT,"&Печать","Печать графика")
+        f0.Append(MENU_PRINT,"Печать","Печать графика")
         f0.AppendSeparator()
-        f0.Append(MENU_EXIT,"В&ыход", "Выход")
-        menuBar.Append(f0, "&Файл");
-  
+        f0.Append(MENU_EXIT,"Выход", "Выход")
+        menuBar.Append(f0, "Файл")
+        
+        # Меню 'Итоговый отчет'
         f1 = wx.Menu()
-        f1.Append(MENU_HELP, "Краткий справочник", "Краткий справочник")
-  
-        menuBar.Append(f1, "&Помощь");
+        f1.Append(MENU_REPORT, "Расчетные параметры электрообогрева", "таблица с расчетными параметрами")
+        f1.AppendSeparator()
+        f1.Append(MENU_FILE_REPORT, "Открыть шаблон отчета", "открываем файл итогового отчета")
+        menuBar.Append(f1, "Результаты расчета")
+        
+        # Меню 'Помощь'
+        f2 = wx.Menu()
+        f2.Append(MENU_HELP, "Краткий справочник", "Краткий справочник")         
+        menuBar.Append(f2, "Помощь")
   
         self.SetMenuBar(menuBar)
   
@@ -6164,13 +6180,31 @@ class PlotFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.onClipboard,      id=MENU_CLIPB)
         self.Bind(wx.EVT_MENU, self.onExport,         id=MENU_SAVE)
         self.Bind(wx.EVT_MENU, self.onExit ,          id=MENU_EXIT)
+        self.Bind(wx.EVT_MENU, self.onFinalReport,    id=MENU_REPORT)
+        self.Bind(wx.EVT_MENU, self.OpenFileReport,   id=MENU_FILE_REPORT)
         self.Bind(wx.EVT_MENU, self.onHelp,           id=MENU_HELP)
+#------------------------------------------------------------------------------------------------------------
         
         # инициализация данных для печати и установка величин по умолчанию 
         self.pdata = wx.PrintData()
         self.pdata.SetPaperId(wx.PAPER_LEGAL)
         self.pdata.SetOrientation(wx.LANDSCAPE)
         self.margins = (wx.Point(1,15), wx.Point(1,15))
+#-------------------------------------------------------------------------------------------------------------------        
+
+    def onFinalReport(self, event):
+        
+        """открываем таблицу с параметрами """
+        
+        frame = FinalReportGrid()
+        frame.Show()        
+#----------------------------------------------------------------------------------------------------------------------
+    def OpenFileReport(self, event):
+        
+        """ открываем итоговый файл отчета """
+        
+        # выводим сообщение что все удачно
+        wx.MessageBox("Вместо этого окна здесь будет открыт файл с итоговым отчетом", "Сообщение", style=wx.OK | wx.ICON_INFORMATION)
 #------------------------------------------------------------------------------------------
     # 
     def onPrinterSetup(self, bmp):
@@ -6403,6 +6437,118 @@ class PlotFrame(wx.Frame):
 
         # Рисуем сетку на графике
         self.axes.grid(True)
+
+############################################################################################################################
+class FinalReportGrid(wx.Frame):
+    
+    """ создаем таблицу параметров """
+    
+#------------------------------------------------------------------------------------------------------------------------ 
+    def __init__(self):
+        wx.Frame.__init__(self, None, wx.ID_ANY, "Параметры системы электрообогрева после прогрева скважины ", size=(580, 350))
+        
+        # Добавляем панель 
+        panel = wx.Panel(self, wx.ID_ANY)
+        grid = gridlib.Grid(panel)
+    
+        # задаем количество строк и колонок
+        grid.CreateGrid(13, 2)
+ 
+        # задаем названия первого и второго столбца таблицы
+        
+        grid.SetColLabelValue(0, "Название параметра")
+        grid.SetColLabelValue(1, "Значение")
+
+    # записываем значения во второй столбец
+        grid.SetCellValue(0, 1, "1 шт.")
+        grid.SetCellAlignment(0, 1, wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
+        
+        grid.SetCellValue(1, 1, "1625")
+        grid.SetCellAlignment(1, 1, wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)    
+    
+        grid.SetCellValue(2, 1, "2")
+        grid.SetCellAlignment(2, 1, wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
+        
+        grid.SetCellValue(3, 1, "20")
+        grid.SetCellAlignment(3, 1, wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
+        
+        grid.SetCellValue(4, 1, "680")
+        grid.SetCellAlignment(4, 1, wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
+        
+        grid.SetCellValue(5, 1, "211")
+        grid.SetCellAlignment(5, 1, wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
+        
+        grid.SetCellValue(6, 1, "450")
+        grid.SetCellAlignment(6, 1, wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
+        
+        grid.SetCellValue(7, 1, "119.1")
+        grid.SetCellAlignment(7, 1, wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
+        
+        grid.SetCellValue(8, 1, "1050")
+        grid.SetCellAlignment(8, 1, wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
+        
+        grid.SetCellValue(9, 1, "85.7")
+        grid.SetCellAlignment(9, 1, wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
+        
+        grid.SetCellValue(10, 1, "143.6")
+        grid.SetCellAlignment(10, 1, wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
+        
+        grid.SetCellValue(11, 1, "42.5")
+        grid.SetCellAlignment(11, 1, wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
+        
+        grid.SetCellValue(12, 1, "172")
+        grid.SetCellAlignment(12, 1, wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
+        
+ 
+    # задаем названия параметров по строкам 
+        grid.SetCellValue(0, 0, u"Stream Tracer 1.0/50-35/50-1120-480-25")
+        grid.AutoSizeColumn(0, setAsMin=True)
+        
+        grid.SetCellValue(1, 0, u"Длина, м")
+        grid.SetCellAlignment(1, 0, wx.ALIGN_LEFT, wx.ALIGN_LEFT)
+    
+        grid.SetCellValue(2, 0, u"Количество зон разной мощности обогрева")
+        grid.SetCellAlignment(2, 0, wx.ALIGN_LEFT, wx.ALIGN_LEFT)
+        
+        grid.SetCellValue(3, 0, u"Длина надземного участка, м")
+        grid.SetCellAlignment(3, 0, wx.ALIGN_LEFT, wx.ALIGN_LEFT)
+        
+        grid.SetCellValue(4, 0, u"Питающее напряжение, В")
+        grid.SetCellAlignment(4, 0, wx.ALIGN_LEFT, wx.ALIGN_LEFT)
+        
+        grid.SetCellValue(5, 0, u"Ток, А")
+        grid.SetCellAlignment(5, 0, wx.ALIGN_LEFT, wx.ALIGN_LEFT)
+        
+        grid.SetCellValue(6, 0, u"Длина горячей (верхней) зоны кабеля, м")
+        grid.SetCellAlignment(6, 0, wx.ALIGN_LEFT, wx.ALIGN_LEFT)
+        
+        grid.SetCellValue(7, 0, u"Линейная мощность горячей зоны, Вт/м")
+        grid.SetCellAlignment(7, 0, wx.ALIGN_LEFT, wx.ALIGN_LEFT)
+                
+        grid.SetCellValue(8, 0, u"Длина участка пониженной мощности, м ")
+        grid.SetCellAlignment(8, 0, wx.ALIGN_LEFT, wx.ALIGN_LEFT)
+        
+        grid.SetCellValue(9, 0, u"Линейная мощность холодной зоны, Вт/м")
+        grid.SetCellAlignment(9, 0, wx.ALIGN_LEFT, wx.ALIGN_LEFT)
+        
+        grid.SetCellValue(10, 0, u"Полная мощность, кВт")
+        grid.SetCellAlignment(10, 0, wx.ALIGN_LEFT, wx.ALIGN_LEFT)
+        
+        grid.SetCellValue(11, 0, u"Устьевая температура жидкости не менее, °С")
+        grid.SetCellAlignment(11, 0, wx.ALIGN_LEFT, wx.ALIGN_LEFT)
+        
+        grid.SetCellValue(12, 0, u"Максимальная температура внутри кабеля, °С")
+     
+        grid.SetCellAlignment(12, 0, wx.ALIGN_LEFT, wx.ALIGN_LEFT)        
+        
+        grid.EnableDragRowSize(True)
+        grid.EnableDragColSize(True)
+        grid.SetRowLabelAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)           
+ 
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(grid, 1, wx.EXPAND, 5)
+        panel.SetSizer(sizer)   
+        
 ##################################################################################################  
 #--------------------------------------- 'Печать отчета' ----------------------------------------#
 ##################################################################################################
