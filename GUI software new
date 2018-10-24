@@ -264,7 +264,7 @@ class MainFrame(wx.Frame):
         """ Вызываем функциональное окно по нажатию на значок    """
         
         # Создаем диалоговое окно
-        dlg = RibbonBar(None, title="Скважина с ЭЦН - Новый расчет", size=(530,180))
+        dlg = RibbonBar(None, title="Скважина с ЭЦН - Новый расчет", size=(420, 180))
         
         # Показываем его
         dlg.ShowModal()
@@ -365,20 +365,20 @@ class RibbonBar(wx.Dialog):
         
 #------------------------ Создаем панель Импорт данных --------------------------------------------------------------
 
-        # Создаем панель 'Импорт данных'
-        DataImportPanel = RB.RibbonPanel(ToolsTab, wx.ID_ANY, "Подготовка данных")
+#         # Создаем панель 'Импорт данных'
+#         DataImportPanel = RB.RibbonPanel(ToolsTab, wx.ID_ANY, "Подготовка данных")
         
-        # Размещаем панель на вкладке
-        ImportDataPanel = RB.RibbonButtonBar(DataImportPanel)
+#         # Размещаем панель на вкладке
+#         ImportDataPanel = RB.RibbonButtonBar(DataImportPanel)
         
-        # Задаем рисунок значка
-        ToolsIconImportData = wx.Bitmap("import2.jpg", wx.BITMAP_TYPE_JPEG)
+#         # Задаем рисунок значка
+#         ToolsIconImportData = wx.Bitmap("import2.jpg", wx.BITMAP_TYPE_JPEG)
         
-        # Задаем название значка и всплывающей подсказки
-        ImportDataPanel.AddSimpleButton(ID_ImportData, "Подготовка данных", ToolsIconImportData, 'подготовить данные для расчета')
+#         # Задаем название значка и всплывающей подсказки
+#         ImportDataPanel.AddSimpleButton(ID_ImportData, "Подготовка данных", ToolsIconImportData, 'подготовить данные для расчета')
         
-        # Вызываем окно 'Ввод данных'
-        ImportDataPanel.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.OnImportData, id=ID_ImportData)
+#         # Вызываем окно 'Ввод данных'
+#         ImportDataPanel.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.OnImportData, id=ID_ImportData)
         
             
 #----------------------- Создаем панель Расчет ------------------------------------------------------------------------
@@ -401,7 +401,7 @@ class RibbonBar(wx.Dialog):
         
 #------------------------ Создаем панель Результаты расчета -------------------------------------------------------
 
-        PlotPanel = RB.RibbonPanel(ToolsTab, wx.ID_ANY, "Результаты расчета")
+        PlotPanel = RB.RibbonPanel(ToolsTab, wx.ID_ANY, "Обработка результатов")
         
         # Размещаем панель на вкладке
         setResult = RB.RibbonButtonBar(PlotPanel)
@@ -490,8 +490,8 @@ class RibbonBar(wx.Dialog):
         # Активность кнопки 'Ввод данных'  
         setDataPanel.EnableButton(ID_SetData, True)
         
-        # Активность кнопки 'Импорт данных'  
-        ImportDataPanel.EnableButton(ID_ImportData, False)
+#         # Активность кнопки 'Импорт данных'  
+#         ImportDataPanel.EnableButton(ID_ImportData, False)
         
         # Активность кнопки 'Пуск'  
         setCalcPanel.EnableButton(ID_Run, False)
@@ -717,319 +717,6 @@ class RibbonBar(wx.Dialog):
         # Активность кнопки 'Создать отчет' 
         setResult.EnableButton(ID_CreateReport, True)
         
-        
-##########################################################################################################################
-
-# Готовим данные к расчету
-
-
-    def OnImportData(self, event):
-        
-        """готовим анкетные данные для расчета """
-        
-        global thispath
-        
-        # Считываем данные из файла
-        wildcard = "Text source (*.txt)|*.txt|" \
-            "All files (*.*)|*.*"
-    
-        self.currentDirectory = os.getcwd()
-
-        dlg = wx.FileDialog(self, message="Открытие документа", defaultDir=self.currentDirectory, 
-                            defaultFile="", wildcard=wildcard, style=wx.FD_OPEN)
-        
-        if dlg.ShowModal() == wx.ID_OK:
-            
-            thispath = dlg.GetPath()
-            
-            report = open(thispath, "r") 
-            
-        data_import = report.readlines()
-            
-        report.close()
- 
-        # удаляем строки заголовка с 0 по 16 строку 
-        del data_import[0:15]
-        
-        # объединяем все значения в один список
-        value = "".join(data_import)
-    
-        # разделяем список на части
-        devOne = value.split()
-
-        # удаляем весь лишний текст до первого значения
-        del devOne[:3]
-
-        # присваиваем значение переменным
-        valueOne = devOne[0]
-        valueTwo = devOne[7]
-        valueThree = devOne[11]
-        valueFour = devOne[16]
-        valueFive = devOne[21]
-        valueSix = devOne[28]
-        valueSeven = devOne[35]
-        valueEight = devOne[40]
-        valueNine = devOne[48]
-        valueTen = devOne[56]
-
-        valueEleven = devOne[65]
-        valueTwelve = devOne[73]
-        valueThirteen = devOne[80]
-        valueFourteen = devOne[85]
-        valueFifteen = devOne[90]
-        valueSixteen = devOne[99]
-        valueSeventeen = devOne[104]
-        valueEighteen = devOne[108]
-        valueNineteen = devOne[116]
-        valueTwenty = devOne[122]
-        
-        valueTwentyOne = devOne[127]
-        valueTwentyTwo = devOne[136]
-        valueTwentyThree = devOne[142]
-        valueTwentyFour = devOne[150]
-        valueTwentyFive = devOne[159]
-        valueTwentySix = devOne[167]
-        valueTwentySeven = devOne[172]
-        valueTwentyEight = devOne[178]
-        valueTwentyNine = devOne[184]
-        valueThirty = devOne[191]
-
-        valueThirtyOne = devOne[197] 
-        valueThirtyTwo = devOne[204]
-        valueThirtyThree = devOne[210] 
-        valueThirtyFour = devOne[215]
-        valueThirtyFive = devOne[220]
-        valueThirtySix = devOne[231]
-        valueThirtySeven = devOne[236]
-        valueThirtyEight = devOne[241]
-        valueThirtyNine = devOne[246]
-        valueForty = devOne[251]
-
-        valueFortyOne = devOne[256]
-        valueFortyTwo = devOne[260]
-        valueFortyThree = devOne[271]
-        valueFortyFour = devOne[276]
-        valueFortyFive = devOne[282]
-        valueFortySix = devOne[288]
-        valueFortySeven = devOne[296]
-        valueFortyEight = devOne[304]
-        valueFortyNine = devOne[308]
-        valueFifty = devOne[314]
-
-        valueFiftyOne = devOne[321]
- 
-        # преобразуем полученное значение в число
-        num1 = float(valueOne)
-        num2 = float(valueTwo)
-        num3 = float(valueThree)
-        num4 = float(valueFour)
-        num5 = float(valueFive)
-        num6 = float(valueSix)
-        num7 = float(valueSeven)
-        num8 = float(valueEight)
-        num9 = float(valueNine)
-        num10 = float(valueTen)
-        
-        num11 = float(valueEleven)
-        num12 = float(valueTwelve)
-        num13 = float(valueThirteen)
-        num14 = float(valueFourteen)
-        num15 = float(valueFifteen)
-        num16 = float(valueSixteen)
-        num17 = float(valueSeventeen)
-        num18 = float(valueEighteen)
-        num19 = float(valueNineteen)
-        num20 = float(valueTwenty)
-        
-        num21 = float(valueTwentyOne)
-        num22 = float(valueTwentyTwo)
-        num23 = float(valueTwentyThree)
-        num24 = float(valueTwentyFour)
-        num25 = float(valueTwentyFive)
-        num26 = float(valueTwentySix)
-        num27 = float(valueTwentySeven)
-        num28 = float(valueTwentyEight)
-        num29 = float(valueTwentyNine)
-        num30 = float(valueThirty)
-        
-        num31 = float(valueOne)
-        num32 = float(valueThirtyTwo)
-        num33 = float(valueThirtyThree)
-        num34 = float(valueThirtyFour)
-        num35 = float(valueThirtyFive)
-        num36 = float(valueThirtySix)
-        num37 = float(valueThirtySeven)
-        num38 = float(valueThirtyEight)
-        num39 = float(valueThirtyNine)
-        num40 = float(valueForty)
-        
-        num41 = float(valueFortyOne)
-        num42 = float(valueFortyTwo)
-        num43 = float(valueFortyThree)
-        num44 = float(valueFortyFour)
-        num45 = float(valueFortyFive)
-        num46 = float(valueFortySix)
-        num47 = float(valueFortySeven)
-        num48 = float(valueFortyEight)
-        num49 = float(valueFortyNine)        
-        num50 = float(valueFifty)
-        num51 = float(valueFiftyOne)
-
-        # создаем папку для временных файлов
-        derictory = 'C:\Users\i.geraskin\Documents\Python script\Program\Temporary' 
-
-        if not os.path.exists(derictory):  
-            os.makedirs(derictory)
-
-        # записываем результат в промежуточный файл
-
-        f = open("C:\Users\i.geraskin\Documents\Python script\Program\Temporary\Treated_Data.txt", "w") 
-        f.write(str(num1) + "\n")
-        f.write(str(num2) + "\n")
-        f.write(str(num3) + "\n")
-        f.write(str(num4) + "\n")
-        f.write(str(num5) + "\n")
-        f.write(str(num6) + "\n")
-        f.write(str(num7) + "\n")
-        f.write(str(num8) + "\n")
-        f.write(str(num9) + "\n")
-        f.write(str(num10) + "\n")
-        
-        f.write(str(num11) + "\n")
-        f.write(str(num12) + "\n")
-        f.write(str(num13) + "\n")
-        f.write(str(num14) + "\n")
-        f.write(str(num15) + "\n")
-        f.write(str(num16) + "\n")
-        f.write(str(num17) + "\n")
-        f.write(str(num18) + "\n")
-        f.write(str(num19) + "\n")
-        f.write(str(num20) + "\n")
-        
-        f.write(str(num21) + "\n")
-        f.write(str(num22) + "\n")
-        f.write(str(num23) + "\n")
-        f.write(str(num24) + "\n")
-        f.write(str(num25) + "\n")
-        f.write(str(num26) + "\n")
-        f.write(str(num27) + "\n")
-        f.write(str(num28) + "\n")
-        f.write(str(num29) + "\n")
-        f.write(str(num30) + "\n")
-        
-        f.write(str(num31) + "\n")
-        f.write(str(num32) + "\n")
-        f.write(str(num33) + "\n")
-        f.write(str(num34) + "\n")
-        f.write(str(num35) + "\n")
-        f.write(str(num36) + "\n")
-        f.write(str(num37) + "\n")
-        f.write(str(num38) + "\n")
-        f.write(str(num39) + "\n")
-        f.write(str(num40) + "\n")
-        
-        f.write(str(num41) + "\n")
-        f.write(str(num42) + "\n")
-        f.write(str(num43) + "\n")
-        f.write(str(num44) + "\n")
-        f.write(str(num45) + "\n")
-        f.write(str(num46) + "\n")
-        f.write(str(num47) + "\n")
-        f.write(str(num48) + "\n")
-        f.write(str(num49) + "\n")
-        f.write(str(num50) + "\n") 
-        f.write(str(num51))        
-        f.close()
-
-        # Считываем данные из промежуточного файла и присваиваем значения переменным,
-        #                которые будут участвовать в расчете 
-        
-        path = "C:\Users\i.geraskin\Documents\Python script\Program\Temporary\Treated_Data.txt" 
-
-        data = loadtxt(path, delimiter = " ", unpack=False)
-
-        # Присваиваем значения переменным, которые будут участвовать в расчете
-        
- #---------- Данные первой вкладки -----------#
-        
-        h_bhole = data[0]
-        h_obs = data[1]
-        d_vnesh_obs = data[2]
-        h_nkt = data[3] 
-        d_vnesh_nkt = data[4]
-        h_stat = data[5]
-        u_ESP = data[6]
-        f_ESP = data[7]
-        i_ESP = data[8]
-
-#  --------- Данные второй вкладки ----------#
-
-        t_bhole = data[9]
-        h_ice = data[10]
-        t_month = data[11] 
-        t_maxh = data[12] 
-
-#  -------- Данные третьей вкладки -----------#
-
-        ro  = data[13]
-        visc_plast = data[14]
-        pn_plast = data[15]
-        tkpn = data[16]
-        g_plast = data[17]
-
-#  -------- Данные четвертой вкладки ----------#
-
-        nomdebit = data[18]
-        debit_oil = data[19]  
-        g = data[20]
-        water = data[21]
-        h_din = data[22]
-        p_wellhead = data[23]
-        t_wellhead = data[24]
-        debit = data[25]
-        scraper = data[26]
-        h_aspo = data[27]
-
-#-------- Данные пятой вкладки -------#
-
-        ro_oil = data[28] 
-        visc_oil = data[29]
-        cp = data[30]
-        asf = data[31]
-        silica_gel = data[32]
-        freezing_oil = data[33]
-        t_0 = data[34]
-        melting = data[35]
-        ro_gas = data[36]
-        ro_water = data[37]
-        
- #-------- Данные шестой вкладки ---------#
-
-        ESP_gas = data[38]
-        d_vnut_nkt = data[39]
-        d_vnut_obs = data[40]
-        c_neft = data[41]
-        kll = data[42]
-        holkon = data[43]
-        sh_gr = data[44]
-        glub_zap = data[45]
-        min_T_zap = data[46]
-        ustavka = data[47]
-        d_kab = data[48]
-        long_ = data[49]
-        u_u = data[50]
-#------------------------------------------------------------------------------------------------------        
-        
-        # Выводим сообщение об успешности сохранения
-        wx.MessageBox('Данные к расчету подготовленны!', 'Сообщение', wx.OK | wx.ICON_INFORMATION)
-        
-        # Активность кнопки 'Импорт данных'  
-        ImportDataPanel.EnableButton(ID_ImportData, False)
-        
-        # Делаем активной кнопку пуска
-        setCalcPanel.EnableButton(ID_Run, True)
-
-        
 ########################################################  
 #-------------- 'Создаем отчет' -----------------------#
 ########################################################
@@ -1099,7 +786,7 @@ class RibbonBar(wx.Dialog):
         splitedData = newvalue.split()
 
         # удаляем весь текст, оставляем только значение
-        del splitedData[:6]
+        del splitedData[:5]
 
         # присваиваем значение переменной
         DownholeNumber = splitedData[0]
@@ -4794,9 +4481,9 @@ class TabPanelSix(wx.Panel):
             # Активность кнопки 'Ввод данных'  
             setDataPanel.EnableButton(ID_SetData, False)
             
-            # Делаем неактивной кнопку 'Импорт данных'  
-            ImportDataPanel.EnableButton(ID_ImportData, True)
-
+            # готовим данные для расчета
+            self.OnImportData(self)
+            
             # Закрываем ноутбук    
             self.GetTopLevelParent().Destroy()  
             
@@ -4810,8 +4497,318 @@ class TabPanelSix(wx.Panel):
         """ Закрываем ноутбук с данными """   
         
         # Закрываем ноутбук    
-        self.GetTopLevelParent().Destroy()
+        self.GetTopLevelParent().Destroy()        
+#-----------------------------------------------------------------------------------------------------------------
+
+# Готовим данные к расчету
+
+
+    def OnImportData(self, event):
         
+        """готовим анкетные данные для расчета """
+        
+        global thispath
+        
+#         # Считываем данные из файла
+#         wildcard = "Text source (*.txt)|*.txt|" \
+#             "All files (*.*)|*.*"
+    
+#         self.currentDirectory = os.getcwd()
+
+#         dlg = wx.FileDialog(self, message="Открытие документа", defaultDir=self.currentDirectory, 
+#                             defaultFile="", wildcard=wildcard, style=wx.FD_OPEN)
+        
+#         if dlg.ShowModal() == wx.ID_OK:
+            
+#         thispath = dlg.GetPath()
+            
+        report = open(thispath, "r") 
+            
+        data_import = report.readlines()
+            
+        report.close()
+ 
+        # удаляем строки заголовка с 0 по 16 строку 
+        del data_import[0:15]
+        
+        # объединяем все значения в один список
+        value = "".join(data_import)
+    
+        # разделяем список на части
+        devOne = value.split()
+
+        # удаляем весь лишний текст до первого значения
+        del devOne[:3]
+
+        # присваиваем значение переменным
+        valueOne = devOne[0]
+        valueTwo = devOne[7]
+        valueThree = devOne[11]
+        valueFour = devOne[16]
+        valueFive = devOne[21]
+        valueSix = devOne[28]
+        valueSeven = devOne[35]
+        valueEight = devOne[40]
+        valueNine = devOne[48]
+        valueTen = devOne[56]
+
+        valueEleven = devOne[65]
+        valueTwelve = devOne[73]
+        valueThirteen = devOne[80]
+        valueFourteen = devOne[85]
+        valueFifteen = devOne[90]
+        valueSixteen = devOne[99]
+        valueSeventeen = devOne[104]
+        valueEighteen = devOne[108]
+        valueNineteen = devOne[116]
+        valueTwenty = devOne[122]
+        
+        valueTwentyOne = devOne[127]
+        valueTwentyTwo = devOne[136]
+        valueTwentyThree = devOne[142]
+        valueTwentyFour = devOne[150]
+        valueTwentyFive = devOne[159]
+        valueTwentySix = devOne[167]
+        valueTwentySeven = devOne[172]
+        valueTwentyEight = devOne[178]
+        valueTwentyNine = devOne[184]
+        valueThirty = devOne[191]
+
+        valueThirtyOne = devOne[197] 
+        valueThirtyTwo = devOne[204]
+        valueThirtyThree = devOne[210] 
+        valueThirtyFour = devOne[215]
+        valueThirtyFive = devOne[220]
+        valueThirtySix = devOne[231]
+        valueThirtySeven = devOne[236]
+        valueThirtyEight = devOne[241]
+        valueThirtyNine = devOne[246]
+        valueForty = devOne[251]
+
+        valueFortyOne = devOne[256]
+        valueFortyTwo = devOne[260]
+        valueFortyThree = devOne[271]
+        valueFortyFour = devOne[276]
+        valueFortyFive = devOne[282]
+        valueFortySix = devOne[288]
+        valueFortySeven = devOne[296]
+        valueFortyEight = devOne[304]
+        valueFortyNine = devOne[308]
+        valueFifty = devOne[314]
+
+        valueFiftyOne = devOne[321]
+ 
+        # преобразуем полученное значение в число
+        num1 = float(valueOne)
+        num2 = float(valueTwo)
+        num3 = float(valueThree)
+        num4 = float(valueFour)
+        num5 = float(valueFive)
+        num6 = float(valueSix)
+        num7 = float(valueSeven)
+        num8 = float(valueEight)
+        num9 = float(valueNine)
+        num10 = float(valueTen)
+        
+        num11 = float(valueEleven)
+        num12 = float(valueTwelve)
+        num13 = float(valueThirteen)
+        num14 = float(valueFourteen)
+        num15 = float(valueFifteen)
+        num16 = float(valueSixteen)
+        num17 = float(valueSeventeen)
+        num18 = float(valueEighteen)
+        num19 = float(valueNineteen)
+        num20 = float(valueTwenty)
+        
+        num21 = float(valueTwentyOne)
+        num22 = float(valueTwentyTwo)
+        num23 = float(valueTwentyThree)
+        num24 = float(valueTwentyFour)
+        num25 = float(valueTwentyFive)
+        num26 = float(valueTwentySix)
+        num27 = float(valueTwentySeven)
+        num28 = float(valueTwentyEight)
+        num29 = float(valueTwentyNine)
+        num30 = float(valueThirty)
+        
+        num31 = float(valueOne)
+        num32 = float(valueThirtyTwo)
+        num33 = float(valueThirtyThree)
+        num34 = float(valueThirtyFour)
+        num35 = float(valueThirtyFive)
+        num36 = float(valueThirtySix)
+        num37 = float(valueThirtySeven)
+        num38 = float(valueThirtyEight)
+        num39 = float(valueThirtyNine)
+        num40 = float(valueForty)
+        
+        num41 = float(valueFortyOne)
+        num42 = float(valueFortyTwo)
+        num43 = float(valueFortyThree)
+        num44 = float(valueFortyFour)
+        num45 = float(valueFortyFive)
+        num46 = float(valueFortySix)
+        num47 = float(valueFortySeven)
+        num48 = float(valueFortyEight)
+        num49 = float(valueFortyNine)        
+        num50 = float(valueFifty)
+        num51 = float(valueFiftyOne)
+
+        # создаем папку для временных файлов
+        derictory = 'C:\Users\i.geraskin\Documents\Python script\Program\Temporary' 
+
+        if not os.path.exists(derictory):  
+            os.makedirs(derictory)
+
+        # записываем результат в промежуточный файл
+
+        f = open("C:\Users\i.geraskin\Documents\Python script\Program\Temporary\Treated_Data.txt", "w") 
+        f.write(str(num1) + "\n")
+        f.write(str(num2) + "\n")
+        f.write(str(num3) + "\n")
+        f.write(str(num4) + "\n")
+        f.write(str(num5) + "\n")
+        f.write(str(num6) + "\n")
+        f.write(str(num7) + "\n")
+        f.write(str(num8) + "\n")
+        f.write(str(num9) + "\n")
+        f.write(str(num10) + "\n")
+        
+        f.write(str(num11) + "\n")
+        f.write(str(num12) + "\n")
+        f.write(str(num13) + "\n")
+        f.write(str(num14) + "\n")
+        f.write(str(num15) + "\n")
+        f.write(str(num16) + "\n")
+        f.write(str(num17) + "\n")
+        f.write(str(num18) + "\n")
+        f.write(str(num19) + "\n")
+        f.write(str(num20) + "\n")
+        
+        f.write(str(num21) + "\n")
+        f.write(str(num22) + "\n")
+        f.write(str(num23) + "\n")
+        f.write(str(num24) + "\n")
+        f.write(str(num25) + "\n")
+        f.write(str(num26) + "\n")
+        f.write(str(num27) + "\n")
+        f.write(str(num28) + "\n")
+        f.write(str(num29) + "\n")
+        f.write(str(num30) + "\n")
+        
+        f.write(str(num31) + "\n")
+        f.write(str(num32) + "\n")
+        f.write(str(num33) + "\n")
+        f.write(str(num34) + "\n")
+        f.write(str(num35) + "\n")
+        f.write(str(num36) + "\n")
+        f.write(str(num37) + "\n")
+        f.write(str(num38) + "\n")
+        f.write(str(num39) + "\n")
+        f.write(str(num40) + "\n")
+        
+        f.write(str(num41) + "\n")
+        f.write(str(num42) + "\n")
+        f.write(str(num43) + "\n")
+        f.write(str(num44) + "\n")
+        f.write(str(num45) + "\n")
+        f.write(str(num46) + "\n")
+        f.write(str(num47) + "\n")
+        f.write(str(num48) + "\n")
+        f.write(str(num49) + "\n")
+        f.write(str(num50) + "\n") 
+        f.write(str(num51))        
+        f.close()
+
+        # Считываем данные из промежуточного файла и присваиваем значения переменным,
+        #                которые будут участвовать в расчете 
+        
+        path = "C:\Users\i.geraskin\Documents\Python script\Program\Temporary\Treated_Data.txt" 
+
+        data = loadtxt(path, delimiter = " ", unpack=False)
+
+        # Присваиваем значения переменным, которые будут участвовать в расчете
+        
+ #---------- Данные первой вкладки -----------#
+        
+        h_bhole = data[0]
+        h_obs = data[1]
+        d_vnesh_obs = data[2]
+        h_nkt = data[3] 
+        d_vnesh_nkt = data[4]
+        h_stat = data[5]
+        u_ESP = data[6]
+        f_ESP = data[7]
+        i_ESP = data[8]
+
+#  --------- Данные второй вкладки ----------#
+
+        t_bhole = data[9]
+        h_ice = data[10]
+        t_month = data[11] 
+        t_maxh = data[12] 
+
+#  -------- Данные третьей вкладки -----------#
+
+        ro  = data[13]
+        visc_plast = data[14]
+        pn_plast = data[15]
+        tkpn = data[16]
+        g_plast = data[17]
+
+#  -------- Данные четвертой вкладки ----------#
+
+        nomdebit = data[18]
+        debit_oil = data[19]  
+        g = data[20]
+        water = data[21]
+        h_din = data[22]
+        p_wellhead = data[23]
+        t_wellhead = data[24]
+        debit = data[25]
+        scraper = data[26]
+        h_aspo = data[27]
+
+#-------- Данные пятой вкладки -------#
+
+        ro_oil = data[28] 
+        visc_oil = data[29]
+        cp = data[30]
+        asf = data[31]
+        silica_gel = data[32]
+        freezing_oil = data[33]
+        t_0 = data[34]
+        melting = data[35]
+        ro_gas = data[36]
+        ro_water = data[37]
+        
+ #-------- Данные шестой вкладки ---------#
+
+        ESP_gas = data[38]
+        d_vnut_nkt = data[39]
+        d_vnut_obs = data[40]
+        c_neft = data[41]
+        kll = data[42]
+        holkon = data[43]
+        sh_gr = data[44]
+        glub_zap = data[45]
+        min_T_zap = data[46]
+        ustavka = data[47]
+        d_kab = data[48]
+        long_ = data[49]
+        u_u = data[50]
+#------------------------------------------------------------------------------------------------------        
+        
+#         # Выводим сообщение об успешности сохранения
+#         wx.MessageBox('Данные к расчету подготовленны!', 'Сообщение', wx.OK | wx.ICON_INFORMATION)
+        
+#         # Активность кнопки 'Импорт данных'  
+#         ImportDataPanel.EnableButton(ID_ImportData, False)
+        
+        # Делаем активной кнопку пуска
+        setCalcPanel.EnableButton(ID_Run, True)
+
 #-----------------------------------------------------------------------------------------------------------------
         
 # Проверяем заполнение полей шестой вкладки
@@ -5389,7 +5386,7 @@ class NotebookFrame(wx.Frame):
 
         fontlabel6 = wx.Font(10, wx.MODERN, wx.NORMAL,  wx.BOLD, False, u'Consolas')  
 
-        Label8 = wx.StaticBox(tab6, label='ДОПОЛНИТЕЛЬНЫЕ ПАРАМЕТРЫ', pos=(30, 20), size=(740, 590))
+        Label8 = wx.StaticBox(tab6, label='6. ДОПОЛНИТЕЛЬНЫЕ ПАРАМЕТРЫ', pos=(30, 20), size=(740, 590))
         Label8.SetFont(fontlabel6)
         Label8.SetForegroundColour('BLUE')
         self.Show(True)
@@ -5410,7 +5407,7 @@ class onSaveAdditionalData(wx.Dialog):
 #------------------------------------------------------------------------------------------        
     def InitUI(self):
         
-        global SaveButton, ImportButton 
+        global SaveButton #, ImportButton 
 
         self.SetSize((370, 350))
         self.SetTitle('Данные по месторождению')
@@ -5447,6 +5444,8 @@ class onSaveAdditionalData(wx.Dialog):
     def onSave_Worksheet_DataAs(self, event):
         
         """ Сохранение анкетных данных """
+        
+        global thispath
 
         wildcard = "Text source (*.txt)|*.txt|" \
             "All files (*.*)|*.*"
@@ -5458,9 +5457,9 @@ class onSaveAdditionalData(wx.Dialog):
         
         if dlg.ShowModal() == wx.ID_OK:
             
-            path = dlg.GetPath()
+            thispath = dlg.GetPath()
             
-            report = open(path, "w") 
+            report = open(thispath, "w") 
  #----------------------------------------------------------------------------------------------------------------
  # Считываем значения с полей
         
@@ -5931,6 +5930,9 @@ class onSaveAdditionalData(wx.Dialog):
     
         SaveButton.Disable()
         
+#         self.OnImportData()
+        
+        
         # Выводим сообщение об успешности сохранения
         wx.MessageBox('Анкетные данные успешно сохранены!', 'Сохранение', wx.OK | wx.ICON_INFORMATION)
 
@@ -6162,7 +6164,7 @@ class PlotFrame(wx.Frame):
         
         # Меню 'Итоговый отчет'
         f1 = wx.Menu()
-        f1.Append(MENU_REPORT, "Расчетные параметры электрообогрева", "таблица с расчетными параметрами")
+        f1.Append(MENU_REPORT, "Таблица расчетных параметров")
         f1.AppendSeparator()
         f1.Append(MENU_FILE_REPORT, "Открыть шаблон отчета", "открываем файл итогового отчета")
         menuBar.Append(f1, "Результаты расчета")
@@ -6931,7 +6933,7 @@ class HelpWindow(wx.Frame):
 
     def OnCloseHelp(self, e): 
         self.Close()
-
+        
     def OnHelp(self, e):
         self.splitter.SplitVertically(self.panelLeft, self.panelRight, 0)
         self.panelLeft.SetFocus()
